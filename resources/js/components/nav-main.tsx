@@ -20,8 +20,10 @@ export function NavMain({ items }: { items: NavItem[] }) {
                     <SidebarMenuItem key={item.title}>
                         {item.children ? (
                             <div className="space-y-1 py-1">
-                                <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-                                    {item.icon && <item.icon className="size-4" />}
+                                <div className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-xs font-medium group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                                    {item.icon && (
+                                        <item.icon className="size-4" />
+                                    )}
                                     <span className="group-data-[collapsible=icon]:hidden">
                                         {item.title}
                                     </span>

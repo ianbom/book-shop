@@ -59,19 +59,19 @@ class BookController extends Controller
         return to_route('admin.books.show', $book);
     }
 
-    public function show(Book $book): Response
+    public function show(Request $request, Book $book): Response
     {
         $book->load(['categories', 'images' => fn ($query) => $query->orderBy('sort_order'), 'stockMovements' => fn ($query) => $query->with('changedBy')->latest()->limit(10)]);
 
-        return Inertia::render('admin/books/show', ['book' => new BookResource($book)]);
+        return Inertia::render('admin/books/show', ['book' => (new BookResource($book))->resolve($request)]);
     }
 
-    public function edit(Book $book): Response
+    public function edit(Request $request, Book $book): Response
     {
         $book->load(['categories', 'images' => fn ($query) => $query->orderBy('sort_order')]);
 
         return Inertia::render('admin/books/edit', [
-            'book' => new BookResource($book),
+            'book' => (new BookResource($book))->resolve($request),
             'categories' => CategoryResource::collection(Category::query()->orderBy('name')->get()),
         ]);
     }

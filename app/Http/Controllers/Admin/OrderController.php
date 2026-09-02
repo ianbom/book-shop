@@ -39,7 +39,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function show(Order $order): Response
+    public function show(Request $request, Order $order): Response
     {
         $order->load([
             'book',
@@ -48,7 +48,7 @@ class OrderController extends Controller
             'stockMovements' => fn ($query) => $query->with(['book', 'order', 'changedBy'])->latest(),
         ]);
 
-        return Inertia::render('admin/orders/show', ['order' => new OrderResource($order)]);
+        return Inertia::render('admin/orders/show', ['order' => (new OrderResource($order))->resolve($request)]);
     }
 
     public function updateStatus(UpdateOrderStatusRequest $request, Order $order): RedirectResponse

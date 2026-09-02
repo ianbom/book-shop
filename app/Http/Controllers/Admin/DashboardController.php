@@ -24,13 +24,13 @@ class DashboardController extends Controller
 
         $orderMetrics = Order::query()
             ->selectRaw('COUNT(*) as total_orders')
-            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending_orders", [OrderStatus::Pending->value])
-            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as packing_orders", [OrderStatus::Packing->value])
-            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as shipping_orders", [OrderStatus::Shipping->value])
-            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed_orders", [OrderStatus::Completed->value])
-            ->selectRaw("SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled_orders", [OrderStatus::Cancelled->value])
-            ->selectRaw("SUM(CASE WHEN payment_status = ? THEN 1 ELSE 0 END) as unpaid_orders", [PaymentStatus::Unpaid->value])
-            ->selectRaw("SUM(CASE WHEN payment_status = ? THEN 1 ELSE 0 END) as paid_orders", [PaymentStatus::Paid->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending_orders', [OrderStatus::Pending->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as packing_orders', [OrderStatus::Packing->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as shipping_orders', [OrderStatus::Shipping->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed_orders', [OrderStatus::Completed->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled_orders', [OrderStatus::Cancelled->value])
+            ->selectRaw('SUM(CASE WHEN payment_status = ? THEN 1 ELSE 0 END) as unpaid_orders', [PaymentStatus::Unpaid->value])
+            ->selectRaw('SUM(CASE WHEN payment_status = ? THEN 1 ELSE 0 END) as paid_orders', [PaymentStatus::Paid->value])
             ->first();
 
         return Inertia::render('admin/dashboard', [

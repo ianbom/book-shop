@@ -9,5 +9,179 @@ import admin from '@/routes/admin';
 import { rupiah } from '@/lib/format';
 import type { Book, Category, Paginated } from '@/types/admin';
 
-export default function BooksIndex({ books, categories, filters }: { books: Paginated<Book>; categories: { data: Category[] } | Category[]; filters: { search?: string; category?: string; status?: string } }) { const categoryData = Array.isArray(categories) ? categories : categories.data; const submit = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.get(admin.books.index(), Object.fromEntries(data.entries()), { preserveState: true, replace: true }); }; return <><Head title="Buku" /><main className="flex flex-1 flex-col gap-6 p-4 md:p-6"><PageHeader title="Buku" description="Kelola katalog, harga, kategori, dan status buku." actions={<Button asChild><Link href={admin.books.create()}><Plus className="mr-2 size-4" />Tambah Buku</Link></Button>} /><Card><CardContent className="p-4"><form onSubmit={submit} className="flex flex-col gap-3 md:flex-row"><div className="relative flex-1"><Search className="absolute top-2.5 left-3 size-4 text-muted-foreground" /><Input name="search" defaultValue={filters.search} placeholder="Cari judul, penulis, ISBN…" className="pl-9" /></div><select name="category" defaultValue={filters.category ?? ''} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">Semua kategori</option>{categoryData.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select><select name="status" defaultValue={filters.status ?? ''} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">Semua status</option><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select><Button type="submit" variant="outline">Filter</Button></form></CardContent></Card><Card><CardContent className="p-0"><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="border-b bg-slate-50 text-xs uppercase text-muted-foreground"><tr><th className="px-5 py-3">Buku</th><th className="px-5 py-3">Penulis</th><th className="px-5 py-3">Kategori</th><th className="px-5 py-3">Harga</th><th className="px-5 py-3">Stok</th><th className="px-5 py-3">Status</th><th className="px-5 py-3" /></tr></thead><tbody className="divide-y">{books.data.map((book) => <tr key={book.id}><td className="px-5 py-4"><Link href={admin.books.show(book.id)} className="font-medium text-[#2563EB]">{book.title}</Link><div className="text-xs text-muted-foreground">{book.isbn || 'ISBN tidak tersedia'}</div></td><td className="px-5 py-4">{book.author}</td><td className="px-5 py-4">{book.categories?.map((category) => category.name).join(', ') || '-'}</td><td className="px-5 py-4">{rupiah(book.price)}</td><td className="px-5 py-4 font-medium">{book.stock}</td><td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs ${book.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{book.is_active ? 'Aktif' : 'Nonaktif'}</span></td><td className="px-5 py-4 text-right"><Button asChild size="sm" variant="ghost"><Link href={admin.books.edit(book.id)}>Edit</Link></Button></td></tr>)}</tbody></table></div>{!books.data.length && <p className="p-8 text-center text-sm text-muted-foreground">Buku belum tersedia.</p>}<div className="border-t p-4"><Pagination links={books.links} /></div></CardContent></Card></main></>; }
-BooksIndex.layout = { breadcrumbs: [{ title: 'Buku', href: admin.books.index() }] };
+export default function BooksIndex({
+    books,
+    categories,
+    filters,
+}: {
+    books: Paginated<Book>;
+    categories: { data: Category[] } | Category[];
+    filters: { search?: string; category?: string; status?: string };
+}) {
+    const categoryData = Array.isArray(categories)
+        ? categories
+        : categories.data;
+    const submit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        router.get(admin.books.index(), Object.fromEntries(data.entries()), {
+            preserveState: true,
+            replace: true,
+        });
+    };
+    return (
+        <>
+            <Head title="Buku" />
+            <main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+                <PageHeader
+                    title="Buku"
+                    description="Kelola katalog, harga, kategori, dan status buku."
+                    actions={
+                        <Button asChild>
+                            <Link href={admin.books.create()}>
+                                <Plus className="mr-2 size-4" />
+                                Tambah Buku
+                            </Link>
+                        </Button>
+                    }
+                />
+                <Card>
+                    <CardContent className="p-4">
+                        <form
+                            onSubmit={submit}
+                            className="flex flex-col gap-3 md:flex-row"
+                        >
+                            <div className="relative flex-1">
+                                <Search className="text-muted-foreground absolute top-2.5 left-3 size-4" />
+                                <Input
+                                    name="search"
+                                    defaultValue={filters.search}
+                                    placeholder="Cari judul, penulis, ISBN…"
+                                    className="pl-9"
+                                />
+                            </div>
+                            <select
+                                name="category"
+                                defaultValue={filters.category ?? ''}
+                                className="bg-background h-10 rounded-md border px-3 text-sm"
+                            >
+                                <option value="">Semua kategori</option>
+                                {categoryData.map((category) => (
+                                    <option
+                                        key={category.id}
+                                        value={category.id}
+                                    >
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                name="status"
+                                defaultValue={filters.status ?? ''}
+                                className="bg-background h-10 rounded-md border px-3 text-sm"
+                            >
+                                <option value="">Semua status</option>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Nonaktif</option>
+                            </select>
+                            <Button type="submit" variant="outline">
+                                Filter
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[760px] text-left text-sm">
+                                <thead className="text-muted-foreground border-b bg-slate-50 text-xs uppercase">
+                                    <tr>
+                                        <th className="px-5 py-3">Buku</th>
+                                        <th className="px-5 py-3">Penulis</th>
+                                        <th className="px-5 py-3">Kategori</th>
+                                        <th className="px-5 py-3">Harga</th>
+                                        <th className="px-5 py-3">Stok</th>
+                                        <th className="px-5 py-3">Status</th>
+                                        <th className="px-5 py-3" />
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {books.data.map((book) => (
+                                        <tr key={book.id}>
+                                            <td className="px-5 py-4">
+                                                <Link
+                                                    href={admin.books.show(
+                                                        book.id,
+                                                    )}
+                                                    className="font-medium text-[#2563EB]"
+                                                >
+                                                    {book.title}
+                                                </Link>
+                                                <div className="text-muted-foreground text-xs">
+                                                    {book.isbn ||
+                                                        'ISBN tidak tersedia'}
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                {book.author}
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                {book.categories
+                                                    ?.map(
+                                                        (category) =>
+                                                            category.name,
+                                                    )
+                                                    .join(', ') || '-'}
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                {rupiah(book.price)}
+                                            </td>
+                                            <td className="px-5 py-4 font-medium">
+                                                {book.stock}
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                <span
+                                                    className={`rounded-full px-2.5 py-1 text-xs ${book.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}
+                                                >
+                                                    {book.is_active
+                                                        ? 'Aktif'
+                                                        : 'Nonaktif'}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-4 text-right">
+                                                <Button
+                                                    asChild
+                                                    size="sm"
+                                                    variant="ghost"
+                                                >
+                                                    <Link
+                                                        href={admin.books.edit(
+                                                            book.id,
+                                                        )}
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        {!books.data.length && (
+                            <p className="text-muted-foreground p-8 text-center text-sm">
+                                Buku belum tersedia.
+                            </p>
+                        )}
+                        <div className="border-t p-4">
+                            <Pagination links={books.meta.links} />
+                        </div>
+                    </CardContent>
+                </Card>
+            </main>
+        </>
+    );
+}
+BooksIndex.layout = {
+    breadcrumbs: [{ title: 'Buku', href: admin.books.index() }],
+};

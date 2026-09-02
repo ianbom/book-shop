@@ -1,5 +1,14 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Boxes, History, LayoutDashboard, Settings2, ShoppingBag, Tags, Warehouse } from 'lucide-react';
+import {
+    BookOpen,
+    Boxes,
+    History,
+    LayoutDashboard,
+    Settings2,
+    ShoppingBag,
+    Tags,
+    Warehouse,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -40,8 +49,16 @@ const mainNavItems: NavItem[] = [
         href: admin.inventory.index(),
         icon: Warehouse,
         children: [
-            { title: 'Manajemen Stok', href: admin.inventory.index(), icon: Boxes },
-            { title: 'Riwayat Stok', href: admin.inventory.history(), icon: History },
+            {
+                title: 'Manajemen Stok',
+                href: admin.inventory.index(),
+                icon: Boxes,
+            },
+            {
+                title: 'Riwayat Stok',
+                href: admin.inventory.history(),
+                icon: History,
+            },
         ],
     },
     {
@@ -53,7 +70,7 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>

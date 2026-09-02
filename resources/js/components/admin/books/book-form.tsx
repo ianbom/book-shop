@@ -9,11 +9,274 @@ import { Textarea } from '@/components/ui/textarea';
 import admin from '@/routes/admin';
 import type { Book, Category } from '@/types/admin';
 
-type FormData = { title: string; slug: string; isbn: string; author: string; description: string; price: string; initial_stock: number; category_ids: number[]; is_active: boolean; images: File[]; image_alt_texts: string[]; primary_image_index: number | null };
-export function BookForm({ book, categories }: { book?: Book; categories: Category[] }) {
+type FormData = {
+    title: string;
+    slug: string;
+    isbn: string;
+    author: string;
+    description: string;
+    price: string;
+    initial_stock: number;
+    category_ids: number[];
+    is_active: boolean;
+    images: File[];
+    image_alt_texts: string[];
+    primary_image_index: number | null;
+};
+export function BookForm({
+    book,
+    categories,
+}: {
+    book?: Book;
+    categories: Category[];
+}) {
     const touched = useRef(Boolean(book));
-    const form = useForm<FormData>({ title: book?.title ?? '', slug: book?.slug ?? '', isbn: book?.isbn ?? '', author: book?.author ?? '', description: book?.description ?? '', price: book?.price ?? '', initial_stock: 0, category_ids: book?.categories?.map((category) => category.id) ?? [], is_active: book?.is_active ?? true, images: [], image_alt_texts: [], primary_image_index: null });
-    const submit = (event: FormEvent) => { event.preventDefault(); const options = { forceFormData: !book, preserveScroll: true, onSuccess: () => book ? undefined : form.reset('images', 'image_alt_texts', 'primary_image_index') }; book ? form.put(admin.books.update(book.id), options) : form.post(admin.books.store(), options); };
-    const error = (key: keyof FormData) => form.errors[key] as string | undefined;
-    return <form onSubmit={submit} className="space-y-6"><Card><CardHeader><CardTitle>Informasi Buku</CardTitle></CardHeader><CardContent className="grid gap-5 md:grid-cols-2"><div className="grid gap-2 md:col-span-2"><Label htmlFor="title">Judul</Label><Input id="title" value={form.data.title} onChange={(e) => { if (!touched.current) form.setData('slug', e.target.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-')); form.setData('title', e.target.value); }} onBlur={() => { touched.current = true; }} required />{error('title') && <p className="text-sm text-destructive">{error('title')}</p>}</div><div className="grid gap-2"><Label htmlFor="slug">Slug</Label><Input id="slug" value={form.data.slug} onChange={(e) => { touched.current = true; form.setData('slug', e.target.value); }} required />{error('slug') && <p className="text-sm text-destructive">{error('slug')}</p>}</div><div className="grid gap-2"><Label htmlFor="author">Penulis</Label><Input id="author" value={form.data.author} onChange={(e) => form.setData('author', e.target.value)} required />{error('author') && <p className="text-sm text-destructive">{error('author')}</p>}</div><div className="grid gap-2"><Label htmlFor="isbn">ISBN</Label><Input id="isbn" value={form.data.isbn} onChange={(e) => form.setData('isbn', e.target.value)} /></div><div className="grid gap-2"><Label htmlFor="price">Harga</Label><Input id="price" type="number" min="0" step="0.01" value={form.data.price} onChange={(e) => form.setData('price', e.target.value)} required />{error('price') && <p className="text-sm text-destructive">{error('price')}</p>}</div><div className="grid gap-2 md:col-span-2"><Label htmlFor="description">Sinopsis</Label><Textarea id="description" value={form.data.description} onChange={(e) => form.setData('description', e.target.value)} rows={5} /></div>{!book && <div className="grid gap-2"><Label htmlFor="initial_stock">Stok Awal</Label><Input id="initial_stock" type="number" min="0" value={form.data.initial_stock} onChange={(e) => form.setData('initial_stock', Number(e.target.value))} required /></div>}<label className="flex items-center gap-3 pt-7 text-sm"><Checkbox checked={form.data.is_active} onCheckedChange={(checked) => form.setData('is_active', checked === true)} />Buku aktif dan tampil di katalog</label></CardContent></Card><Card><CardHeader><CardTitle>Kategori</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{categories.map((category) => <label key={category.id} className="flex items-center gap-3 rounded-lg border p-3 text-sm"><Checkbox checked={form.data.category_ids.includes(category.id)} onCheckedChange={(checked) => form.setData('category_ids', checked === true ? [...form.data.category_ids, category.id] : form.data.category_ids.filter((id) => id !== category.id))} />{category.name}</label>)}</CardContent></Card>{!book && <Card><CardHeader><CardTitle>Gambar Buku</CardTitle></CardHeader><CardContent className="grid gap-4"><Input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => form.setData('images', Array.from(e.target.files ?? []))} /><p className="text-xs text-muted-foreground">Maksimal 10 gambar, 8 MB per gambar. Gambar pertama menjadi utama jika tidak dipilih.</p></CardContent></Card>}<div className="flex justify-end gap-3"><Button asChild variant="outline"><Link href={book ? admin.books.show(book.id) : admin.books.index()}>Batal</Link></Button><Button disabled={form.processing}>{form.processing ? 'Menyimpan…' : book ? 'Simpan Perubahan' : 'Tambah Buku'}</Button></div></form>;
+    const form = useForm<FormData>({
+        title: book?.title ?? '',
+        slug: book?.slug ?? '',
+        isbn: book?.isbn ?? '',
+        author: book?.author ?? '',
+        description: book?.description ?? '',
+        price: book?.price ?? '',
+        initial_stock: 0,
+        category_ids: book?.categories?.map((category) => category.id) ?? [],
+        is_active: book?.is_active ?? true,
+        images: [],
+        image_alt_texts: [],
+        primary_image_index: null,
+    });
+    const submit = (event: FormEvent) => {
+        event.preventDefault();
+        const options = {
+            forceFormData: !book,
+            preserveScroll: true,
+            onSuccess: () =>
+                book
+                    ? undefined
+                    : form.reset(
+                          'images',
+                          'image_alt_texts',
+                          'primary_image_index',
+                      ),
+        };
+        if (book) form.put(admin.books.update.url(book.id), options);
+        else form.post(admin.books.store.url(), options);
+    };
+    const error = (key: keyof FormData) =>
+        form.errors[key] as string | undefined;
+    return (
+        <form onSubmit={submit} className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Informasi Buku</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-5 md:grid-cols-2">
+                    <div className="grid gap-2 md:col-span-2">
+                        <Label htmlFor="title">Judul</Label>
+                        <Input
+                            id="title"
+                            value={form.data.title}
+                            onChange={(e) => {
+                                if (!touched.current)
+                                    form.setData(
+                                        'slug',
+                                        e.target.value
+                                            .toLowerCase()
+                                            .trim()
+                                            .replace(/[^a-z0-9]+/g, '-'),
+                                    );
+                                form.setData('title', e.target.value);
+                            }}
+                            onBlur={() => {
+                                touched.current = true;
+                            }}
+                            required
+                        />
+                        {error('title') && (
+                            <p className="text-destructive text-sm">
+                                {error('title')}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="slug">Slug</Label>
+                        <Input
+                            id="slug"
+                            value={form.data.slug}
+                            onChange={(e) => {
+                                touched.current = true;
+                                form.setData('slug', e.target.value);
+                            }}
+                            required
+                        />
+                        {error('slug') && (
+                            <p className="text-destructive text-sm">
+                                {error('slug')}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="author">Penulis</Label>
+                        <Input
+                            id="author"
+                            value={form.data.author}
+                            onChange={(e) =>
+                                form.setData('author', e.target.value)
+                            }
+                            required
+                        />
+                        {error('author') && (
+                            <p className="text-destructive text-sm">
+                                {error('author')}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="isbn">ISBN</Label>
+                        <Input
+                            id="isbn"
+                            value={form.data.isbn}
+                            onChange={(e) =>
+                                form.setData('isbn', e.target.value)
+                            }
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="price">Harga</Label>
+                        <Input
+                            id="price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={form.data.price}
+                            onChange={(e) =>
+                                form.setData('price', e.target.value)
+                            }
+                            required
+                        />
+                        {error('price') && (
+                            <p className="text-destructive text-sm">
+                                {error('price')}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2 md:col-span-2">
+                        <Label htmlFor="description">Sinopsis</Label>
+                        <Textarea
+                            id="description"
+                            value={form.data.description}
+                            onChange={(e) =>
+                                form.setData('description', e.target.value)
+                            }
+                            rows={5}
+                        />
+                    </div>
+                    {!book && (
+                        <div className="grid gap-2">
+                            <Label htmlFor="initial_stock">Stok Awal</Label>
+                            <Input
+                                id="initial_stock"
+                                type="number"
+                                min="0"
+                                value={form.data.initial_stock}
+                                onChange={(e) =>
+                                    form.setData(
+                                        'initial_stock',
+                                        Number(e.target.value),
+                                    )
+                                }
+                                required
+                            />
+                        </div>
+                    )}
+                    <label className="flex items-center gap-3 pt-7 text-sm">
+                        <Checkbox
+                            checked={form.data.is_active}
+                            onCheckedChange={(checked) =>
+                                form.setData('is_active', checked === true)
+                            }
+                        />
+                        Buku aktif dan tampil di katalog
+                    </label>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Kategori</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {categories.map((category) => (
+                        <label
+                            key={category.id}
+                            className="flex items-center gap-3 rounded-lg border p-3 text-sm"
+                        >
+                            <Checkbox
+                                checked={form.data.category_ids.includes(
+                                    category.id,
+                                )}
+                                onCheckedChange={(checked) =>
+                                    form.setData(
+                                        'category_ids',
+                                        checked === true
+                                            ? [
+                                                  ...form.data.category_ids,
+                                                  category.id,
+                                              ]
+                                            : form.data.category_ids.filter(
+                                                  (id) => id !== category.id,
+                                              ),
+                                    )
+                                }
+                            />
+                            {category.name}
+                        </label>
+                    ))}
+                </CardContent>
+            </Card>
+            {!book && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Gambar Buku</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-4">
+                        <Input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            multiple
+                            onChange={(e) =>
+                                form.setData(
+                                    'images',
+                                    Array.from(e.target.files ?? []),
+                                )
+                            }
+                        />
+                        <p className="text-muted-foreground text-xs">
+                            Maksimal 10 gambar, 8 MB per gambar. Gambar pertama
+                            menjadi utama jika tidak dipilih.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+            <div className="flex justify-end gap-3">
+                <Button asChild variant="outline">
+                    <Link
+                        href={
+                            book
+                                ? admin.books.show(book.id)
+                                : admin.books.index()
+                        }
+                    >
+                        Batal
+                    </Link>
+                </Button>
+                <Button disabled={form.processing}>
+                    {form.processing
+                        ? 'Menyimpan…'
+                        : book
+                          ? 'Simpan Perubahan'
+                          : 'Tambah Buku'}
+                </Button>
+            </div>
+        </form>
+    );
 }

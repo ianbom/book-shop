@@ -38,9 +38,18 @@ class OrderResource extends JsonResource
                 'id' => $this->book?->id,
                 'slug' => $this->book?->slug,
             ]),
-            'payment_proofs' => PaymentProofResource::collection($this->whenLoaded('paymentProofs')),
-            'status_histories' => OrderStatusHistoryResource::collection($this->whenLoaded('statusHistories')),
-            'stock_movements' => BookStockMovementResource::collection($this->whenLoaded('stockMovements')),
+            'payment_proofs' => $this->whenLoaded('paymentProofs', fn () => $this->paymentProofs
+                ->map(fn ($proof) => (new PaymentProofResource($proof))->resolve($request))
+                ->values()
+                ->all()),
+            'status_histories' => $this->whenLoaded('statusHistories', fn () => $this->statusHistories
+                ->map(fn ($history) => (new OrderStatusHistoryResource($history))->resolve($request))
+                ->values()
+                ->all()),
+            'stock_movements' => $this->whenLoaded('stockMovements', fn () => $this->stockMovements
+                ->map(fn ($movement) => (new BookStockMovementResource($movement))->resolve($request))
+                ->values()
+                ->all()),
         ];
     }
 }

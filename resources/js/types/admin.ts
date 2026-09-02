@@ -1,13 +1,125 @@
-export type PaginationLink = { url: string | null; label: string; active: boolean };
-export type Paginated<T> = { data: T[]; links: PaginationLink[]; meta: { current_page: number; last_page: number; from: number | null; to: number | null; total: number } };
-export type Category = { id: number; name: string; slug: string; books_count?: number };
-export type BookImage = { id: number; url: string; alt_text: string | null; sort_order: number; is_primary: boolean };
-export type Book = { id: number; title: string; slug: string; isbn: string | null; author: string; description: string | null; price: string; stock: number; is_active: boolean; primary_image_url?: string | null; images?: BookImage[]; categories?: Category[]; created_at: string; updated_at: string };
-export type OrderStatus = 'pending' | 'packing' | 'shipping' | 'completed' | 'cancelled';
+export type PaginationLink = {
+    url: string | null;
+    label: string;
+    active: boolean;
+};
+export type Paginated<T> = {
+    data: T[];
+    links: {
+        first: string | null;
+        last: string | null;
+        prev: string | null;
+        next: string | null;
+    };
+    meta: {
+        current_page: number;
+        last_page: number;
+        from: number | null;
+        to: number | null;
+        total: number;
+        links: PaginationLink[];
+    };
+};
+export type Category = {
+    id: number;
+    name: string;
+    slug: string;
+    books_count?: number;
+};
+export type BookImage = {
+    id: number;
+    url: string;
+    alt_text: string | null;
+    sort_order: number;
+    is_primary: boolean;
+};
+export type Book = {
+    id: number;
+    title: string;
+    slug: string;
+    isbn: string | null;
+    author: string;
+    description: string | null;
+    price: string;
+    stock: number;
+    is_active: boolean;
+    primary_image_url?: string | null;
+    images?: BookImage[];
+    categories?: Category[];
+    stock_movements?: StockMovement[];
+    created_at: string;
+    updated_at: string;
+};
+export type OrderStatus =
+    | 'pending'
+    | 'packing'
+    | 'shipping'
+    | 'completed'
+    | 'cancelled';
 export type PaymentStatus = 'unpaid' | 'paid' | 'rejected';
-export type StockMovementType = 'initial' | 'adjustment_in' | 'adjustment_out' | 'order' | 'cancellation';
-export type PaymentProof = { id: number; image_url: string; payment_amount: string | null; paid_at: string | null; note: string | null; uploaded_by?: { id: number | null; name: string | null }; created_at: string };
-export type OrderStatusHistory = { id: number; status: OrderStatus; note: string | null; changed_by?: { id: number | null; name: string | null }; created_at: string };
-export type StockMovement = { id: number; type: StockMovementType; quantity: number; stock_before: number; stock_after: number; note: string | null; created_at: string; book?: { id: number | null; title: string | null }; order?: { id: number; order_code: string } | null; changed_by?: { id: number; name: string } | null };
-export type Order = { id: number; order_code: string; customer_name: string; customer_phone: string; customer_email: string | null; customer_address: string; customer_note: string | null; book_id: number; book_title: string; book_isbn: string | null; book_author: string | null; unit_price: string; quantity: number; subtotal: string; shipping_cost: string; total: string; status: OrderStatus; payment_status: PaymentStatus; created_at: string; payment_proofs?: PaymentProof[]; status_histories?: OrderStatusHistory[]; stock_movements?: StockMovement[] };
-export type StoreSetting = { id: number; store_name: string; whatsapp_number: string; email: string | null; address: string | null };
+export type StockMovementType =
+    | 'initial'
+    | 'adjustment_in'
+    | 'adjustment_out'
+    | 'order'
+    | 'cancellation';
+export type PaymentProof = {
+    id: number;
+    image_url: string;
+    payment_amount: string | null;
+    paid_at: string | null;
+    note: string | null;
+    uploaded_by?: { id: number | null; name: string | null };
+    created_at: string;
+};
+export type OrderStatusHistory = {
+    id: number;
+    status: OrderStatus;
+    note: string | null;
+    changed_by?: { id: number | null; name: string | null };
+    created_at: string;
+};
+export type StockMovement = {
+    id: number;
+    type: StockMovementType;
+    quantity: number;
+    stock_before: number;
+    stock_after: number;
+    note: string | null;
+    created_at: string;
+    book?: { id: number | null; title: string | null };
+    order?: { id: number; order_code: string } | null;
+    changed_by?: { id: number; name: string } | null;
+};
+export type Order = {
+    id: number;
+    order_code: string;
+    customer_name: string;
+    customer_phone: string;
+    customer_email: string | null;
+    customer_address: string;
+    customer_note: string | null;
+    book_id: number;
+    book_title: string;
+    book_isbn: string | null;
+    book_author: string | null;
+    unit_price: string;
+    quantity: number;
+    subtotal: string;
+    shipping_cost: string;
+    total: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+    created_at: string;
+    book?: { id: number | null; slug: string | null };
+    payment_proofs?: PaymentProof[];
+    status_histories?: OrderStatusHistory[];
+    stock_movements?: StockMovement[];
+};
+export type StoreSetting = {
+    id: number;
+    store_name: string;
+    whatsapp_number: string;
+    email: string | null;
+    address: string | null;
+};

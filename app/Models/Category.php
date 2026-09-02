@@ -16,7 +16,7 @@ class Category extends Model
     /** @return BelongsToMany<Book, $this, BookCategory> */
     public function books(): BelongsToMany
     {
-        return $this->belongsToMany(Book::class)
+        return $this->belongsToMany(Book::class, 'book_categories')
             ->using(BookCategory::class)
             ->withTimestamps();
     }

@@ -7,11 +7,178 @@ import { formatDate, rupiah } from '@/lib/format';
 import admin from '@/routes/admin';
 import type { Book, Order } from '@/types/admin';
 
-type Metrics = Record<'total_books' | 'active_books' | 'total_stock' | 'total_orders' | 'pending_orders' | 'packing_orders' | 'shipping_orders' | 'completed_orders' | 'cancelled_orders' | 'unpaid_orders' | 'paid_orders', number>;
-export default function Dashboard({ metrics, recentOrders, lowStockBooks }: { metrics: Metrics; recentOrders: { data: Order[] } | Order[]; lowStockBooks: { data: Book[] } | Book[] }) {
-    const orders = Array.isArray(recentOrders) ? recentOrders : recentOrders.data;
-    const books = Array.isArray(lowStockBooks) ? lowStockBooks : lowStockBooks.data;
-    const cards = [{ label: 'Total Buku', value: metrics.total_books, icon: BookOpen }, { label: 'Stok Saat Ini', value: metrics.total_stock, icon: Package }, { label: 'Total Pesanan', value: metrics.total_orders, icon: ClipboardList }, { label: 'Perlu Diproses', value: metrics.pending_orders + metrics.packing_orders, icon: ClipboardList }];
-    return <><Head title="Dashboard" /><main className="flex flex-1 flex-col gap-6 p-4 md:p-6"><PageHeader title="Dashboard" description="Ringkasan operasional Buku Order hari ini." /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({ label, value, icon: Icon }) => <Card key={label} className="border-slate-200 shadow-sm"><CardContent className="flex items-center justify-between p-5"><div><p className="text-sm text-muted-foreground">{label}</p><p className="mt-2 text-3xl font-semibold text-[#0B1F3A] dark:text-white">{value.toLocaleString('id-ID')}</p></div><span className="rounded-xl bg-[#EAF2FF] p-3 text-[#2563EB]"><Icon className="size-5" /></span></CardContent></Card>)}</div><div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]"><Card><CardHeader className="flex flex-row items-center justify-between"><CardTitle>Pesanan Terbaru</CardTitle><Link href={admin.orders.index()} className="flex items-center gap-1 text-sm text-[#2563EB]">Lihat semua <ArrowRight className="size-4" /></Link></CardHeader><CardContent><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b text-xs uppercase text-muted-foreground"><tr><th className="pb-3">Order</th><th className="pb-3">Customer</th><th className="pb-3">Total</th><th className="pb-3">Status</th></tr></thead><tbody className="divide-y">{orders.map((order) => <tr key={order.id}><td className="py-3 font-medium"><Link className="text-[#2563EB]" href={admin.orders.show(order.id)}>{order.order_code}</Link><div className="text-xs text-muted-foreground">{formatDate(order.created_at)}</div></td><td className="py-3">{order.customer_name}<div className="max-w-40 truncate text-xs text-muted-foreground">{order.book_title} × {order.quantity}</div></td><td className="py-3">{rupiah(order.total)}</td><td className="py-3"><StatusBadge value={order.status} /></td></tr>)}</tbody></table></div></CardContent></Card><Card><CardHeader><CardTitle>Stok Menipis</CardTitle></CardHeader><CardContent className="space-y-3">{books.length ? books.map((book) => <Link key={book.id} href={admin.books.show(book.id)} className="flex items-center justify-between rounded-lg border p-3 transition hover:border-[#2563EB]"><span className="min-w-0"><span className="block truncate font-medium">{book.title}</span><span className="text-xs text-muted-foreground">{book.author}</span></span><span className="ml-3 font-semibold text-amber-600">{book.stock}</span></Link>) : <p className="text-sm text-muted-foreground">Tidak ada stok menipis.</p>}</CardContent></Card></div></main></>;
+type Metrics = Record<
+    | 'total_books'
+    | 'active_books'
+    | 'total_stock'
+    | 'total_orders'
+    | 'pending_orders'
+    | 'packing_orders'
+    | 'shipping_orders'
+    | 'completed_orders'
+    | 'cancelled_orders'
+    | 'unpaid_orders'
+    | 'paid_orders',
+    number
+>;
+export default function Dashboard({
+    metrics,
+    recentOrders,
+    lowStockBooks,
+}: {
+    metrics: Metrics;
+    recentOrders: { data: Order[] } | Order[];
+    lowStockBooks: { data: Book[] } | Book[];
+}) {
+    const orders = Array.isArray(recentOrders)
+        ? recentOrders
+        : recentOrders.data;
+    const books = Array.isArray(lowStockBooks)
+        ? lowStockBooks
+        : lowStockBooks.data;
+    const cards = [
+        { label: 'Total Buku', value: metrics.total_books, icon: BookOpen },
+        { label: 'Stok Saat Ini', value: metrics.total_stock, icon: Package },
+        {
+            label: 'Total Pesanan',
+            value: metrics.total_orders,
+            icon: ClipboardList,
+        },
+        {
+            label: 'Perlu Diproses',
+            value: metrics.pending_orders + metrics.packing_orders,
+            icon: ClipboardList,
+        },
+    ];
+    return (
+        <>
+            <Head title="Dashboard" />
+            <main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+                <PageHeader
+                    title="Dashboard"
+                    description="Ringkasan operasional Buku Order hari ini."
+                />
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {cards.map(({ label, value, icon: Icon }) => (
+                        <Card
+                            key={label}
+                            className="border-slate-200 shadow-sm"
+                        >
+                            <CardContent className="flex items-center justify-between p-5">
+                                <div>
+                                    <p className="text-muted-foreground text-sm">
+                                        {label}
+                                    </p>
+                                    <p className="mt-2 text-3xl font-semibold text-[#0B1F3A] dark:text-white">
+                                        {value.toLocaleString('id-ID')}
+                                    </p>
+                                </div>
+                                <span className="rounded-xl bg-[#EAF2FF] p-3 text-[#2563EB]">
+                                    <Icon className="size-5" />
+                                </span>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+                <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>Pesanan Terbaru</CardTitle>
+                            <Link
+                                href={admin.orders.index()}
+                                className="flex items-center gap-1 text-sm text-[#2563EB]"
+                            >
+                                Lihat semua <ArrowRight className="size-4" />
+                            </Link>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="text-muted-foreground border-b text-xs uppercase">
+                                        <tr>
+                                            <th className="pb-3">Order</th>
+                                            <th className="pb-3">Customer</th>
+                                            <th className="pb-3">Total</th>
+                                            <th className="pb-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {orders.map((order) => (
+                                            <tr key={order.id}>
+                                                <td className="py-3 font-medium">
+                                                    <Link
+                                                        className="text-[#2563EB]"
+                                                        href={admin.orders.show(
+                                                            order.id,
+                                                        )}
+                                                    >
+                                                        {order.order_code}
+                                                    </Link>
+                                                    <div className="text-muted-foreground text-xs">
+                                                        {formatDate(
+                                                            order.created_at,
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3">
+                                                    {order.customer_name}
+                                                    <div className="text-muted-foreground max-w-40 truncate text-xs">
+                                                        {order.book_title} ×{' '}
+                                                        {order.quantity}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3">
+                                                    {rupiah(order.total)}
+                                                </td>
+                                                <td className="py-3">
+                                                    <StatusBadge
+                                                        value={order.status}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Stok Menipis</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {books.length ? (
+                                books.map((book) => (
+                                    <Link
+                                        key={book.id}
+                                        href={admin.books.show(book.id)}
+                                        className="flex items-center justify-between rounded-lg border p-3 transition hover:border-[#2563EB]"
+                                    >
+                                        <span className="min-w-0">
+                                            <span className="block truncate font-medium">
+                                                {book.title}
+                                            </span>
+                                            <span className="text-muted-foreground text-xs">
+                                                {book.author}
+                                            </span>
+                                        </span>
+                                        <span className="ml-3 font-semibold text-amber-600">
+                                            {book.stock}
+                                        </span>
+                                    </Link>
+                                ))
+                            ) : (
+                                <p className="text-muted-foreground text-sm">
+                                    Tidak ada stok menipis.
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            </main>
+        </>
+    );
 }
-Dashboard.layout = { breadcrumbs: [{ title: 'Dashboard', href: admin.dashboard() }] };
+Dashboard.layout = {
+    breadcrumbs: [{ title: 'Dashboard', href: admin.dashboard() }],
+};

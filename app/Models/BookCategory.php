@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 #[Fillable(['book_id', 'category_id'])]
 class BookCategory extends Pivot
 {
+    protected $table = 'book_categories';
+
     public $incrementing = true;
 
     /** @return BelongsTo<Book, $this> */

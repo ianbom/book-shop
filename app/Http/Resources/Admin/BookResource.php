@@ -27,7 +27,10 @@ class BookResource extends JsonResource
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
-            'categories' => CategoryResource::collection($this->whenLoaded('categories')),
+            'categories' => $this->whenLoaded('categories', fn () => $this->categories
+                ->map(fn ($category) => (new CategoryResource($category))->resolve($request))
+                ->values()
+                ->all()),
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($image) => [
                 'id' => $image->id,
                 'url' => Storage::disk('public')->url($image->image_path),
@@ -35,6 +38,10 @@ class BookResource extends JsonResource
                 'sort_order' => $image->sort_order,
                 'is_primary' => $image->is_primary,
             ])->values()),
+            'stock_movements' => $this->whenLoaded('stockMovements', fn () => $this->stockMovements
+                ->map(fn ($movement) => (new BookStockMovementResource($movement))->resolve($request))
+                ->values()
+                ->all()),
             'primary_image_url' => $this->whenLoaded('images', fn () => ($this->images->firstWhere('is_primary') ?? $this->images->first()) ? Storage::disk('public')->url(($this->images->firstWhere('is_primary') ?? $this->images->first())->image_path) : null),
         ];
     }
