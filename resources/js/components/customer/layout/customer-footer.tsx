@@ -23,7 +23,7 @@ export function CustomerFooter({
     storeSettings?: CustomerStoreSettings;
 }) {
     const store = storeSettings ?? {
-        store_name: 'Buku Order',
+        store_name: 'Wonder Book',
         whatsapp_number: '+62 812-3456-7890',
         email: 'halo@bukuorder.id',
         address: null,
@@ -72,7 +72,7 @@ export function CustomerFooter({
             </SectionContainer>
             <div className="border-primary-foreground/20 border-t">
                 <SectionContainer className="text-primary-foreground/70 flex flex-col gap-4 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
-                    <p>© 2026 Buku Order. Semua hak dilindungi.</p>
+                    <p>© 2026 Wonder Book. Semua hak dilindungi.</p>
                     <div className="flex flex-wrap items-center gap-4">
                         <span>Metode Pembayaran</span>
                         {['BCA', 'mandiri', 'BRI', 'BNI', 'VISA', '●●'].map(

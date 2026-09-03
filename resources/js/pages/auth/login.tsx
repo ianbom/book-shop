@@ -105,5 +105,5 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Selamat datang kembali',
-    description: 'Masuk untuk mengelola katalog dan pesanan Buku Order.',
+    description: 'Masuk untuk mengelola katalog dan pesanan Wonder Book.',
 };

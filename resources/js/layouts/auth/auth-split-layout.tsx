@@ -23,7 +23,7 @@ export default function AuthSplitLayout({
                 >
                     <AppLogoIcon className="size-8 fill-current" />
                     <span className="font-heading text-2xl tracking-tight">
-                        Buku Order
+                        Wonder Book
                     </span>
                 </Link>
                 <div className="text-primary-foreground absolute right-10 bottom-10 left-10 z-10 max-w-lg">
@@ -42,7 +42,7 @@ export default function AuthSplitLayout({
                 >
                     <AppLogoIcon className="size-8 fill-current" />
                     <span className="font-heading text-xl font-semibold">
-                        Buku Order
+                        Wonder Book
                     </span>
                 </Link>
                 <div className="flex flex-1 items-center justify-center py-10">

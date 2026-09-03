@@ -17,7 +17,7 @@ export function EditorialBanner() {
                     </h2>
                     <p className="text-primary-foreground/80 mt-4 max-w-md text-sm leading-6">
                         Buku adalah jendela menuju pengetahuan, inspirasi, dan
-                        perubahan. Di Buku Order, kami hadir untuk membawakan
+                        perubahan. Di Wonder Book, kami hadir untuk membawakan
                         bacaan terbaik yang akan menemani setiap langkah
                         perjalananmu.
                     </p>

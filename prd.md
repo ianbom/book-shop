@@ -1,8 +1,8 @@
-# PRD — Buku Order E-Commerce
+# PRD — Wonder Book E-Commerce
 
 ## 1. Document Information
 
-**Product Name:** Buku Order  
+**Product Name:** Wonder Book  
 **Document Type:** Product Requirements Document (PRD)  
 **Platform:** Web Application  
 **Primary Stack:** Laravel, Inertia.js, React, TypeScript, Tailwind CSS, shadcn/ui, MySQL  
@@ -18,7 +18,7 @@
 
 # 2. Product Overview
 
-Buku Order adalah website e-commerce buku sederhana yang berfokus pada katalog buku, pemesanan tanpa login, komunikasi transaksi melalui WhatsApp, dan tracking pesanan menggunakan kode order.
+Wonder Book adalah website e-commerce buku sederhana yang berfokus pada katalog buku, pemesanan tanpa login, komunikasi transaksi melalui WhatsApp, dan tracking pesanan menggunakan kode order.
 
 Website dirancang untuk satu toko buku dan tidak menggunakan konsep tenant atau multi-store.
 

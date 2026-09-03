@@ -56,7 +56,7 @@ export default function Dashboard({
             <main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
                 <PageHeader
                     title="Dashboard"
-                    description="Ringkasan operasional Buku Order hari ini."
+                    description="Ringkasan operasional Wonder Book hari ini."
                 />
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {cards.map(({ label, value, icon: Icon }) => (

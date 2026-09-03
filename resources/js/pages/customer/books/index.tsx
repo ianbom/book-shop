@@ -77,7 +77,7 @@ export default function BooksIndex({
             <section className="bg-secondary py-12 sm:py-16">
                 <SectionContainer>
                     <p className="text-primary text-sm font-semibold tracking-[.18em] uppercase">
-                        Buku Order
+                        Wonder Book
                     </p>
                     <h1 className="font-heading text-foreground mt-3 text-4xl font-semibold sm:text-5xl">
                         Katalog Buku

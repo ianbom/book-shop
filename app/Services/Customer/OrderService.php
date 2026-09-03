@@ -100,7 +100,7 @@ class OrderService
     private function whatsappMessage(Order $order): string
     {
         $message = implode("\n", [
-            'Halo Admin Buku Order,',
+            'Halo Admin Wonder Book,',
             '',
             'Saya ingin melanjutkan pesanan berikut:',
             '',

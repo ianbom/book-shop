@@ -15,7 +15,7 @@ export default function StoreSettings({
     setting: StoreSetting | null;
 }) {
     const form = useForm({
-        store_name: setting?.store_name ?? 'Buku Order',
+        store_name: setting?.store_name ?? 'Wonder Book',
         whatsapp_number: setting?.whatsapp_number ?? '',
         email: setting?.email ?? '',
         address: setting?.address ?? '',

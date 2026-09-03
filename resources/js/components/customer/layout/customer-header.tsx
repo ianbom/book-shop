@@ -21,7 +21,7 @@ function Brand() {
         <Link
             href="/"
             className="flex items-center gap-3"
-            aria-label="Buku Order, beranda"
+            aria-label="Wonder Book, beranda"
         >
             <svg
                 aria-hidden="true"
@@ -36,7 +36,7 @@ function Brand() {
                 />
             </svg>
             <span className="font-heading text-foreground text-2xl font-semibold tracking-tight">
-                Buku Order
+                Wonder Book
             </span>
         </Link>
     );
@@ -60,8 +60,8 @@ export function CustomerHeader() {
                             href={item.href}
                             className={
                                 (item.href === '/' && currentPath === '/') ||
-                                (item.href !== '/' &&
-                                    currentPath.startsWith(item.href))
+                                    (item.href !== '/' &&
+                                        currentPath.startsWith(item.href))
                                     ? isTrackingPage
                                         ? 'text-foreground'
                                         : 'text-primary'

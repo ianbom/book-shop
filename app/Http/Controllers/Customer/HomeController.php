@@ -55,7 +55,7 @@ class HomeController extends Controller
         $settings = StoreSetting::query()->first();
 
         return [
-            'store_name' => $settings?->store_name ?? 'Buku Order',
+            'store_name' => $settings?->store_name ?? 'Wonder Book',
             'whatsapp_number' => $settings?->whatsapp_number ?? '+62 812-3456-7890',
             'email' => $settings?->email ?? 'halo@bukuorder.id',
             'address' => $settings?->address,

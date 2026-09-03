@@ -33,7 +33,7 @@ class HomepageTest extends TestCase
             'is_primary' => false,
             'sort_order' => 0,
         ]);
-        StoreSetting::factory()->create(['store_name' => 'Buku Order']);
+        StoreSetting::factory()->create(['store_name' => 'Wonder Book']);
 
         $this->get(route('home'))
             ->assertOk()
@@ -44,7 +44,7 @@ class HomepageTest extends TestCase
                 ->has('latestBooks', 1)
                 ->where('featuredBooks.0.id', $visibleBook->id)
                 ->where('featuredBooks.0.primary_image.url', config('app.url').'/storage/books/visible/first.webp')
-                ->where('storeSettings.store_name', 'Buku Order'),
+                ->where('storeSettings.store_name', 'Wonder Book'),
             );
 
         $this->assertDatabaseHas('books', ['id' => $hiddenBook->id, 'is_active' => false]);
