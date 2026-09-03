@@ -8,9 +8,14 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentProofController;
 use App\Http\Controllers\Admin\StoreSettingController;
+use App\Http\Controllers\Customer\BookController as CustomerBookController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('books', [CustomerBookController::class, 'index'])->name('books.index');
+Route::post('orders', [CustomerOrderController::class, 'store'])->name('orders.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('dashboard', '/admin')->name('dashboard');

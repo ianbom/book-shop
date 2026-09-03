@@ -70,4 +70,10 @@ class Book extends Model
     {
         $query->when($active !== null, fn (Builder $query) => $query->where('is_active', $active));
     }
+
+    /** @param Builder<Book> $query */
+    public function scopeInCategory(Builder $query, ?string $slug): void
+    {
+        $query->when($slug, fn (Builder $query, string $slug) => $query->whereHas('categories', fn (Builder $query) => $query->where('slug', $slug)));
+    }
 }
