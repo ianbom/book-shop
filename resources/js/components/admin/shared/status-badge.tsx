@@ -22,19 +22,19 @@ const labels: Record<OrderStatus | PaymentStatus | StockMovementType, string> =
         cancellation: 'Pembatalan',
     };
 const colors: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-800',
-    packing: 'bg-blue-100 text-blue-800',
-    shipping: 'bg-indigo-100 text-indigo-800',
-    completed: 'bg-emerald-100 text-emerald-800',
-    cancelled: 'bg-red-100 text-red-800',
-    unpaid: 'bg-slate-100 text-slate-700',
-    paid: 'bg-emerald-100 text-emerald-800',
-    rejected: 'bg-red-100 text-red-800',
-    initial: 'bg-sky-100 text-sky-800',
-    adjustment_in: 'bg-emerald-100 text-emerald-800',
-    adjustment_out: 'bg-orange-100 text-orange-800',
-    order: 'bg-violet-100 text-violet-800',
-    cancellation: 'bg-cyan-100 text-cyan-800',
+    pending: 'bg-warning/10 text-warning',
+    packing: 'bg-secondary text-secondary-foreground',
+    shipping: 'bg-accent text-accent-foreground',
+    completed: 'bg-success/10 text-success',
+    cancelled: 'bg-destructive/10 text-destructive',
+    unpaid: 'bg-secondary text-foreground',
+    paid: 'bg-success/10 text-success',
+    rejected: 'bg-destructive/10 text-destructive',
+    initial: 'bg-secondary text-secondary-foreground',
+    adjustment_in: 'bg-success/10 text-success',
+    adjustment_out: 'bg-warning/10 text-warning',
+    order: 'bg-accent text-accent-foreground',
+    cancellation: 'bg-secondary text-secondary-foreground',
 };
 
 export function StatusBadge({

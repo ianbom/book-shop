@@ -39,3 +39,33 @@ export interface CustomerStoreSettings {
     email: string | null;
     address: string | null;
 }
+
+export type CustomerOrderStatus =
+    | 'pending'
+    | 'packing'
+    | 'shipping'
+    | 'completed'
+    | 'cancelled';
+export type CustomerPaymentStatus = 'unpaid' | 'paid' | 'rejected';
+
+export interface CustomerOrderStatusHistory {
+    status: CustomerOrderStatus;
+    note: string | null;
+    created_at: string | null;
+}
+
+export interface CustomerTrackedOrder {
+    order_code: string;
+    book_title: string;
+    book_author: string | null;
+    book_isbn: string | null;
+    quantity: number;
+    unit_price: string | number;
+    subtotal: string | number;
+    shipping_cost: string | number;
+    total: string | number;
+    status: CustomerOrderStatus;
+    payment_status: CustomerPaymentStatus;
+    status_histories: CustomerOrderStatusHistory[];
+    whatsapp_url: string | null;
+}

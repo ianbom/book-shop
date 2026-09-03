@@ -36,43 +36,43 @@ export function BookDetailDialog({
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid md:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)]">
-                        <div className="bg-slate-50 p-6 sm:p-8">
+                        <div className="bg-muted p-6 sm:p-8">
                             <BookImageGallery book={book} />
                         </div>
                         <div className="flex flex-col p-6 sm:p-8">
-                            <p className="text-sm text-slate-500">
+                            <p className="text-muted-foreground text-sm">
                                 {book.categories
                                     .map((category) => category.name)
                                     .join(' · ') || 'Buku'}
                             </p>
-                            <h2 className="mt-2 font-serif text-3xl font-semibold text-[#0B1F3A]">
+                            <h2 className="font-heading text-foreground mt-2 text-3xl font-semibold">
                                 {book.title}
                             </h2>
-                            <p className="mt-2 text-base text-slate-600">
+                            <p className="text-muted-foreground mt-2 text-base">
                                 {book.author}
                             </p>
-                            <p className="mt-5 text-2xl font-bold text-[#0B1F3A]">
+                            <p className="text-foreground mt-5 text-2xl font-bold">
                                 {rupiah(book.price)}
                             </p>
                             <div className="mt-5 flex flex-wrap gap-2">
                                 {book.categories.map((category) => (
                                     <span
                                         key={category.id}
-                                        className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600"
+                                        className="border-border text-muted-foreground border px-2.5 py-1 text-xs"
                                     >
                                         {category.name}
                                     </span>
                                 ))}
                             </div>
-                            <dl className="mt-6 grid grid-cols-[92px_1fr] gap-y-3 border-y border-slate-200 py-5 text-sm">
-                                <dt className="text-slate-500">ISBN</dt>
+                            <dl className="border-border mt-6 grid grid-cols-[92px_1fr] gap-y-3 border-y py-5 text-sm">
+                                <dt className="text-muted-foreground">ISBN</dt>
                                 <dd>{book.isbn ?? '-'}</dd>
-                                <dt className="text-slate-500">Stok</dt>
+                                <dt className="text-muted-foreground">Stok</dt>
                                 <dd
                                     className={
                                         book.stock > 0
-                                            ? 'font-medium text-emerald-700'
-                                            : 'font-medium text-red-600'
+                                            ? 'text-success font-medium'
+                                            : 'text-destructive font-medium'
                                     }
                                 >
                                     {book.stock > 0
@@ -82,7 +82,7 @@ export function BookDetailDialog({
                             </dl>
                             <div className="mt-6">
                                 <h3 className="font-semibold">Sinopsis</h3>
-                                <p className="mt-2 text-sm leading-6 whitespace-pre-line text-slate-600">
+                                <p className="text-muted-foreground mt-2 text-sm leading-6 whitespace-pre-line">
                                     {book.description ||
                                         'Deskripsi belum tersedia.'}
                                 </p>
@@ -93,7 +93,7 @@ export function BookDetailDialog({
                                     onClose();
                                     onBuy(book);
                                 }}
-                                className="mt-8 w-full bg-[#0B1F3A] hover:bg-[#071426]"
+                                className="bg-foreground hover:bg-foreground mt-8 w-full"
                             >
                                 <ShoppingBag /> Beli Buku
                             </Button>

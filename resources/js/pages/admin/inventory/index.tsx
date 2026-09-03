@@ -105,7 +105,7 @@ export default function InventoryIndex({
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[720px] text-left text-sm">
-                                <thead className="text-muted-foreground border-b bg-slate-50 text-xs uppercase">
+                                <thead className="text-muted-foreground bg-muted border-b text-xs uppercase">
                                     <tr>
                                         <th className="px-5 py-3">Buku</th>
                                         <th className="px-5 py-3">
@@ -135,7 +135,7 @@ export default function InventoryIndex({
                                                                 className="size-11 rounded object-cover"
                                                             />
                                                         ) : (
-                                                            <div className="size-11 rounded bg-slate-100" />
+                                                            <div className="bg-secondary size-11 rounded" />
                                                         )}
                                                         <span>
                                                             <span className="block font-medium">
@@ -154,7 +154,7 @@ export default function InventoryIndex({
                                                     <span
                                                         className={
                                                             book.is_active
-                                                                ? 'text-emerald-700'
+                                                                ? 'text-success'
                                                                 : 'text-muted-foreground'
                                                         }
                                                     >

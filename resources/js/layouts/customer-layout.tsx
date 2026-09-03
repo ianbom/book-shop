@@ -18,7 +18,7 @@ export default function CustomerLayout({
     }>().props.storeSettings;
 
     return (
-        <div className="min-h-screen bg-white text-[#0B1F3A]">
+        <div className="bg-card text-foreground min-h-screen">
             <CustomerHeader />
             <main>{children}</main>
             <CustomerFooter

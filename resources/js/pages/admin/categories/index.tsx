@@ -89,7 +89,7 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
-                                <thead className="text-muted-foreground border-b bg-slate-50 text-xs uppercase">
+                                <thead className="text-muted-foreground bg-muted border-b text-xs uppercase">
                                     <tr>
                                         <th className="px-5 py-3">Nama</th>
                                         <th className="px-5 py-3">Slug</th>

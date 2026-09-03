@@ -27,19 +27,19 @@ const benefits = [
 export function StoreBenefits() {
     return (
         <SectionContainer className="pb-10">
-            <section className="grid overflow-hidden rounded-md bg-[#F3F7FF] sm:grid-cols-2 lg:grid-cols-4">
+            <section className="bg-secondary grid overflow-hidden rounded-md sm:grid-cols-2 lg:grid-cols-4">
                 {benefits.map(({ title, description, icon: Icon }, index) => (
                     <div
                         key={title}
-                        className={`flex items-center gap-4 px-6 py-6 ${index > 0 ? 'lg:border-l lg:border-[#0B1F3A]/15' : ''}`}
+                        className={`flex items-center gap-4 px-6 py-6 ${index > 0 ? 'lg:border-foreground/15 lg:border-l' : ''}`}
                     >
                         <Icon
-                            className="size-8 shrink-0 text-[#0B1F3A]"
+                            className="text-foreground size-8 shrink-0"
                             strokeWidth={1.6}
                         />
                         <div>
                             <h2 className="text-sm font-semibold">{title}</h2>
-                            <p className="mt-1 text-xs text-slate-600">
+                            <p className="text-muted-foreground mt-1 text-xs">
                                 {description}
                             </p>
                         </div>

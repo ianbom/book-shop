@@ -74,15 +74,15 @@ export default function BooksIndex({
     return (
         <>
             <Head title="Katalog Buku" />
-            <section className="bg-[#EAF2FF] py-12 sm:py-16">
+            <section className="bg-secondary py-12 sm:py-16">
                 <SectionContainer>
-                    <p className="text-sm font-semibold tracking-[.18em] text-[#2563EB] uppercase">
+                    <p className="text-primary text-sm font-semibold tracking-[.18em] uppercase">
                         Buku Order
                     </p>
-                    <h1 className="mt-3 font-serif text-4xl font-semibold text-[#0B1F3A] sm:text-5xl">
+                    <h1 className="font-heading text-foreground mt-3 text-4xl font-semibold sm:text-5xl">
                         Katalog Buku
                     </h1>
-                    <p className="mt-3 max-w-2xl text-slate-600">
+                    <p className="text-muted-foreground mt-3 max-w-2xl">
                         Temukan buku terbaik untuk menemani perjalanan membaca
                         dan berkembang.
                     </p>
@@ -98,7 +98,7 @@ export default function BooksIndex({
                     onReset={reset}
                 />
                 <div className="mt-7 flex items-center justify-between">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-muted-foreground text-sm">
                         {books.meta.total} buku ditemukan
                     </p>
                 </div>

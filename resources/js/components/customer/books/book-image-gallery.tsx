@@ -12,7 +12,7 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
 
     if (images.length === 0) {
         return (
-            <div className="grid aspect-[3/4] place-items-center bg-slate-50 text-slate-400">
+            <div className="bg-muted text-muted-foreground grid aspect-[3/4] place-items-center">
                 <ImageOff className="size-10" />
                 <span className="sr-only">Cover belum tersedia</span>
             </div>
@@ -28,7 +28,7 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
     return (
         <div>
             <div
-                className="relative grid aspect-[3/4] place-items-center overflow-hidden bg-slate-50"
+                className="bg-muted relative grid aspect-[3/4] place-items-center overflow-hidden"
                 onTouchStart={(event) => {
                     touchStart.current = event.touches[0]?.clientX ?? null;
                 }}
@@ -55,7 +55,7 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
                             type="button"
                             variant="secondary"
                             size="icon"
-                            className="absolute top-1/2 left-3 -translate-y-1/2 bg-white/90"
+                            className="bg-card/90 absolute top-1/2 left-3 -translate-y-1/2"
                             onClick={() => move(-1)}
                             aria-label="Gambar sebelumnya"
                         >
@@ -65,13 +65,13 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
                             type="button"
                             variant="secondary"
                             size="icon"
-                            className="absolute top-1/2 right-3 -translate-y-1/2 bg-white/90"
+                            className="bg-card/90 absolute top-1/2 right-3 -translate-y-1/2"
                             onClick={() => move(1)}
                             aria-label="Gambar berikutnya"
                         >
                             <ChevronRight />
                         </Button>
-                        <span className="absolute bottom-3 rounded-full bg-[#071426]/80 px-2.5 py-1 text-xs text-white">
+                        <span className="bg-foreground/80 text-primary-foreground absolute bottom-3 rounded-full px-2.5 py-1 text-xs">
                             {activeIndex + 1} / {images.length}
                         </span>
                     </>
@@ -84,13 +84,13 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
                             type="button"
                             key={thumbnail.id}
                             onClick={() => setActiveIndex(index)}
-                            className={`h-16 w-12 shrink-0 overflow-hidden border ${index === activeIndex ? 'border-[#2563EB] ring-1 ring-[#2563EB]' : 'border-slate-200'}`}
+                            className={`h-16 w-12 shrink-0 overflow-hidden border ${index === activeIndex ? 'border-primary ring-primary ring-1' : 'border-border'}`}
                             aria-label={`Pilih gambar ${index + 1}`}
                         >
                             <img
                                 src={thumbnail.url}
                                 alt=""
-                                className="size-full bg-slate-50 object-contain p-1"
+                                className="bg-muted size-full object-contain p-1"
                             />
                         </button>
                     ))}

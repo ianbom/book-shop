@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-VyAwnChk.js";import{n as t}from"./dist-CgPdulhM.js";var n=e();function r({message:e,className:r=``,...i}){return e?(0,n.jsx)(`p`,{...i,className:t(`text-destructive text-sm`,r),children:e}):null}export{r as t};

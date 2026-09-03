@@ -82,7 +82,7 @@ export function BookOrderDialog({
                         WhatsApp.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="flex gap-3 border-y border-slate-200 py-4">
+                <div className="border-border flex gap-3 border-y py-4">
                     {book.primary_image && (
                         <img
                             src={book.primary_image.url}
@@ -92,13 +92,13 @@ export function BookOrderDialog({
                     )}
                     <div>
                         <h3 className="font-semibold">{book.title}</h3>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="text-muted-foreground mt-1 text-sm">
                             {book.author}
                         </p>
                         <p className="mt-2 text-sm font-bold">
                             {rupiah(book.price)}
                         </p>
-                        <p className="mt-1 text-xs text-emerald-700">
+                        <p className="text-success mt-1 text-xs">
                             Stok tersedia: {book.stock}
                         </p>
                     </div>
@@ -106,9 +106,11 @@ export function BookOrderDialog({
                 <form onSubmit={submit} className="space-y-4">
                     <Field
                         label="Nama Lengkap"
+                        htmlFor="customer_name"
                         error={form.errors.customer_name}
                     >
                         <Input
+                            id="customer_name"
                             value={form.data.customer_name}
                             onChange={(event) =>
                                 form.setData(
@@ -121,9 +123,11 @@ export function BookOrderDialog({
                     </Field>
                     <Field
                         label="Nomor WhatsApp"
+                        htmlFor="customer_phone"
                         error={form.errors.customer_phone}
                     >
                         <Input
+                            id="customer_phone"
                             value={form.data.customer_phone}
                             onChange={(event) =>
                                 form.setData(
@@ -135,8 +139,13 @@ export function BookOrderDialog({
                             placeholder="0812..."
                         />
                     </Field>
-                    <Field label="Email" error={form.errors.customer_email}>
+                    <Field
+                        label="Email"
+                        htmlFor="customer_email"
+                        error={form.errors.customer_email}
+                    >
                         <Input
+                            id="customer_email"
                             value={form.data.customer_email}
                             onChange={(event) =>
                                 form.setData(
@@ -150,9 +159,11 @@ export function BookOrderDialog({
                     </Field>
                     <Field
                         label="Alamat Lengkap"
+                        htmlFor="customer_address"
                         error={form.errors.customer_address}
                     >
                         <Textarea
+                            id="customer_address"
                             value={form.data.customer_address}
                             onChange={(event) =>
                                 form.setData(
@@ -163,8 +174,12 @@ export function BookOrderDialog({
                             autoComplete="street-address"
                         />
                     </Field>
-                    <Field label="Jumlah" error={form.errors.quantity}>
-                        <div className="flex w-fit items-center border border-slate-200">
+                    <Field
+                        label="Jumlah"
+                        htmlFor="quantity"
+                        error={form.errors.quantity}
+                    >
+                        <div className="border-border flex w-fit items-center border">
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -180,6 +195,7 @@ export function BookOrderDialog({
                                 <Minus />
                             </Button>
                             <Input
+                                id="quantity"
                                 type="number"
                                 min={1}
                                 max={book.stock}
@@ -206,8 +222,13 @@ export function BookOrderDialog({
                             </Button>
                         </div>
                     </Field>
-                    <Field label="Catatan" error={form.errors.customer_note}>
+                    <Field
+                        label="Catatan"
+                        htmlFor="customer_note"
+                        error={form.errors.customer_note}
+                    >
                         <Textarea
+                            id="customer_note"
                             value={form.data.customer_note}
                             onChange={(event) =>
                                 form.setData(
@@ -218,20 +239,24 @@ export function BookOrderDialog({
                             placeholder="Opsional"
                         />
                     </Field>
-                    {orderError && (
-                        <p className="text-sm text-red-600">{orderError}</p>
+                    {(form.errors.book_id || orderError) && (
+                        <p className="text-destructive text-sm">
+                            {form.errors.book_id || orderError}
+                        </p>
                     )}
-                    <div className="border-y border-slate-200 py-4 text-sm">
+                    <div className="border-border border-y py-4 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-slate-500">Harga</span>
+                            <span className="text-muted-foreground">Harga</span>
                             <span>{rupiah(book.price)}</span>
                         </div>
                         <div className="mt-2 flex justify-between">
-                            <span className="text-slate-500">Jumlah</span>
+                            <span className="text-muted-foreground">
+                                Jumlah
+                            </span>
                             <span>{form.data.quantity}</span>
                         </div>
                         <div className="mt-2 flex justify-between">
-                            <span className="text-slate-500">
+                            <span className="text-muted-foreground">
                                 Biaya Pengiriman
                             </span>
                             <span>{rupiah(0)}</span>
@@ -244,7 +269,7 @@ export function BookOrderDialog({
                     <Button
                         type="submit"
                         disabled={form.processing || book.stock <= 0}
-                        className="w-full bg-[#2563EB] hover:bg-blue-700"
+                        className="bg-primary hover:bg-primary/90 w-full"
                     >
                         {form.processing ? 'Memproses...' : 'Buat Pesanan'}
                     </Button>
@@ -256,18 +281,20 @@ export function BookOrderDialog({
 
 function Field({
     label,
+    htmlFor,
     error,
     children,
 }: {
     label: string;
+    htmlFor: string;
     error?: string;
     children: React.ReactNode;
 }) {
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
+            <Label htmlFor={htmlFor}>{label}</Label>
             {children}
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-destructive text-sm">{error}</p>}
         </div>
     );
 }

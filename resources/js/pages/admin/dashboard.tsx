@@ -60,20 +60,17 @@ export default function Dashboard({
                 />
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {cards.map(({ label, value, icon: Icon }) => (
-                        <Card
-                            key={label}
-                            className="border-slate-200 shadow-sm"
-                        >
+                        <Card key={label} className="border-border shadow-sm">
                             <CardContent className="flex items-center justify-between p-5">
                                 <div>
                                     <p className="text-muted-foreground text-sm">
                                         {label}
                                     </p>
-                                    <p className="mt-2 text-3xl font-semibold text-[#0B1F3A] dark:text-white">
+                                    <p className="text-foreground mt-2 text-3xl font-semibold">
                                         {value.toLocaleString('id-ID')}
                                     </p>
                                 </div>
-                                <span className="rounded-xl bg-[#EAF2FF] p-3 text-[#2563EB]">
+                                <span className="text-primary bg-secondary rounded-xl p-3">
                                     <Icon className="size-5" />
                                 </span>
                             </CardContent>
@@ -86,7 +83,7 @@ export default function Dashboard({
                             <CardTitle>Pesanan Terbaru</CardTitle>
                             <Link
                                 href={admin.orders.index()}
-                                className="flex items-center gap-1 text-sm text-[#2563EB]"
+                                className="text-primary flex items-center gap-1 text-sm"
                             >
                                 Lihat semua <ArrowRight className="size-4" />
                             </Link>
@@ -107,7 +104,7 @@ export default function Dashboard({
                                             <tr key={order.id}>
                                                 <td className="py-3 font-medium">
                                                     <Link
-                                                        className="text-[#2563EB]"
+                                                        className="text-primary"
                                                         href={admin.orders.show(
                                                             order.id,
                                                         )}
@@ -152,7 +149,7 @@ export default function Dashboard({
                                     <Link
                                         key={book.id}
                                         href={admin.books.show(book.id)}
-                                        className="flex items-center justify-between rounded-lg border p-3 transition hover:border-[#2563EB]"
+                                        className="hover:border-primary flex items-center justify-between rounded-lg border p-3 transition"
                                     >
                                         <span className="min-w-0">
                                             <span className="block truncate font-medium">
@@ -162,7 +159,7 @@ export default function Dashboard({
                                                 {book.author}
                                             </span>
                                         </span>
-                                        <span className="ml-3 font-semibold text-amber-600">
+                                        <span className="text-warning ml-3 font-semibold">
                                             {book.stock}
                                         </span>
                                     </Link>

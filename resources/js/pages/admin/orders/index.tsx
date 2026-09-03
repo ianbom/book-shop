@@ -90,7 +90,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[980px] text-left text-sm">
-                                <thead className="text-muted-foreground border-b bg-slate-50 text-xs uppercase">
+                                <thead className="text-muted-foreground bg-muted border-b text-xs uppercase">
                                     <tr>
                                         <th className="px-5 py-3">Order</th>
                                         <th className="px-5 py-3">Pelanggan</th>
@@ -121,7 +121,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                             </td>
                                             <td className="px-5 py-4">
                                                 <a
-                                                    className="text-[#2563EB]"
+                                                    className="text-primary"
                                                     href={`https://wa.me/${order.customer_phone.replace(/\D/g, '').replace(/^0/, '62')}`}
                                                     target="_blank"
                                                     rel="noreferrer"

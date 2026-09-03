@@ -30,14 +30,17 @@ export function CustomerFooter({
     };
 
     return (
-        <footer id="kontak" className="border-t-2 border-[#0B1F3A] bg-white">
+        <footer
+            id="kontak"
+            className="border-primary-foreground/20 bg-foreground text-primary-foreground border-t-2"
+        >
             <SectionContainer className="grid gap-10 py-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.25fr]">
                 <div>
-                    <div className="mb-4 flex items-center gap-2 font-serif text-2xl font-semibold">
+                    <div className="font-heading mb-4 flex items-center gap-2 text-2xl font-semibold">
                         <span aria-hidden="true">◖◗</span>
                         {store.store_name}
                     </div>
-                    <p className="max-w-xs text-sm leading-6 text-slate-600">
+                    <p className="text-primary-foreground/70 max-w-xs text-sm leading-6">
                         Temukan buku terbaik untuk versi dirimu yang lebih baik
                         setiap hari.
                     </p>
@@ -52,7 +55,7 @@ export function CustomerFooter({
                 <FooterLinks title="Bantuan" links={help} />
                 <div>
                     <h2 className="mb-4 font-semibold">Kontak</h2>
-                    <div className="space-y-3 text-sm text-slate-600">
+                    <div className="text-primary-foreground/70 space-y-3 text-sm">
                         <p className="flex gap-2">
                             <Phone size={16} className="shrink-0" />
                             {store.whatsapp_number}
@@ -67,14 +70,17 @@ export function CustomerFooter({
                     </div>
                 </div>
             </SectionContainer>
-            <div className="border-t border-[#0B1F3A]/25">
-                <SectionContainer className="flex flex-col gap-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <div className="border-primary-foreground/20 border-t">
+                <SectionContainer className="text-primary-foreground/70 flex flex-col gap-4 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
                     <p>© 2026 Buku Order. Semua hak dilindungi.</p>
                     <div className="flex flex-wrap items-center gap-4">
                         <span>Metode Pembayaran</span>
                         {['BCA', 'mandiri', 'BRI', 'BNI', 'VISA', '●●'].map(
                             (method) => (
-                                <strong key={method} className="text-[#0B1F3A]">
+                                <strong
+                                    key={method}
+                                    className="text-primary-foreground"
+                                >
                                     {method}
                                 </strong>
                             ),
@@ -90,10 +96,13 @@ function FooterLinks({ title, links }: { title: string; links: string[] }) {
     return (
         <div>
             <h2 className="mb-4 font-semibold">{title}</h2>
-            <ul className="space-y-3 text-sm text-slate-600">
+            <ul className="text-primary-foreground/70 space-y-3 text-sm">
                 {links.map((link) => (
                     <li key={link}>
-                        <a href="#" className="hover:text-[#2563EB]">
+                        <a
+                            href={link === 'Lacak Order' ? '/track-order' : '#'}
+                            className="hover:text-primary-foreground transition-colors"
+                        >
                             {link}
                         </a>
                     </li>

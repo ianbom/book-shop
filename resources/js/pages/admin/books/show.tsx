@@ -175,8 +175,8 @@ export default function BookShow({
                                             <span
                                                 className={
                                                     movement.quantity >= 0
-                                                        ? 'text-emerald-600'
-                                                        : 'text-red-600'
+                                                        ? 'text-success'
+                                                        : 'text-destructive'
                                                 }
                                             >
                                                 {movement.quantity > 0

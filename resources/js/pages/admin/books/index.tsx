@@ -94,7 +94,7 @@ export default function BooksIndex({
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[760px] text-left text-sm">
-                                <thead className="text-muted-foreground border-b bg-slate-50 text-xs uppercase">
+                                <thead className="text-muted-foreground bg-muted border-b text-xs uppercase">
                                     <tr>
                                         <th className="px-5 py-3">Buku</th>
                                         <th className="px-5 py-3">Penulis</th>
@@ -113,7 +113,7 @@ export default function BooksIndex({
                                                     href={admin.books.show(
                                                         book.id,
                                                     )}
-                                                    className="font-medium text-[#2563EB]"
+                                                    className="text-primary font-medium"
                                                 >
                                                     {book.title}
                                                 </Link>
@@ -141,7 +141,7 @@ export default function BooksIndex({
                                             </td>
                                             <td className="px-5 py-4">
                                                 <span
-                                                    className={`rounded-full px-2.5 py-1 text-xs ${book.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}
+                                                    className={`rounded-full px-2.5 py-1 text-xs ${book.is_active ? 'bg-success/10 text-success' : 'bg-secondary text-muted-foreground'}`}
                                                 >
                                                     {book.is_active
                                                         ? 'Aktif'

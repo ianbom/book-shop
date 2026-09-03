@@ -140,4 +140,42 @@ class AdminWorkflowTest extends TestCase
         $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => OrderStatus::Cancelled->value])->assertSessionHasErrors('status');
         $this->assertSame(7, $book->fresh()->stock);
     }
+
+    public function test_admin_can_update_shipping_cost_and_order_total(): void
+    {
+        $admin = User::factory()->create();
+        $order = Order::factory()->create([
+            'subtotal' => 125000,
+            'shipping_cost' => 0,
+            'total' => 125000,
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.orders.shipping-cost', $order), ['shipping_cost' => 18000])
+            ->assertRedirect();
+
+        $order->refresh();
+
+        $this->assertSame('18000.00', $order->shipping_cost);
+        $this->assertSame('143000.00', $order->total);
+    }
+
+    public function test_shipping_cost_must_be_a_non_negative_number(): void
+    {
+        $admin = User::factory()->create();
+        $order = Order::factory()->create([
+            'subtotal' => 125000,
+            'shipping_cost' => 10000,
+            'total' => 135000,
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.orders.shipping-cost', $order), ['shipping_cost' => -1])
+            ->assertSessionHasErrors('shipping_cost');
+
+        $order->refresh();
+
+        $this->assertSame('10000.00', $order->shipping_cost);
+        $this->assertSame('135000.00', $order->total);
+    }
 }

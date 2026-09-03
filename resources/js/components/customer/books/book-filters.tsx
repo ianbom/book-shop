@@ -38,14 +38,14 @@ export function BookFilters({
     );
 
     return (
-        <div className="space-y-4 border-y border-slate-200 py-5">
+        <div className="border-border space-y-4 border-y py-5">
             <div className="relative">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <Input
                     value={search}
                     onChange={(event) => onSearchChange(event.target.value)}
                     placeholder="Cari judul, penulis, atau ISBN..."
-                    className="h-11 border-slate-200 pl-10"
+                    className="border-border h-11 pl-10"
                 />
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -105,7 +105,7 @@ export function BookFilters({
                     <Button
                         variant="ghost"
                         onClick={onReset}
-                        className="text-slate-600"
+                        className="text-muted-foreground"
                     >
                         <X className="size-4" /> Reset
                     </Button>

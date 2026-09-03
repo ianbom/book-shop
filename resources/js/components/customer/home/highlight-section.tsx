@@ -30,7 +30,7 @@ export function HighlightSection() {
             {highlights.map(({ title, description, image, icon: Icon }) => (
                 <article
                     key={title}
-                    className="relative min-h-[260px] overflow-hidden rounded-md border border-slate-200 bg-[#071426] shadow-sm"
+                    className="border-border bg-foreground relative min-h-[260px] overflow-hidden rounded-md border shadow-sm"
                 >
                     <img
                         src={image}
@@ -38,18 +38,18 @@ export function HighlightSection() {
                         className="absolute inset-0 size-full object-cover"
                         loading="lazy"
                     />
-                    <div className="absolute inset-x-3 bottom-3 flex gap-3 rounded-md bg-white/95 p-4 backdrop-blur-sm">
-                        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#0B1F3A] text-white">
+                    <div className="bg-card/95 absolute inset-x-3 bottom-3 flex gap-3 rounded-md p-4 backdrop-blur-sm">
+                        <span className="bg-foreground text-primary-foreground grid size-10 shrink-0 place-items-center rounded-full">
                             <Icon size={18} />
                         </span>
                         <div>
                             <h2 className="font-semibold">{title}</h2>
-                            <p className="mt-1 text-xs leading-5 text-slate-600">
+                            <p className="text-muted-foreground mt-1 text-xs leading-5">
                                 {description}
                             </p>
                             <a
                                 href="#koleksi"
-                                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#0B1F3A] hover:text-[#2563EB]"
+                                className="text-foreground hover:text-primary mt-2 inline-flex items-center gap-1 text-xs font-semibold"
                             >
                                 Lihat Koleksi <ArrowRight size={13} />
                             </a>

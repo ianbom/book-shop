@@ -12,12 +12,12 @@ export function CategoryTabs({
     onChange,
 }: CategoryTabsProps) {
     return (
-        <div className="flex justify-center overflow-x-auto border-b border-slate-200">
+        <div className="border-border flex justify-center overflow-x-auto border-b">
             <div className="flex min-w-max gap-8 px-2">
                 <button
                     type="button"
                     onClick={() => onChange(null)}
-                    className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${activeCategory === null ? 'border-[#0B1F3A] text-[#0B1F3A]' : 'border-transparent text-slate-500 hover:text-[#0B1F3A]'}`}
+                    className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${activeCategory === null ? 'border-foreground text-foreground' : 'text-muted-foreground hover:text-foreground border-transparent'}`}
                 >
                     Semua
                 </button>
@@ -26,7 +26,7 @@ export function CategoryTabs({
                         key={category.id}
                         type="button"
                         onClick={() => onChange(category.slug)}
-                        className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${activeCategory === category.slug ? 'border-[#0B1F3A] text-[#0B1F3A]' : 'border-transparent text-slate-500 hover:text-[#0B1F3A]'}`}
+                        className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${activeCategory === category.slug ? 'border-foreground text-foreground' : 'text-muted-foreground hover:text-foreground border-transparent'}`}
                     >
                         {category.name === 'Pengembangan Diri'
                             ? 'Self Improvement'

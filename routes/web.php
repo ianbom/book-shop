@@ -11,11 +11,14 @@ use App\Http\Controllers\Admin\StoreSettingController;
 use App\Http\Controllers\Customer\BookController as CustomerBookController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Customer\OrderTrackingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('books', [CustomerBookController::class, 'index'])->name('books.index');
 Route::post('orders', [CustomerOrderController::class, 'store'])->name('orders.store');
+Route::get('track-order', [OrderTrackingController::class, 'index'])->name('track-order.index');
+Route::get('track-order/{orderCode}', [OrderTrackingController::class, 'show'])->name('track-order.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('dashboard', '/admin')->name('dashboard');
@@ -38,6 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
+        Route::patch('orders/{order}/shipping-cost', [OrderController::class, 'updateShippingCost'])->name('orders.shipping-cost');
         Route::post('orders/{order}/payment-proofs', [PaymentProofController::class, 'store'])->name('orders.payment-proofs.store');
         Route::delete('orders/{order}/payment-proofs/{paymentProof}', [PaymentProofController::class, 'destroy'])->name('orders.payment-proofs.destroy');
 

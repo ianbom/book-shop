@@ -9,17 +9,18 @@ use App\Models\Book;
 use App\Models\BookStockMovement;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
-use App\Models\StoreSetting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
+    public function __construct(private readonly WhatsAppService $whatsApp) {}
+
     /** @param array<string, mixed> $data @return array{order: Order, whatsapp_url: string} */
     public function create(array $data): array
     {
-        $whatsappNumber = $this->whatsappNumber();
+        $whatsappNumber = $this->whatsApp->storeNumberOrFail();
 
         $order = DB::transaction(function () use ($data): Order {
             $book = Book::query()->lockForUpdate()->findOrFail($data['book_id']);
@@ -83,7 +84,7 @@ class OrderService
 
         return [
             'order' => $order,
-            'whatsapp_url' => $this->whatsappUrl($whatsappNumber, $order),
+            'whatsapp_url' => $this->whatsApp->url($whatsappNumber, $this->whatsappMessage($order)),
         ];
     }
 
@@ -96,19 +97,7 @@ class OrderService
         return $code;
     }
 
-    private function whatsappNumber(): string
-    {
-        $number = preg_replace('/\D+/', '', (string) StoreSetting::query()->value('whatsapp_number'));
-        $number = str_starts_with($number, '0') ? '62'.substr($number, 1) : ltrim($number, '+');
-
-        if (! preg_match('/^62\d{8,14}$/', $number)) {
-            throw ValidationException::withMessages(['order' => 'Nomor WhatsApp toko belum tersedia.']);
-        }
-
-        return $number;
-    }
-
-    private function whatsappUrl(string $number, Order $order): string
+    private function whatsappMessage(Order $order): string
     {
         $message = implode("\n", [
             'Halo Admin Buku Order,',
@@ -137,7 +126,7 @@ class OrderService
             'Mohon informasi untuk proses pembayaran.',
         ]);
 
-        return "https://wa.me/{$number}?text=".rawurlencode($message);
+        return $message;
     }
 
     private function rupiah(string|float $value): string

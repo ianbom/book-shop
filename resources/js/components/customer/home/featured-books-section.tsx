@@ -38,14 +38,14 @@ export function FeaturedBooksSection({
                     ))}
                 </div>
                 {visibleBooks.length === 0 && (
-                    <p className="py-12 text-center text-sm text-slate-500">
+                    <p className="text-muted-foreground py-12 text-center text-sm">
                         Belum ada buku pada genre ini.
                     </p>
                 )}
                 <div className="mt-7 text-center">
                     <a
                         href="/books"
-                        className="inline-flex h-10 items-center rounded-md border border-[#0B1F3A] px-8 text-sm font-semibold transition hover:bg-[#0B1F3A] hover:text-white"
+                        className="border-foreground hover:bg-foreground hover:text-primary-foreground inline-flex h-10 items-center rounded-md border px-8 text-sm font-semibold transition"
                     >
                         Semua Buku
                     </a>

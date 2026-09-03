@@ -27,7 +27,7 @@ export function LatestBooksSection({
         <section className="py-12 lg:py-16">
             <SectionContainer>
                 <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
-                    <h2 className="font-serif text-3xl font-semibold">
+                    <h2 className="font-heading text-3xl font-semibold">
                         Buku Terbaru
                     </h2>
                     <div className="flex flex-wrap gap-2">
@@ -45,7 +45,7 @@ export function LatestBooksSection({
                                 type="button"
                                 key={filter.label}
                                 onClick={() => setActiveCategory(filter.slug)}
-                                className={`rounded-md px-4 py-2 text-xs font-medium ${activeCategory === filter.slug ? 'bg-[#0B1F3A] text-white' : 'border border-slate-200 text-slate-600 hover:border-[#0B1F3A]'}`}
+                                className={`rounded-md px-4 py-2 text-xs font-medium ${activeCategory === filter.slug ? 'bg-foreground text-primary-foreground' : 'border-border text-muted-foreground hover:border-foreground border'}`}
                             >
                                 {filter.label}
                             </button>
@@ -58,7 +58,7 @@ export function LatestBooksSection({
                     ))}
                 </div>
                 {visibleBooks.length === 0 && (
-                    <p className="py-8 text-center text-sm text-slate-500">
+                    <p className="text-muted-foreground py-8 text-center text-sm">
                         Belum ada buku terbaru pada genre ini.
                     </p>
                 )}

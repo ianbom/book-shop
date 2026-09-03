@@ -104,7 +104,7 @@ export default function InventoryHistory({
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[900px] text-left text-sm">
-                                <thead className="text-muted-foreground border-b bg-slate-50 text-xs uppercase">
+                                <thead className="text-muted-foreground bg-muted border-b text-xs uppercase">
                                     <tr>
                                         <th className="px-5 py-3">Tanggal</th>
                                         <th className="px-5 py-3">Buku</th>
@@ -134,7 +134,7 @@ export default function InventoryHistory({
                                                 />
                                             </td>
                                             <td
-                                                className={`px-5 py-4 font-semibold ${movement.quantity >= 0 ? 'text-emerald-700' : 'text-red-700'}`}
+                                                className={`px-5 py-4 font-semibold ${movement.quantity >= 0 ? 'text-success' : 'text-destructive'}`}
                                             >
                                                 {movement.quantity > 0
                                                     ? '+'
@@ -150,7 +150,7 @@ export default function InventoryHistory({
                                             <td className="px-5 py-4">
                                                 {movement.order ? (
                                                     <Link
-                                                        className="text-[#2563EB]"
+                                                        className="text-primary"
                                                         href={admin.orders.show(
                                                             movement.order.id,
                                                         )}

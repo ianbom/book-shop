@@ -18,6 +18,13 @@ const transitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
     shipping: ['completed'],
 };
 
+function currentDateTimeLocal() {
+    const date = new Date();
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+    return date.toISOString().slice(0, 16);
+}
+
 export default function OrderShow({ order }: { order: Order }) {
     const statusForm = useForm<{ status: OrderStatus; note: string }>({
         status: transitions[order.status]?.[0] ?? order.status,
@@ -26,12 +33,20 @@ export default function OrderShow({ order }: { order: Order }) {
     const paymentForm = useForm<{ payment_status: PaymentStatus }>({
         payment_status: order.payment_status,
     });
+    const shippingForm = useForm<{ shipping_cost: string }>({
+        shipping_cost: String(order.shipping_cost),
+    });
     const proofForm = useForm<{
         image: File | null;
         payment_amount: string;
         paid_at: string;
         note: string;
-    }>({ image: null, payment_amount: '', paid_at: '', note: '' });
+    }>({
+        image: null,
+        payment_amount: String(order.total),
+        paid_at: currentDateTimeLocal(),
+        note: '',
+    });
     const whatsapp = `https://wa.me/${order.customer_phone.replace(/\D/g, '').replace(/^0/, '62')}`;
 
     const updateStatus = (event: FormEvent) => {
@@ -45,7 +60,19 @@ export default function OrderShow({ order }: { order: Order }) {
         proofForm.post(admin.orders.paymentProofs.store.url(order.id), {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => proofForm.reset(),
+            onSuccess: () =>
+                proofForm.setData({
+                    image: null,
+                    payment_amount: String(order.total),
+                    paid_at: currentDateTimeLocal(),
+                    note: '',
+                }),
+        });
+    };
+    const updateShippingCost = (event: FormEvent) => {
+        event.preventDefault();
+        shippingForm.patch(admin.orders.shippingCost.url(order.id), {
+            preserveScroll: true,
         });
     };
 
@@ -449,6 +476,52 @@ export default function OrderShow({ order }: { order: Order }) {
                         </Card>
                         <Card>
                             <CardHeader>
+                                <CardTitle>Biaya Pengiriman</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form
+                                    onSubmit={updateShippingCost}
+                                    className="space-y-3"
+                                >
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="shipping_cost">
+                                            Harga Ongkir
+                                        </Label>
+                                        <Input
+                                            id="shipping_cost"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={
+                                                shippingForm.data.shipping_cost
+                                            }
+                                            onChange={(event) =>
+                                                shippingForm.setData(
+                                                    'shipping_cost',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                        <p className="text-destructive text-sm">
+                                            {shippingForm.errors.shipping_cost}
+                                        </p>
+                                    </div>
+                                    <Button
+                                        className="w-full"
+                                        variant="outline"
+                                        disabled={
+                                            shippingForm.processing ||
+                                            shippingForm.data.shipping_cost ===
+                                                String(order.shipping_cost)
+                                        }
+                                    >
+                                        Simpan Ongkir
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
                                 <CardTitle>Timeline Status</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-0">
@@ -458,7 +531,7 @@ export default function OrderShow({ order }: { order: Order }) {
                                             key={history.id}
                                             className="relative border-l pb-6 pl-5 last:pb-0"
                                         >
-                                            <span className="ring-background absolute top-1 -left-1.5 size-3 rounded-full bg-[#2563EB] ring-4" />
+                                            <span className="ring-background bg-primary absolute top-1 -left-1.5 size-3 rounded-full ring-4" />
                                             <StatusBadge
                                                 value={history.status}
                                             />

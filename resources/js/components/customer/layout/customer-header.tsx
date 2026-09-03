@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Heart, Menu, Search, ShoppingBag, UserRound } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -13,9 +13,7 @@ import { SectionContainer } from '@/components/customer/shared/section-container
 const navigation = [
     { label: 'Home', href: '/' },
     { label: 'Katalog', href: '/books' },
-    { label: 'Koleksi', href: '#koleksi' },
-    { label: 'Tentang', href: '#tentang' },
-    { label: 'Lacak Order', href: '#kontak' },
+    { label: 'Lacak Order', href: '/track-order' },
 ];
 
 function Brand() {
@@ -28,7 +26,7 @@ function Brand() {
             <svg
                 aria-hidden="true"
                 viewBox="0 0 44 34"
-                className="h-8 w-10 fill-[#0B1F3A]"
+                className="fill-foreground h-8 w-10"
             >
                 <path d="M21 7C15 2 8 2 2 4v25c7-2 13 0 19 5V7Zm2 0c6-5 13-5 19-3v25c-7-2-13 0-19 5V7Z" />
                 <path
@@ -37,7 +35,7 @@ function Brand() {
                     opacity=".18"
                 />
             </svg>
-            <span className="font-serif text-2xl font-semibold tracking-tight text-[#0B1F3A]">
+            <span className="font-heading text-foreground text-2xl font-semibold tracking-tight">
                 Buku Order
             </span>
         </Link>
@@ -46,64 +44,35 @@ function Brand() {
 
 export function CustomerHeader() {
     const currentPath = usePage().url.split('?')[0];
+    const isTrackingPage = currentPath.startsWith('/track-order');
 
     return (
-        <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur-sm">
+        <header className="border-border bg-card/95 sticky top-0 z-50 border-b backdrop-blur-sm">
             <SectionContainer className="flex h-[72px] items-center justify-between">
                 <Brand />
                 <nav
                     className="hidden items-center gap-9 text-sm font-medium lg:flex"
                     aria-label="Navigasi utama"
                 >
-                    {navigation.map((item, index) => (
+                    {navigation.map((item) => (
                         <Link
                             key={item.label}
                             href={item.href}
                             className={
                                 (item.href === '/' && currentPath === '/') ||
-                                (item.href !== '/' && currentPath.startsWith(item.href))
-                                    ? 'text-[#2563EB]'
-                                    : 'transition-colors hover:text-[#2563EB]'
+                                (item.href !== '/' &&
+                                    currentPath.startsWith(item.href))
+                                    ? isTrackingPage
+                                        ? 'text-foreground'
+                                        : 'text-primary'
+                                    : 'hover:text-foreground transition-colors'
                             }
                         >
                             {item.label}
                         </Link>
                     ))}
                 </nav>
-                <div className="hidden items-center gap-1 md:flex">
-                    <Button variant="ghost" size="icon" aria-label="Cari buku">
-                        <Search />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Profil admin"
-                    >
-                        <UserRound />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative"
-                        aria-label="Buku favorit"
-                    >
-                        <Heart />
-                        <span className="absolute top-0.5 right-0.5 grid size-4 place-items-center rounded-full bg-[#2563EB] text-[9px] text-white">
-                            2
-                        </span>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative"
-                        aria-label="Pesanan"
-                    >
-                        <ShoppingBag />
-                        <span className="absolute top-0.5 right-0.5 grid size-4 place-items-center rounded-full bg-[#2563EB] text-[9px] text-white">
-                            0
-                        </span>
-                    </Button>
-                </div>
+                <div className="hidden items-center gap-1 md:flex"></div>
                 <Sheet>
                     <SheetTrigger asChild>
                         <Button
@@ -129,35 +98,12 @@ export function CustomerHeader() {
                                 <Link
                                     key={item.label}
                                     href={item.href}
-                                    className="rounded-md px-3 py-3 font-medium hover:bg-[#EAF2FF]"
+                                    className="hover:bg-secondary rounded-md px-3 py-3 font-medium"
                                 >
                                     {item.label}
                                 </Link>
                             ))}
                         </nav>
-                        <div className="flex gap-2 border-t pt-5">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                aria-label="Cari buku"
-                            >
-                                <Search />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                aria-label="Buku favorit"
-                            >
-                                <Heart />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                aria-label="Pesanan"
-                            >
-                                <ShoppingBag />
-                            </Button>
-                        </div>
                     </SheetContent>
                 </Sheet>
             </SectionContainer>

@@ -18,7 +18,7 @@ export function CatalogPagination<T>({ books }: { books: PaginatedData<T> }) {
                     size="sm"
                     disabled={!link.url}
                     className={
-                        link.active ? 'bg-[#0B1F3A] hover:bg-[#071426]' : ''
+                        link.active ? 'bg-foreground hover:bg-foreground' : ''
                     }
                 >
                     <Link

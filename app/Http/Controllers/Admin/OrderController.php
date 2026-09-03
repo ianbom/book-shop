@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Orders\UpdateOrderShippingCostRequest;
 use App\Http\Requests\Admin\Orders\UpdateOrderStatusRequest;
 use App\Http\Requests\Admin\Orders\UpdatePaymentStatusRequest;
 use App\Http\Resources\Admin\OrderResource;
@@ -63,6 +64,19 @@ class OrderController extends Controller
     {
         $order->update(['payment_status' => PaymentStatus::from($request->validated('payment_status'))]);
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Status pembayaran berhasil diperbarui.']);
+
+        return back();
+    }
+
+    public function updateShippingCost(UpdateOrderShippingCostRequest $request, Order $order): RedirectResponse
+    {
+        $shippingCost = $request->validated('shipping_cost');
+
+        $order->update([
+            'shipping_cost' => $shippingCost,
+            'total' => number_format((float) $order->subtotal + (float) $shippingCost, 2, '.', ''),
+        ]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Ongkir order berhasil diperbarui.']);
 
         return back();
     }
