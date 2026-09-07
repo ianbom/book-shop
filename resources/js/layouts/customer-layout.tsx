@@ -18,9 +18,9 @@ export default function CustomerLayout({
     }>().props.storeSettings;
 
     return (
-        <div className="bg-card text-foreground min-h-screen">
+        <div className="bg-background text-foreground flex min-h-screen flex-col">
             <CustomerHeader />
-            <main>{children}</main>
+            <main className="flex-1">{children}</main>
             <CustomerFooter
                 storeSettings={storeSettings ?? pageStoreSettings}
             />

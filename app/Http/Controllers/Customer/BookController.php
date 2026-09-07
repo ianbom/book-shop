@@ -16,6 +16,10 @@ class BookController extends Controller
     {
         $sort = $request->string('sort')->toString();
         $availability = $request->string('availability')->toString();
+        $rawCategories = $request->input('categories', $request->input('category', []));
+        $selectedCategories = is_array($rawCategories)
+            ? array_values(array_filter($rawCategories))
+            : ($rawCategories ? array_values(array_filter(explode(',', (string) $rawCategories))) : []);
 
         $books = Book::query()
             ->active()
@@ -24,7 +28,7 @@ class BookController extends Controller
                 'images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
             ])
             ->search($request->string('search')->toString())
-            ->inCategory($request->string('category')->toString())
+            ->inCategory($selectedCategories)
             ->when($availability === 'available', fn ($query) => $query->where('stock', '>', 0))
             ->when($availability === 'out_of_stock', fn ($query) => $query->where('stock', 0));
 
@@ -41,7 +45,8 @@ class BookController extends Controller
             'categories' => Category::query()->orderBy('name')->get(['id', 'name', 'slug']),
             'filters' => [
                 'search' => $request->string('search')->toString(),
-                'category' => $request->string('category')->toString(),
+                'categories' => $selectedCategories,
+                'category' => implode(',', $selectedCategories),
                 'availability' => in_array($availability, ['available', 'out_of_stock'], true) ? $availability : '',
                 'sort' => in_array($sort, ['latest', 'title_asc', 'title_desc', 'price_asc', 'price_desc'], true) ? $sort : 'latest',
             ],

@@ -12,7 +12,7 @@ export function EmptyState({ onReset }: { onReset: () => void }) {
                 <p className="text-muted-foreground mt-2 text-sm">
                     Coba ubah kata pencarian atau filter yang digunakan.
                 </p>
-                <Button variant="outline" onClick={onReset} className="mt-5">
+                <Button variant="outline" onClick={onReset} className="mt-5 rounded-none">
                     Reset Filter
                 </Button>
             </div>

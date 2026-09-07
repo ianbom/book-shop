@@ -71,9 +71,13 @@ class Book extends Model
         $query->when($active !== null, fn (Builder $query) => $query->where('is_active', $active));
     }
 
-    /** @param Builder<Book> $query */
-    public function scopeInCategory(Builder $query, ?string $slug): void
+    /** @param Builder<Book> $query @param array<string>|string|null $slug */
+    public function scopeInCategory(Builder $query, array|string|null $slug): void
     {
-        $query->when($slug, fn (Builder $query, string $slug) => $query->whereHas('categories', fn (Builder $query) => $query->where('slug', $slug)));
+        $slugs = is_array($slug)
+            ? array_values(array_filter($slug))
+            : ($slug !== null && $slug !== '' ? array_values(array_filter(explode(',', $slug))) : []);
+
+        $query->when(!empty($slugs), fn (Builder $query) => $query->whereHas('categories', fn (Builder $query) => $query->whereIn('slug', $slugs)));
     }
 }

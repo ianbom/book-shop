@@ -28,75 +28,113 @@ export function BookDetailDialog({
             onOpenChange={(open) => !open && onClose()}
         >
             {book && (
-                <DialogContent className="max-h-[calc(100vh-2rem)] max-w-5xl overflow-y-auto p-0">
+                <DialogContent className="w-[94vw] max-w-[94vw] sm:max-w-4xl md:max-w-5xl lg:max-w-6xl max-h-[90vh] overflow-hidden rounded-none border border-border p-0 shadow-2xl">
                     <DialogHeader className="sr-only">
                         <DialogTitle>{book.title}</DialogTitle>
                         <DialogDescription>
                             Detail buku {book.title}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid md:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)]">
-                        <div className="bg-muted p-6 sm:p-8">
-                            <BookImageGallery book={book} />
+                    <div className="flex flex-col md:grid md:grid-cols-[340px_1fr] lg:grid-cols-[400px_1fr] max-h-[90vh] overflow-y-auto md:overflow-hidden">
+                        {/* Left Column: Image Gallery */}
+                        <div className="bg-muted/40 p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-border shrink-0">
+                            <div className="w-full max-w-[200px] sm:max-w-[260px] md:max-w-[320px]">
+                                <BookImageGallery book={book} />
+                            </div>
                         </div>
-                        <div className="flex flex-col p-6 sm:p-8">
-                            <p className="text-muted-foreground text-sm">
-                                {book.categories
-                                    .map((category) => category.name)
-                                    .join(' · ') || 'Buku'}
-                            </p>
-                            <h2 className="font-heading text-foreground mt-2 text-3xl font-semibold">
+
+                        {/* Right Column: Book Details & Actions */}
+                        <div className="flex flex-1 flex-col p-4 sm:p-6 lg:p-8 md:overflow-y-auto md:max-h-[90vh]">
+                            {/* Categories */}
+                            <div className="flex flex-wrap items-center gap-1.5 pr-8 md:pr-0">
+                                {book.categories.length > 0 ? (
+                                    book.categories.map((category) => (
+                                        <span
+                                            key={category.id}
+                                            className="border border-border bg-secondary/60 text-muted-foreground px-2 py-0.5 text-[10px] sm:text-[11px] font-medium"
+                                        >
+                                            {category.name}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="border border-border bg-secondary/60 text-muted-foreground px-2 py-0.5 text-[10px] sm:text-[11px] font-medium">
+                                        Buku
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Title & Author */}
+                            <h2 className="font-heading text-foreground mt-2.5 text-xl sm:text-2xl lg:text-3xl font-semibold leading-snug">
                                 {book.title}
                             </h2>
-                            <p className="text-muted-foreground mt-2 text-base">
-                                {book.author}
+                            <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
+                                Penulis:{' '}
+                                <span className="text-foreground font-medium">
+                                    {book.author}
+                                </span>
                             </p>
-                            <p className="text-foreground mt-5 text-2xl font-bold">
-                                {rupiah(book.price)}
-                            </p>
-                            <div className="mt-5 flex flex-wrap gap-2">
-                                {book.categories.map((category) => (
-                                    <span
-                                        key={category.id}
-                                        className="border-border text-muted-foreground border px-2.5 py-1 text-xs"
-                                    >
-                                        {category.name}
-                                    </span>
-                                ))}
-                            </div>
-                            <dl className="border-border mt-6 grid grid-cols-[92px_1fr] gap-y-3 border-y py-5 text-sm">
-                                <dt className="text-muted-foreground">ISBN</dt>
-                                <dd>{book.isbn ?? '-'}</dd>
-                                <dt className="text-muted-foreground">Stok</dt>
-                                <dd
-                                    className={
-                                        book.stock > 0
-                                            ? 'text-success font-medium'
-                                            : 'text-destructive font-medium'
-                                    }
+
+                            {/* Price & Stock status */}
+                            <div className="mt-3.5 sm:mt-4 flex flex-wrap items-baseline gap-3 sm:gap-4 border-y border-border py-3">
+                                <span className="text-foreground font-heading text-2xl sm:text-3xl font-bold tracking-tight">
+                                    {rupiah(book.price)}
+                                </span>
+                                <span
+                                    className={`text-[11px] sm:text-xs font-semibold px-2 py-0.5 border ${
+                                        book.stock > 0 ? 'border-black' : 'border-black'
+                                    }`}
                                 >
                                     {book.stock > 0
-                                        ? `Tersedia (${book.stock})`
+                                        ? `Stok Tersedia (${book.stock})`
                                         : 'Stok Habis'}
-                                </dd>
-                            </dl>
-                            <div className="mt-6">
-                                <h3 className="font-semibold">Sinopsis</h3>
-                                <p className="text-muted-foreground mt-2 text-sm leading-6 whitespace-pre-line">
+                                </span>
+                            </div>
+
+                            {/* Meta info / specs */}
+                            <div className="mt-3.5 sm:mt-4 grid grid-cols-2 gap-3 sm:gap-4 border-b border-border pb-3.5 text-xs">
+                                <div>
+                                    <span className="text-muted-foreground block text-[10px] sm:text-[11px]">
+                                        ISBN
+                                    </span>
+                                    <span className="font-medium text-foreground text-xs sm:text-sm">
+                                        {book.isbn || '-'}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground block text-[10px] sm:text-[11px]">
+                                        Kategori Utama
+                                    </span>
+                                    <span className="font-medium text-foreground text-xs sm:text-sm">
+                                        {book.categories[0]?.name || '-'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Synopsis / Description */}
+                            <div className="mt-3.5 sm:mt-4 flex-1">
+                                <h3 className="text-[11px] sm:text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                    Sinopsis
+                                </h3>
+                                <p className="text-muted-foreground mt-1.5 sm:mt-2 text-xs sm:text-sm leading-relaxed whitespace-pre-line max-h-36 sm:max-h-48 overflow-y-auto pr-1">
                                     {book.description ||
-                                        'Deskripsi belum tersedia.'}
+                                        'Sinopsis belum tersedia untuk buku ini.'}
                                 </p>
                             </div>
-                            <Button
-                                disabled={book.stock <= 0}
-                                onClick={() => {
-                                    onClose();
-                                    onBuy(book);
-                                }}
-                                className="bg-foreground hover:bg-foreground mt-8 w-full"
-                            >
-                                <ShoppingBag /> Beli Buku
-                            </Button>
+
+                            {/* Action Button */}
+                            <div className="sticky bottom-0 -mx-4 mt-4 border-t border-border bg-background/95 px-4 pt-3 pb-1 backdrop-blur-xs sm:-mx-6 sm:px-6 md:static md:mx-0 md:border-t md:bg-transparent md:px-0 md:pt-4 md:pb-0 md:backdrop-blur-none">
+                                <Button
+                                    size="lg"
+                                    disabled={book.stock <= 0}
+                                    onClick={() => {
+                                        onClose();
+                                        onBuy(book);
+                                    }}
+                                    className="w-full rounded-none h-10 sm:h-11 text-xs font-bold uppercase tracking-wider"
+                                >
+                                    <ShoppingBag className="size-4" /> Beli Buku
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </DialogContent>

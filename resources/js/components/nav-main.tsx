@@ -14,13 +14,13 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-sidebar-foreground/60 font-semibold tracking-wider uppercase text-[11px]">Platform</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         {item.children ? (
                             <div className="space-y-1 py-1">
-                                <div className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-xs font-medium group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                                <div className="text-sidebar-foreground/70 flex items-center gap-2 px-2 py-1 text-xs font-semibold tracking-wide group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
                                     {item.icon && (
                                         <item.icon className="size-4" />
                                     )}

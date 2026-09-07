@@ -5,7 +5,6 @@ import type { CustomerBook } from '@/types';
 
 export function BookCard({
     book,
-    compact = false,
     onView,
     onBuy,
 }: {
@@ -14,15 +13,13 @@ export function BookCard({
     onView?: (book: CustomerBook) => void;
     onBuy?: (book: CustomerBook) => void;
 }) {
-    const catalogCard = Boolean(onView);
-
     return (
-        <article className="group border-border bg-card hover:border-primary flex min-w-0 flex-col rounded-md border p-3 transition hover:-translate-y-0.5 hover:shadow-md">
+        <article className="border-border group bg-card hover:border-primary flex min-w-0 flex-col border p-2.5 transition hover:-translate-y-1 hover:shadow-md sm:p-3">
             <button
                 type="button"
                 onClick={() => onView?.(book)}
-                className={`bg-muted grid place-items-center overflow-hidden ${compact ? 'h-48 sm:h-52' : 'h-60 sm:h-64'}`}
-                aria-label={`Lihat ${book.title}`}
+                className="bg-muted flex aspect-[.72] w-full items-center justify-center overflow-hidden"
+                aria-label={`Lihat detail ${book.title}`}
             >
                 {book.primary_image ? (
                     <img
@@ -31,53 +28,50 @@ export function BookCard({
                             book.primary_image.alt_text ??
                             `Cover buku ${book.title}`
                         }
-                        className="h-full max-w-full object-contain p-2 drop-shadow-md"
+                        className="size-full object-cover transition duration-300 group-hover:scale-105"
                         loading="lazy"
                     />
                 ) : (
                     <BookOpen
-                        className="text-muted-foreground size-10"
+                        className="text-muted-foreground size-8"
                         aria-hidden="true"
                     />
                 )}
             </button>
-            <div className="pt-3">
+            <div className="flex flex-1 flex-col pt-3">
                 <button
                     type="button"
                     onClick={() => onView?.(book)}
-                    className="text-foreground hover:text-primary line-clamp-1 text-left text-sm font-semibold"
+                    className="font-heading hover:text-primary line-clamp-2 min-h-10 text-left text-base leading-5 font-semibold transition-colors"
                 >
                     {book.title}
                 </button>
-                {!compact && (
-                    <p className="text-muted-foreground mt-1 line-clamp-2 min-h-10 text-xs leading-5">
-                        {book.description ?? book.author}
-                    </p>
-                )}
-                <p className="text-foreground mt-2 text-sm font-bold">
-                    {rupiah(book.price)}
+                <p className="text-muted-foreground mt-1 line-clamp-1 text-[11px]">
+                    {book.author}
                 </p>
-                {catalogCard && (
-                    <div className="mt-3 flex items-center justify-between gap-2">
-                        <span
-                            className={`text-xs font-medium ${book.stock > 0 ? 'text-success' : 'text-destructive'}`}
-                        >
-                            {book.stock > 0
-                                ? `Stok ${book.stock}`
-                                : 'Stok Habis'}
-                        </span>
-                        <Button
-                            size="sm"
-                            disabled={book.stock <= 0}
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                onBuy?.(book);
-                            }}
-                        >
-                            <ShoppingBag className="size-3.5" /> Beli
-                        </Button>
-                    </div>
-                )}
+                <div className="mt-2 flex items-center justify-between">
+                    <p className="text-xs font-bold text-foreground">
+                        {rupiah(book.price)}
+                    </p>
+                    <span
+                        className={`text-[10px] font-medium ${book.stock > 0 ? 'text-success' : 'text-destructive'}`}
+                    >
+                        {book.stock > 0 ? `Stok ${book.stock}` : 'Habis'}
+                    </span>
+                </div>
+                <div className="mt-3 pt-1">
+                    <Button
+                        size="sm"
+                        disabled={book.stock <= 0}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onBuy?.(book);
+                        }}
+                        className="h-8 w-full rounded-none text-xs font-medium"
+                    >
+                        <ShoppingBag className="size-3.5" /> Beli Buku
+                    </Button>
+                </div>
             </div>
         </article>
     );

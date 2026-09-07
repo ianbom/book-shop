@@ -74,13 +74,13 @@
     --chart-3: #0b1f3a;
     --chart-4: #9a6b2f;
     --chart-5: #3f8065;
-    --sidebar: #ffffff;
-    --sidebar-foreground: #0b1f3a;
+    --sidebar: #0b1f3a;
+    --sidebar-foreground: #cbd5e1;
     --sidebar-primary: #2563eb;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #eaf2ff;
-    --sidebar-accent-foreground: #0b1f3a;
-    --sidebar-border: #e2e8f0;
+    --sidebar-accent: #162e50;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #162e50;
     --sidebar-ring: #2563eb;
     --font-heading: 'Cormorant Garamond', serif;
     --font-body: 'Manrope', sans-serif;

@@ -1,5 +1,6 @@
-import { Link, usePage } from '@inertiajs/react';
-import { Menu } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { FormEvent, useEffect, useState } from 'react';
+import { Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -12,7 +13,7 @@ import { SectionContainer } from '@/components/customer/shared/section-container
 
 const navigation = [
     { label: 'Home', href: '/' },
-    { label: 'Katalog', href: '/books' },
+    { label: 'Buku', href: '/books' },
     { label: 'Lacak Order', href: '/track-order' },
 ];
 
@@ -20,89 +21,164 @@ function Brand() {
     return (
         <Link
             href="/"
-            className="flex items-center gap-3"
+            className="flex shrink-0 items-center gap-2.5"
             aria-label="Wonder Book, beranda"
         >
             <svg
                 aria-hidden="true"
-                viewBox="0 0 44 34"
-                className="fill-foreground h-8 w-10"
+                viewBox="0 0 48 48"
+                className="text-foreground size-10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.35"
             >
-                <path d="M21 7C15 2 8 2 2 4v25c7-2 13 0 19 5V7Zm2 0c6-5 13-5 19-3v25c-7-2-13 0-19 5V7Z" />
-                <path
-                    d="M5 7c5-1 10 0 14 3v18c-4-2-9-3-14-2V7Zm34 0c-5-1-10 0-14 3v18c4-2 9-3 14-2V7Z"
-                    fill="white"
-                    opacity=".18"
-                />
+                <rect x="3" y="3" width="42" height="42" />
+                <path d="m5 5 38 38M43 5 5 43" />
             </svg>
-            <span className="font-heading text-foreground text-2xl font-semibold tracking-tight">
-                Wonder Book
+            <span className="leading-none">
+                <span className="font-heading block text-[1.7rem] font-semibold tracking-tight">
+                    Wonderbook
+                </span>
+                <span className="text-muted-foreground mt-1 block text-[10px] font-semibold tracking-wide">
+                    More Books, A better You
+                </span>
             </span>
         </Link>
     );
 }
 
 export function CustomerHeader() {
-    const currentPath = usePage().url.split('?')[0];
-    const isTrackingPage = currentPath.startsWith('/track-order');
+    const page = usePage();
+    const currentPath = page.url.split('?')[0];
+    const [search, setSearch] = useState('');
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (page.url.startsWith('/books')) {
+            const params = new URLSearchParams(page.url.split('?')[1] ?? '');
+            setSearch(params.get('search') ?? '');
+        } else {
+            setSearch('');
+        }
+    }, [page.url]);
+
+    const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const trimmed = search.trim();
+        router.get('/books', trimmed ? { search: trimmed } : {});
+        setOpen(false);
+    };
 
     return (
-        <header className="border-border bg-card/95 sticky top-0 z-50 border-b backdrop-blur-sm">
-            <SectionContainer className="flex h-[72px] items-center justify-between">
+        <header className="bg-card text-foreground relative z-40 border-b">
+            <SectionContainer className="flex min-h-[74px] items-center gap-4 py-3 lg:min-h-[86px]">
                 <Brand />
+                <form
+                    onSubmit={submitSearch}
+                    className="hidden min-w-0 flex-1 items-stretch gap-3 md:flex"
+                >
+                    <label className="border-border focus-within:border-primary flex h-10 min-w-0 flex-1 items-center border">
+                        <span className="sr-only">Cari buku</span>
+                        <input
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Cari judul buku, penulis, atau ISBN..."
+                            className="h-full min-w-0 flex-1 bg-transparent px-3 text-xs outline-none"
+                        />
+                        <button
+                            type="submit"
+                            className="text-foreground hover:bg-secondary border-l px-3 transition"
+                            aria-label="Cari buku"
+                        >
+                            <Search className="size-5" />
+                        </button>
+                    </label>
+                </form>
+
                 <nav
-                    className="hidden items-center gap-9 text-sm font-medium lg:flex"
+                    className="ml-auto hidden items-center gap-6 text-sm font-medium md:flex"
                     aria-label="Navigasi utama"
                 >
-                    {navigation.map((item) => (
-                        <Link
-                            key={item.label}
-                            href={item.href}
-                            className={
-                                (item.href === '/' && currentPath === '/') ||
-                                    (item.href !== '/' &&
-                                        currentPath.startsWith(item.href))
-                                    ? isTrackingPage
-                                        ? 'text-foreground'
-                                        : 'text-primary'
-                                    : 'hover:text-foreground transition-colors'
-                            }
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
+                    {navigation.map((item) => {
+                        const isActive =
+                            item.href === '/'
+                                ? currentPath === '/'
+                                : currentPath.startsWith(item.href);
+
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                className={
+                                    isActive
+                                        ? 'text-primary font-semibold'
+                                        : 'text-muted-foreground hover:text-foreground transition-colors'
+                                }
+                            >
+                                {item.label}
+                            </Link>
+                        );
+                    })}
                 </nav>
-                <div className="hidden items-center gap-1 md:flex"></div>
-                <Sheet>
+
+                <Sheet open={open} onOpenChange={setOpen}>
                     <SheetTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="lg:hidden"
+                            className="ml-auto md:hidden"
                             aria-label="Buka navigasi"
                         >
                             <Menu />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-[310px] px-6">
+                    <SheetContent side="right" className="w-[320px] px-6">
                         <SheetHeader className="border-b px-0 py-5 text-left">
                             <SheetTitle>
                                 <Brand />
                             </SheetTitle>
                         </SheetHeader>
+                        <form
+                            onSubmit={submitSearch}
+                            className="mt-6 flex border"
+                        >
+                            <input
+                                value={search}
+                                onChange={(event) =>
+                                    setSearch(event.target.value)
+                                }
+                                placeholder="Cari buku..."
+                                className="h-10 min-w-0 flex-1 px-3 text-sm outline-none"
+                            />
+                            <button type="submit" className="border-l px-3" aria-label="Cari buku">
+                                <Search className="size-4" />
+                            </button>
+                        </form>
                         <nav
                             className="flex flex-col gap-1 py-6"
                             aria-label="Navigasi seluler"
                         >
-                            {navigation.map((item) => (
-                                <Link
-                                    key={item.label}
-                                    href={item.href}
-                                    className="hover:bg-secondary rounded-md px-3 py-3 font-medium"
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
+                            {navigation.map((item) => {
+                                const isActive =
+                                    item.href === '/'
+                                        ? currentPath === '/'
+                                        : currentPath.startsWith(item.href);
+
+                                return (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        onClick={() => setOpen(false)}
+                                        className={`rounded-sm px-3 py-3 text-sm font-semibold transition-colors ${
+                                            isActive
+                                                ? 'bg-secondary text-primary'
+                                                : 'hover:bg-secondary text-foreground'
+                                        }`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
                         </nav>
                     </SheetContent>
                 </Sheet>

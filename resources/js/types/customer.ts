@@ -28,7 +28,8 @@ export interface CustomerBook {
 
 export interface CatalogFilters {
     search: string;
-    category: string;
+    categories: string[];
+    category?: string;
     availability: '' | 'available' | 'out_of_stock';
     sort: 'latest' | 'title_asc' | 'title_desc' | 'price_asc' | 'price_desc';
 }

@@ -17,9 +17,9 @@ export function CatalogPagination<T>({ books }: { books: PaginatedData<T> }) {
                     variant={link.active ? 'default' : 'outline'}
                     size="sm"
                     disabled={!link.url}
-                    className={
+                    className={`rounded-none ${
                         link.active ? 'bg-foreground hover:bg-foreground' : ''
-                    }
+                    }`}
                 >
                     <Link
                         href={link.url ?? '#'}

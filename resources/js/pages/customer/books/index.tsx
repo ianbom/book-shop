@@ -39,10 +39,19 @@ export default function BooksIndex({
         [books.data, orderBookId],
     );
 
-    const navigate = (next: CatalogFilters) =>
+    const navigate = (next: CatalogFilters) => {
+        const payload: Record<string, unknown> = {
+            search: next.search,
+            availability: next.availability,
+            sort: next.sort,
+        };
+        if (next.categories && next.categories.length > 0) {
+            payload.categories = next.categories;
+        }
+
         router.get(
             '/books',
-            { ...next },
+            payload,
             {
                 preserveScroll: true,
                 preserveState: true,
@@ -50,6 +59,7 @@ export default function BooksIndex({
                 only: ['books', 'filters'],
             },
         );
+    };
 
     useEffect(() => setSearch(filters.search), [filters.search]);
     useEffect(() => {
@@ -57,15 +67,16 @@ export default function BooksIndex({
             navigate({ ...filters, search: debouncedSearch });
     }, [debouncedSearch]);
 
-    const updateFilter = (
-        key: Exclude<keyof CatalogFilters, 'search'>,
-        value: string,
-    ) => navigate({ ...filters, [key]: value } as CatalogFilters);
+    const updateFilter = <K extends keyof CatalogFilters>(
+        key: K,
+        value: CatalogFilters[K],
+    ) => navigate({ ...filters, [key]: value });
+
     const reset = () => {
         setSearch('');
         navigate({
             search: '',
-            category: '',
+            categories: [],
             availability: '',
             sort: 'latest',
         });
@@ -74,55 +85,64 @@ export default function BooksIndex({
     return (
         <>
             <Head title="Katalog Buku" />
-            <section className="bg-secondary py-12 sm:py-16">
+            <section className="bg-background border-b py-10 sm:py-14">
                 <SectionContainer>
-                    <p className="text-primary text-sm font-semibold tracking-[.18em] uppercase">
-                        Wonder Book
+                    <p className="text-primary text-xs font-bold tracking-[.24em] uppercase">
+                        Wonderbook
                     </p>
                     <h1 className="font-heading text-foreground mt-3 text-4xl font-semibold sm:text-5xl">
                         Katalog Buku
                     </h1>
-                    <p className="text-muted-foreground mt-3 max-w-2xl">
-                        Temukan buku terbaik untuk menemani perjalanan membaca
-                        dan berkembang.
+                    <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
+                        Temukan ribuan buku inspiratif pilihan untuk menemani perjalanan
+                        membaca dan berkembang.
                     </p>
                 </SectionContainer>
             </section>
-            <SectionContainer className="py-10 sm:py-14">
-                <BookFilters
-                    categories={categories}
-                    filters={filters}
-                    search={search}
-                    onSearchChange={setSearch}
-                    onChange={updateFilter}
-                    onReset={reset}
-                />
-                <div className="mt-7 flex items-center justify-between">
-                    <p className="text-muted-foreground text-sm">
-                        {books.meta.total} buku ditemukan
-                    </p>
+            <SectionContainer className="py-8 sm:py-12">
+                <div className="grid items-start gap-8 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
+                    <BookFilters
+                        categories={categories}
+                        filters={filters}
+                        search={search}
+                        onSearchChange={setSearch}
+                        onChange={updateFilter}
+                        onReset={reset}
+                    />
+
+                    <div className="min-w-0">
+                        <div className="flex items-center justify-between border-b pb-3">
+                            <p className="text-muted-foreground text-xs font-medium">
+                                Menampilkan{' '}
+                                <span className="text-foreground font-semibold">
+                                    {books.meta.total}
+                                </span>{' '}
+                                buku
+                            </p>
+                        </div>
+                        {books.data.length > 0 ? (
+                            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 lg:gap-4">
+                                {books.data.map((book) => (
+                                    <BookCard
+                                        key={book.id}
+                                        book={book}
+                                        onView={(selected) =>
+                                            setDetailBookId(selected.id)
+                                        }
+                                        onBuy={(selected) =>
+                                            setOrderBookId(selected.id)
+                                        }
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="mt-6">
+                                <EmptyState onReset={reset} />
+                            </div>
+                        )}
+                        <CatalogPagination books={books} />
+                    </div>
                 </div>
-                {books.data.length > 0 ? (
-                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
-                        {books.data.map((book) => (
-                            <BookCard
-                                key={book.id}
-                                book={book}
-                                onView={(selected) =>
-                                    setDetailBookId(selected.id)
-                                }
-                                onBuy={(selected) =>
-                                    setOrderBookId(selected.id)
-                                }
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="mt-5">
-                        <EmptyState onReset={reset} />
-                    </div>
-                )}
-                <CatalogPagination books={books} />
             </SectionContainer>
             <BookDetailDialog
                 book={selectedDetailBook}
