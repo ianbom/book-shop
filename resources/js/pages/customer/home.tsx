@@ -74,7 +74,7 @@ export default function Home({
 }: HomeProps) {
     const [detailBookId, setDetailBookId] = useState<number | null>(null);
     const [orderBookId, setOrderBookId] = useState<number | null>(null);
-    const books = featuredBooks.slice(0, 4);
+    const books = featuredBooks.slice(0, 8);
     const categoryList = categories.slice(0, 8);
 
     const selectedDetailBook = useMemo(
@@ -89,8 +89,8 @@ export default function Home({
     return (
         <>
             <Head title={'Home'} />
-            <section className="bg-background border-b border-border overflow-hidden">
-                <SectionContainer className="grid items-center gap-8 py-12 sm:py-16 lg:grid-cols-[1fr_1.2fr] lg:py-16 xl:gap-12">
+            <section className="bg-background border-b border-border min-h-[calc(100svh-74px)] lg:min-h-[calc(100svh-86px)] flex flex-col justify-center overflow-hidden">
+                <SectionContainer className="grid items-center gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:py-12 xl:gap-12 w-full">
                     <div className="max-w-[460px]">
                         <p className="text-primary mb-3 text-xs font-bold tracking-[0.24em] uppercase">
                             Wonderbook
@@ -113,41 +113,6 @@ export default function Home({
                         >
                             Lihat Semua Buku <ArrowRight className="size-4" />
                         </Link>
-                        <div className="mt-10 sm:mt-12 grid grid-cols-3 gap-4 sm:gap-6">
-                            <div className="flex items-start gap-2.5">
-                                <BookOpen className="text-primary mt-0.5 size-5 shrink-0" />
-                                <div className="text-xs leading-snug">
-                                    <span className="text-foreground font-semibold block">
-                                        Koleksi Lengkap
-                                    </span>
-                                    <span className="text-muted-foreground">
-                                        untuk Semua Minat
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-2.5">
-                                <ShieldCheck className="text-primary mt-0.5 size-5 shrink-0" />
-                                <div className="text-xs leading-snug">
-                                    <span className="text-foreground font-semibold block">
-                                        Buku Original
-                                    </span>
-                                    <span className="text-muted-foreground">
-                                        100% Terjamin
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-2.5">
-                                <Truck className="text-primary mt-0.5 size-5 shrink-0" />
-                                <div className="text-xs leading-snug">
-                                    <span className="text-foreground font-semibold block">
-                                        Pengiriman Cepat
-                                    </span>
-                                    <span className="text-muted-foreground">
-                                        ke Seluruh Indonesia
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div className="relative flex items-center justify-center lg:justify-end">
                         <img
@@ -268,44 +233,6 @@ export default function Home({
                             Belum ada buku pilihan.
                         </p>
                     )}
-                </SectionContainer>
-            </section>
-
-            <section className="bg-background border-y py-8">
-                <SectionContainer>
-                    <div className="flex items-center justify-between">
-                        <h2 className="font-heading text-2xl font-semibold">
-                            Kategori Populer
-                        </h2>
-                        <Link
-                            href="/books"
-                            className="hover:text-primary flex items-center gap-1 text-xs font-semibold"
-                        >
-                            Lihat Semua <ArrowRight className="size-3.5" />
-                        </Link>
-                    </div>
-                    <div className="mt-6 grid grid-cols-4 gap-4 sm:grid-cols-8">
-                        {categoryList.map((category, index) => {
-                            const Icon =
-                                categoryIcons[index % categoryIcons.length];
-                            return (
-                                <Link
-                                    key={category.id}
-                                    href={`/books?category=${category.slug}`}
-                                    className="group text-center"
-                                >
-                                    <span className="border-border group-hover:border-primary group-hover:bg-secondary mx-auto grid size-16 place-items-center rounded-full border transition sm:size-20">
-                                        <Icon className="text-foreground size-7 stroke-[1.2]" />
-                                    </span>
-                                    <span className="mt-3 block text-[10px] leading-4 font-semibold">
-                                        {category.name === 'Pengembangan Diri'
-                                            ? 'Self Improvement'
-                                            : category.name}
-                                    </span>
-                                </Link>
-                            );
-                        })}
-                    </div>
                 </SectionContainer>
             </section>
             <BookDetailDialog
