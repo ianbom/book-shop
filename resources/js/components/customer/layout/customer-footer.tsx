@@ -41,7 +41,6 @@ export function CustomerFooter({
     storeSettings?: CustomerStoreSettings;
 }) {
     const store = storeSettings ?? {
-        store_name: 'Wonder Book',
         whatsapp_number: '+62 812-3456-7890',
         email: 'halo@bukuorder.id',
         address: null,
@@ -55,7 +54,7 @@ export function CustomerFooter({
             <SectionContainer className="grid gap-9 py-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1.1fr]">
                 <div>
                     <div className="font-heading mb-3 text-2xl font-semibold">
-                        {store.store_name.replace(' Book', 'book')}
+                        Wonderbook
                     </div>
                     <p className="text-primary-foreground/75 max-w-[13rem] text-xs leading-5">
                         Lebih dari sekadar toko buku. Kami menemani perjalanan
@@ -81,7 +80,7 @@ export function CustomerFooter({
             </SectionContainer>
             <div className="border-primary-foreground/20 border-t">
                 <SectionContainer className="text-primary-foreground/70 py-4 text-center text-[11px]">
-                    © 2026 {store.store_name}. All rights reserved.
+                    © 2026 Wonderbook. All rights reserved.
                 </SectionContainer>
             </div>
         </footer>

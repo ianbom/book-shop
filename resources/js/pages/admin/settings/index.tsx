@@ -15,7 +15,6 @@ export default function StoreSettings({
     setting: StoreSetting | null;
 }) {
     const form = useForm({
-        store_name: setting?.store_name ?? 'Wonder Book',
         whatsapp_number: setting?.whatsapp_number ?? '',
         email: setting?.email ?? '',
         address: setting?.address ?? '',
@@ -38,23 +37,6 @@ export default function StoreSettings({
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-5">
-                            <div className="grid gap-2">
-                                <Label htmlFor="store_name">Nama Toko</Label>
-                                <Input
-                                    id="store_name"
-                                    value={form.data.store_name}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'store_name',
-                                            event.target.value,
-                                        )
-                                    }
-                                    required
-                                />
-                                <p className="text-destructive text-sm">
-                                    {form.errors.store_name}
-                                </p>
-                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="whatsapp_number">
                                     Nomor WhatsApp

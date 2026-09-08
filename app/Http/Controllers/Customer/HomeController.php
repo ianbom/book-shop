@@ -49,13 +49,12 @@ class HomeController extends Controller
             ->all();
     }
 
-    /** @return array{store_name: string, whatsapp_number: string, email: ?string, address: ?string} */
+    /** @return array{whatsapp_number: string, email: ?string, address: ?string} */
     private function storeSettings(): array
     {
         $settings = StoreSetting::query()->first();
 
         return [
-            'store_name' => $settings?->store_name ?? 'Wonder Book',
             'whatsapp_number' => $settings?->whatsapp_number ?? '+62 812-3456-7890',
             'email' => $settings?->email ?? 'halo@bukuorder.id',
             'address' => $settings?->address,

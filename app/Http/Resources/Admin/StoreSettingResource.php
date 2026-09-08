@@ -16,7 +16,6 @@ class StoreSettingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'store_name' => $this->store_name,
             'whatsapp_number' => $this->whatsapp_number,
             'email' => $this->email,
             'address' => $this->address,

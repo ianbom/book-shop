@@ -33,7 +33,11 @@ class HomepageTest extends TestCase
             'is_primary' => false,
             'sort_order' => 0,
         ]);
-        StoreSetting::factory()->create(['store_name' => 'Wonder Book']);
+        StoreSetting::factory()->create([
+            'whatsapp_number' => '628117866977',
+            'email' => 'wonderprince@gmail.com',
+            'address' => 'Jl Merdeka Surabaya',
+        ]);
 
         $this->get(route('home'))
             ->assertOk()
@@ -44,7 +48,10 @@ class HomepageTest extends TestCase
                 ->has('latestBooks', 1)
                 ->where('featuredBooks.0.id', $visibleBook->id)
                 ->where('featuredBooks.0.primary_image.url', config('app.url').'/storage/books/visible/first.webp')
-                ->where('storeSettings.store_name', 'Wonder Book'),
+                ->missing('storeSettings.store_name')
+                ->where('storeSettings.whatsapp_number', '628117866977')
+                ->where('storeSettings.email', 'wonderprince@gmail.com')
+                ->where('storeSettings.address', 'Jl Merdeka Surabaya'),
             );
 
         $this->assertDatabaseHas('books', ['id' => $hiddenBook->id, 'is_active' => false]);

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { BookDetailDialog } from '@/components/customer/books/book-detail-dialog';
 import { BookOrderDialog } from '@/components/customer/books/book-order-dialog';
+import { HeroSection } from '@/components/customer/home/hero-section';
 import { SectionContainer } from '@/components/customer/shared/section-container';
 import { Button } from '@/components/ui/button';
 import { rupiah } from '@/lib/format';
@@ -103,41 +104,7 @@ export default function Home({
     return (
         <>
             <Head title={'Home'} />
-            <section className="bg-background border-b border-border min-h-[calc(100svh-74px)] lg:min-h-[calc(100svh-86px)] flex flex-col justify-center overflow-hidden">
-                <SectionContainer className="grid items-center gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:py-12 xl:gap-12 w-full">
-                    <div className="max-w-[460px]">
-                        <p className="text-primary mb-3 text-xs font-bold tracking-[0.24em] uppercase">
-                            Wonderbook
-                        </p>
-                        <h1 className="font-heading text-foreground text-4xl sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.08] tracking-tight">
-                            Temukan
-                            <br />
-                            Buku Favoritmu
-                            <br />
-                            di Wonderbook
-                        </h1>
-                        <p className="text-muted-foreground mt-5 text-sm sm:text-base leading-relaxed">
-                            Ribuan buku inspiratif, dari kisah yang menghibur
-                            hingga ilmu yang mengubah hidup. Mulai petualangan
-                            membacamu hari ini.
-                        </p>
-                        <Link
-                            href="/books"
-                            className="bg-primary text-primary-foreground hover:bg-primary/90 mt-7 inline-flex h-11 items-center gap-2.5 rounded-lg px-6 text-sm font-semibold shadow-xs transition"
-                        >
-                            Lihat Semua Buku <ArrowRight className="size-4" />
-                        </Link>
-                    </div>
-                    <div className="relative flex items-center justify-center lg:justify-end">
-                        <img
-                            src="/hero.png"
-                            alt="Koleksi Buku di Wonderbook"
-                            className="w-full max-w-[620px] lg:max-w-none h-auto object-contain select-none"
-                            loading="eager"
-                        />
-                    </div>
-                </SectionContainer>
-            </section>
+            <HeroSection />
 
             {galleryBooks.length > 0 && (
                 <section className="bg-secondary/30 border-y py-10 sm:py-12 lg:py-16">

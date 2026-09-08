@@ -41,5 +41,6 @@ class DomainSchemaTest extends TestCase
         }
 
         $this->assertFalse(Schema::hasColumn('book_categories', 'deleted_at'));
+        $this->assertFalse(Schema::hasColumn('store_settings', 'store_name'));
     }
 }

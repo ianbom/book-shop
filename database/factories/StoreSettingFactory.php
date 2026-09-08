@@ -13,7 +13,6 @@ class StoreSettingFactory extends Factory
     public function definition(): array
     {
         return [
-            'store_name' => 'Wonder Book',
             'whatsapp_number' => '+6281234567890',
             'email' => fake()->safeEmail(),
             'address' => fake()->address(),

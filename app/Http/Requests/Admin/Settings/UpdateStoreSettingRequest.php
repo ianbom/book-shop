@@ -23,7 +23,6 @@ class UpdateStoreSettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'store_name' => ['required', 'string', 'max:150'],
             'whatsapp_number' => ['required', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['nullable', 'string', 'max:5000'],

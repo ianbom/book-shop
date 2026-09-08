@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('store_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('store_name', 150);
             $table->string('whatsapp_number', 30);
             $table->string('email', 150)->nullable();
             $table->text('address')->nullable();

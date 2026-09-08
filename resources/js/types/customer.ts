@@ -35,7 +35,6 @@ export interface CatalogFilters {
 }
 
 export interface CustomerStoreSettings {
-    store_name: string;
     whatsapp_number: string;
     email: string | null;
     address: string | null;
