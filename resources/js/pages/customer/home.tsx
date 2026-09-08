@@ -75,6 +75,21 @@ export default function Home({
     const [orderBookId, setOrderBookId] = useState<number | null>(null);
     const books = featuredBooks.slice(0, 8);
     const categoryList = categories.slice(0, 8);
+    const galleryBooks = Array.from(
+        new Map(
+            [...latestBooks, ...featuredBooks].map((book) => [book.id, book]),
+        ).values(),
+    ).slice(0, 8);
+    const galleryTileClasses = [
+        'col-span-2 row-span-2',
+        'row-span-1',
+        'row-span-1',
+        'col-span-2 row-span-1',
+        'row-span-2',
+        'row-span-1',
+        'row-span-1',
+        'col-span-2 row-span-1',
+    ];
 
     const selectedDetailBook = useMemo(
         () => featuredBooks.find((book) => book.id === detailBookId) ?? null,
@@ -124,81 +139,49 @@ export default function Home({
                 </SectionContainer>
             </section>
 
-            <SectionContainer className="grid gap-4 py-5 md:grid-cols-3 lg:py-6">
-                <PromoCard
-                    title="Buku Terbaru"
-                    description="Jelajahi rilis buku paling baru dan menarik."
-                    image="/images/customer/home/highlight-library.jpg"
-                    href="#koleksi"
-                />
-                <PromoCard
-                    title="Pre Order Sekarang"
-                    description="Dapatkan buku impianmu sebelum rilis resmi."
-                    image="/images/customer/home/highlight-reading.jpg"
-                    href="#koleksi"
-                    badge="PRE ORDER"
-                />
-                <PromoCard
-                    title="Buku Terlaris"
-                    description="Pilihan favorit pembaca di seluruh Indonesia."
-                    image="/images/customer/home/highlight-books.jpg"
-                    href="#koleksi"
-                />
-            </SectionContainer>
-
-            <section
-                id="promo"
-                className="bg-secondary/45 scroll-mt-32 border-y"
-            >
-                <SectionContainer className="grid min-h-[175px] items-center gap-6 py-6 lg:grid-cols-[1fr_1fr_1fr]">
-                    <img
-                        src="/images/customer/home/editorial.jpg"
-                        alt="Buku terbuka"
-                        className="hidden h-36 w-full object-cover lg:block"
-                        loading="lazy"
-                    />
-                    <div className="text-center">
-                        <p className="text-[10px] font-semibold tracking-[.2em] uppercase">
-                            Khusus Hari Ini
-                        </p>
-                        <h2 className="font-heading mt-1 text-4xl font-semibold">
-                            Diskon 20%
-                        </h2>
-                        <p className="text-muted-foreground mt-1 text-xs">
-                            untuk Koleksi Buku Pilihan
-                        </p>
-                        <Link
-                            href="/books"
-                            className="border-foreground hover:bg-foreground hover:text-primary-foreground mt-4 inline-flex h-9 items-center gap-2 border px-4 text-xs font-bold transition"
-                        >
-                            Belanja Sekarang <ArrowRight className="size-3.5" />
-                        </Link>
-                    </div>
-                    <div className="hidden items-end justify-center gap-[-1px] lg:flex">
-                        {(latestBooks.length
-                            ? latestBooks.slice(0, 4)
-                            : books.slice(0, 4)
-                        ).map((book, index) => (
-                            <div
-                                key={book.id}
-                                className={`border-border bg-card w-28 border p-2 shadow-sm ${index % 2 ? '-rotate-2' : 'rotate-2'}`}
-                            >
-                                <div className="bg-muted aspect-[.68] overflow-hidden">
+            {galleryBooks.length > 0 && (
+                <section className="bg-secondary/30 border-y py-10 sm:py-12 lg:py-16">
+                    <SectionContainer>
+                        <div className="mb-6 flex flex-col justify-between gap-3 sm:mb-8 sm:flex-row sm:items-end">
+                            <div>
+                                <p className="text-primary text-xs font-bold tracking-[.24em] uppercase">
+                                    Koleksi Wonderbook
+                                </p>
+                                <h2 className="font-heading text-3xl font-semibold sm:text-4xl">
+                                    Cerita di setiap sampul
+                                </h2>
+                            </div>
+                            <p className="text-muted-foreground max-w-sm text-xs leading-5 sm:text-right">
+                                Temukan judul-judul pilihan dalam kolase koleksi buku kami.
+                            </p>
+                        </div>
+                        <div className="grid auto-rows-[130px] grid-cols-2 gap-3 sm:auto-rows-[170px] sm:grid-cols-4 lg:auto-rows-[210px] lg:gap-4">
+                            {galleryBooks.map((book, index) => (
+                                <figure
+                                    key={book.id}
+                                    className={`border-border bg-card group relative min-h-0 overflow-hidden border ${galleryTileClasses[index]}`}
+                                >
                                     {book.primary_image ? (
                                         <img
                                             src={book.primary_image.url}
-                                            alt=""
-                                            className="size-full object-cover"
+                                            alt={`Cover buku ${book.title}`}
+                                            className="size-full object-cover transition duration-500 group-hover:scale-105"
+                                            loading="lazy"
                                         />
                                     ) : (
-                                        <BookOpen className="m-auto mt-8 size-7" />
+                                        <div className="bg-muted text-muted-foreground flex size-full items-center justify-center">
+                                            <BookOpen className="size-8" aria-hidden="true" />
+                                        </div>
                                     )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </SectionContainer>
-            </section>
+                                    <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-8 text-xs font-semibold text-white">
+                                        {book.title}
+                                    </figcaption>
+                                </figure>
+                            ))}
+                        </div>
+                    </SectionContainer>
+                </section>
+            )}
 
             <section id="koleksi" className="scroll-mt-32 py-10 lg:py-14">
                 <SectionContainer>
@@ -241,50 +224,6 @@ export default function Home({
                 onClose={() => setOrderBookId(null)}
             />
         </>
-    );
-}
-
-function PromoCard({
-    title,
-    description,
-    image,
-    href,
-    badge,
-}: {
-    title: string;
-    description: string;
-    image: string;
-    href: string;
-    badge?: string;
-}) {
-    return (
-        <Link
-            href={href}
-            className="border-border group bg-card hover:border-primary relative min-h-[185px] overflow-hidden border p-5 transition"
-        >
-            <img
-                src={image}
-                alt=""
-                className="absolute inset-0 size-full object-cover opacity-25 transition duration-500 group-hover:scale-105"
-                loading="lazy"
-            />
-            <div className="relative max-w-[175px]">
-                <h2 className="font-heading text-2xl leading-none font-semibold">
-                    {title}
-                </h2>
-                <p className="text-muted-foreground mt-4 text-xs leading-5">
-                    {description}
-                </p>
-                <span className="mt-5 inline-flex items-center gap-1 text-xs font-bold">
-                    Lihat Koleksi <ArrowRight className="size-3.5" />
-                </span>
-            </div>
-            {badge && (
-                <span className="bg-card absolute top-4 right-4 grid size-14 place-items-center rounded-full border text-center text-[9px] leading-3 font-bold">
-                    {badge}
-                </span>
-            )}
-        </Link>
     );
 }
 
