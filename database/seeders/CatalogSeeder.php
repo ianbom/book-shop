@@ -8,7 +8,6 @@ use App\Models\BookStockMovement;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -45,12 +44,15 @@ class CatalogSeeder extends Seeder
         return $category;
     }
 
-    /** @param array<string, mixed> $data @param array<string, Category> $categories */
+    /**
+     * @param  array{title: string, slug: string, isbn: null, author: string, description: string, price: int, stock: int, is_active: bool, genres: list<string>, image_file: string}  $data
+     * @param  array<string, Category>  $categories
+     */
     private function book(array $data, array $categories): void
     {
         $genres = $data['genres'];
-        $imageUrl = $data['image_url'];
-        unset($data['genres'], $data['image_url']);
+        $imageFile = $data['image_file'];
+        unset($data['genres'], $data['image_file']);
         $stock = (int) $data['stock'];
 
         $book = DB::transaction(function () use ($data, $genres, $categories, $stock): Book {
@@ -64,7 +66,7 @@ class CatalogSeeder extends Seeder
                 $book->restore();
             }
             $book->save();
-            $book->categories()->sync(collect($genres)->map(fn (string $genre) => $categories[$genre]->id)->all());
+            $book->categories()->sync(array_map(fn (string $genre) => $categories[$genre]->id, $genres));
 
             if ($new && $stock > 0) {
                 BookStockMovement::create([
@@ -79,76 +81,81 @@ class CatalogSeeder extends Seeder
             return $book;
         });
 
-        if ($imageUrl && ! $book->images()->exists()) {
-            $path = "books/{$book->slug}/cover.jpg";
-            $response = Http::retry(2, 250)->timeout(20)->get($imageUrl);
-            $response->throw();
-            if (! Storage::disk('public')->put($path, $response->body())) {
+        $sourcePath = public_path($imageFile);
+        if (! is_file($sourcePath)) {
+            throw new RuntimeException("Cover buku tidak ditemukan: {$sourcePath}");
+        }
+
+        $imagePath = "books/{$book->slug}/cover.jpeg";
+        $disk = Storage::disk('public');
+        if (! $disk->exists($imagePath)) {
+            $contents = file_get_contents($sourcePath);
+            if ($contents === false || ! $disk->put($imagePath, $contents)) {
                 throw new RuntimeException("Gagal menyimpan cover buku {$book->title}.");
             }
-            $book->images()->create([
-                'image_path' => $path,
+        }
+
+        $book->images()->update(['is_primary' => false]);
+        $book->images()->updateOrCreate(
+            ['image_path' => $imagePath],
+            [
                 'alt_text' => "Cover buku {$book->title}",
                 'sort_order' => 0,
                 'is_primary' => true,
-            ]);
-        }
+            ],
+        );
     }
 
-    /** @return list<array<string, mixed>> */
+    /**
+     * @return list<array{title: string, slug: string, isbn: null, author: string, description: string, price: int, stock: int, is_active: bool, genres: list<string>, image_file: string}>
+     */
     private function books(): array
     {
-        $covers = [
-            'photo-1543002588-bfa74002ed7e', 'photo-1512820790803-83ca734da794',
-            'photo-1521587760476-6c12a4b040da', 'photo-1495446815901-a7297e633e8d',
-            'photo-1519682337058-a94d519337bc', 'photo-1532012197267-da84d127e765',
-            'photo-1544947950-fa07a98d237f', 'photo-1495640388908-05fa85288e61',
-            'photo-1516979187457-637abb4f9353', 'photo-1524995997946-a1c2e315a42f',
-            'photo-1531072901881-d644216d4bf9', 'photo-1517842645767-c639042777db',
-            'photo-1544716278-ca5e3f4abd8c', 'photo-1512820790803-83ca734da794',
-            'photo-1497633762265-9d179a990aa6', 'photo-1513001900722-370f803f498d',
-            'photo-1541963463532-d68292c34b19', 'photo-1519681393784-d120267933ba',
-            'photo-1476275466078-4007374efbbe', 'photo-1526243741027-444d633d7365',
-        ];
-        $titles = [
-            ['Jejak Senja di Ujung Kota', 'Nadia Pramesti', ['fiksi', 'romansa'], 89000, 24],
-            ['Peta Rahasia Negeri Awan', 'Raka Mahendra', ['fantasi'], 115000, 12],
-            ['Malam Terakhir di Rumah Tua', 'Dimas Ardhana', ['misteri', 'fiksi'], 98000, 18],
-            ['Langit yang Memilih Kita', 'Alya Kirana', ['romansa', 'fiksi'], 92000, 20],
-            ['Membangun Produk Digital', 'Bima Satriyo', ['teknologi', 'bisnis'], 145000, 10],
-            ['Kebiasaan Kecil, Hasil Besar', 'Sinta Wulandari', ['pengembangan-diri', 'bisnis'], 105000, 16],
-            ['Kronik Penjaga Bintang', 'Aruna Wijaya', ['fantasi'], 128000, 9],
-            ['Kode di Balik Jendela', 'Fajar Nugraha', ['misteri', 'teknologi'], 110000, 14],
-            ['Sebelum Hujan Berhenti', 'Maya Lestari', ['romansa'], 87000, 21],
-            ['Dasar-Dasar Pemrograman Modern', 'Reno Aditya', ['teknologi'], 155000, 8],
-            ['Strategi Bisnis Sederhana', 'Gita Permata', ['bisnis'], 132000, 11],
-            ['Berani Mulai Hari Ini', 'Niken Larasati', ['pengembangan-diri'], 99000, 25],
-            ['Perpustakaan Tengah Malam', 'Yusuf Ramadhan', ['fiksi', 'misteri'], 108000, 13],
-            ['Pangeran dari Utara', 'Tara Kencana', ['fantasi', 'romansa'], 119000, 15],
-            ['Seni Memahami Diri', 'Bagas Prakoso', ['pengembangan-diri'], 101000, 19],
-            ['Algoritma untuk Semua', 'Citra Anggraini', ['teknologi'], 139000, 7],
-            ['Kopi, Surat, dan Kenangan', 'Rani Oktavia', ['romansa', 'fiksi'], 85000, 22],
-            ['Kasus di Balik Kabut', 'Adrian Malik', ['misteri'], 97000, 17],
-            ['Pemimpin yang Bertumbuh', 'Dewi Anindita', ['bisnis', 'pengembangan-diri'], 125000, 12],
-            ['Taman Rahasia Arcapolis', 'Ilham Fadli', ['fantasi', 'fiksi'], 134000, 10],
+        $books = [
+            ['1.jpeg', 'Be Awesome, Be Cool', 'Warda Artist', ['pengembangan-diri']],
+            ['2.jpeg', 'The World Without You', 'Joshua Henkin', ['fiksi', 'romansa']],
+            ['3.jpeg', 'Serenity', 'Steven Knight', ['misteri', 'fiksi']],
+            ['4.jpeg', 'The Son', 'Florian Zeller', ['fiksi']],
+            ['5.jpeg', 'Esperanza', 'Department of Economics', ['bisnis']],
+            ['6.jpeg', 'In the Fire', 'Connor Allyn', ['misteri', 'fiksi']],
+            ['7.jpeg', 'Gernika', 'Koldo Serra', ['fiksi']],
+            ['8.jpeg', '7 Days', 'Tidak tercantum', ['romansa', 'fiksi']],
+            ['9.jpeg', 'Hidden Figures', 'Margot Lee Shetterly', ['teknologi', 'pengembangan-diri']],
+            ['10.jpeg', 'What If It Works: Just Do It', 'Tidak tercantum', ['pengembangan-diri']],
+            ['11.jpeg', 'Success: Elon Musk', 'Success Media', ['bisnis']],
+            ['12.jpeg', 'The Lost City of Z', 'David Grann', ['fiksi', 'misteri']],
+            ['13.jpeg', 'Business: Anas Azwar', 'Anas Azwar', ['bisnis']],
+            ['14.jpeg', 'The Youngest Billionaire', 'Forbes', ['bisnis']],
+            ['15.jpeg', 'Inspire: The Future of Leadership', 'Inspire Magazine', ['bisnis', 'pengembangan-diri']],
+            ['16.jpeg', 'Building Multi-Billionaire Start Up', 'Vick Stone', ['bisnis']],
+            ['17.jpeg', 'Innovisual: The Best Actor', 'Innovisual', ['teknologi']],
+            ['18.jpeg', 'I Was Born With the Devil in Me', 'H. H. Holmes', ['misteri']],
+            ['19.jpeg', 'CEO Times: Mauricio Fernandez Piqueras', 'CEO Times', ['bisnis']],
+            ['20.jpeg', 'The Moneychanger', 'Federico Veiroj', ['misteri', 'fiksi']],
+            ['21.jpeg', 'Stella: A Life', 'Tidak tercantum', ['fiksi']],
+            ['22.jpeg', 'Oppenheimer: The Destroyer of Worlds', 'Christopher Nolan', ['teknologi', 'fiksi']],
+            ['23.jpeg', 'Maria Stuart', 'Stefan Zweig', ['fiksi', 'romansa']],
         ];
 
-        return collect($titles)->values()->map(function (array $book, int $index) use ($covers): array {
-            [$title, $author, $genres, $price, $stock] = $book;
+        $data = [];
+        foreach ($books as $index => $book) {
+            [$imageFile, $title, $author, $genres] = $book;
             $slug = Str::slug($title);
 
-            return [
+            $data[] = [
                 'title' => $title,
                 'slug' => $slug,
-                'isbn' => '978602'.str_pad((string) ($index + 1000000), 10, '0', STR_PAD_LEFT),
+                'isbn' => null,
                 'author' => $author,
-                'description' => "Sinopsis {$title} karya {$author}.",
-                'price' => $price,
-                'stock' => $stock,
+                'description' => "Koleksi {$title} karya {$author}.",
+                'price' => 79000 + ($index * 3000),
+                'stock' => 10 + ($index % 11),
                 'is_active' => true,
                 'genres' => $genres,
-                'image_url' => "https://images.unsplash.com/{$covers[$index]}?auto=format&fit=crop&w=900&q=85",
+                'image_file' => "boks/{$imageFile}",
             ];
-        })->all();
+        }
+
+        return $data;
     }
 }

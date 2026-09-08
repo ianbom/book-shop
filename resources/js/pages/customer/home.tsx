@@ -10,7 +10,6 @@ import {
     Laptop,
     Leaf,
     ShieldCheck,
-    ShoppingBag,
     Star,
     Truck,
     Undo2,
@@ -222,9 +221,6 @@ export default function Home({
                                 onView={(selected) =>
                                     setDetailBookId(selected.id)
                                 }
-                                onBuy={(selected) =>
-                                    setOrderBookId(selected.id)
-                                }
                             />
                         ))}
                     </div>
@@ -295,11 +291,9 @@ function PromoCard({
 function HomeBookCard({
     book,
     onView,
-    onBuy,
 }: {
     book: CustomerBook;
     onView: (book: CustomerBook) => void;
-    onBuy: (book: CustomerBook) => void;
 }) {
     return (
         <article className="border-border group bg-card hover:border-primary flex min-w-0 flex-col border p-2.5 transition hover:-translate-y-1 hover:shadow-md sm:p-3">
@@ -344,11 +338,10 @@ function HomeBookCard({
                 <div className="mt-3 pt-1">
                     <Button
                         size="sm"
-                        disabled={book.stock <= 0}
-                        onClick={() => onBuy(book)}
+                        onClick={() => onView(book)}
                         className="h-8 w-full rounded-none text-xs font-medium"
                     >
-                        <ShoppingBag className="size-3.5" /> Beli Buku
+                        <BookOpen className="size-3.5" /> Lihat Buku
                     </Button>
                 </div>
             </div>

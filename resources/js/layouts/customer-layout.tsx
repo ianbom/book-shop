@@ -19,7 +19,7 @@ export default function CustomerLayout({
 
     return (
         <div className="bg-background text-foreground flex min-h-screen flex-col">
-            <CustomerHeader />
+            <CustomerHeader logoSrc="/wonderbok.webp" />
             <main className="flex-1">{children}</main>
             <CustomerFooter
                 storeSettings={storeSettings ?? pageStoreSettings}

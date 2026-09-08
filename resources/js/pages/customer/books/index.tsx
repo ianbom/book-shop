@@ -129,9 +129,6 @@ export default function BooksIndex({
                                         onView={(selected) =>
                                             setDetailBookId(selected.id)
                                         }
-                                        onBuy={(selected) =>
-                                            setOrderBookId(selected.id)
-                                        }
                                     />
                                 ))}
                             </div>

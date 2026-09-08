@@ -17,29 +17,33 @@ const navigation = [
     { label: 'Lacak Order', href: '/track-order' },
 ];
 
-function Brand() {
+function Brand({
+    logoSrc,
+    inverted = false,
+}: {
+    logoSrc: string;
+    inverted?: boolean;
+}) {
     return (
         <Link
             href="/"
             className="flex shrink-0 items-center gap-2.5"
             aria-label="Wonder Book, beranda"
         >
-            <svg
-                aria-hidden="true"
-                viewBox="0 0 48 48"
-                className="text-foreground size-10"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.35"
-            >
-                <rect x="3" y="3" width="42" height="42" />
-                <path d="m5 5 38 38M43 5 5 43" />
-            </svg>
+            <img
+                src={logoSrc}
+                alt=""
+                className="size-10 shrink-0 object-cover object-top"
+            />
             <span className="leading-none">
-                <span className="font-heading block text-[1.7rem] font-semibold tracking-tight">
+                <span
+                    className={`font-heading block text-[1.7rem] font-semibold tracking-tight ${inverted ? 'text-background' : 'text-foreground'}`}
+                >
                     Wonderbook
                 </span>
-                <span className="text-muted-foreground mt-1 block text-[10px] font-semibold tracking-wide">
+                <span
+                    className={`mt-1 block text-[10px] font-semibold tracking-wide ${inverted ? 'text-background/70' : 'text-muted-foreground'}`}
+                >
                     More Books, A better You
                 </span>
             </span>
@@ -47,7 +51,7 @@ function Brand() {
     );
 }
 
-export function CustomerHeader() {
+export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
     const page = usePage();
     const currentPath = page.url.split('?')[0];
     const [search, setSearch] = useState('');
@@ -70,24 +74,24 @@ export function CustomerHeader() {
     };
 
     return (
-        <header className="bg-card text-foreground relative z-40 border-b">
+        <header className="bg-foreground text-background border-sidebar-border relative z-40 border-b">
             <SectionContainer className="flex min-h-[74px] items-center gap-4 py-3 lg:min-h-[86px]">
-                <Brand />
+                <Brand logoSrc={logoSrc} inverted />
                 <form
                     onSubmit={submitSearch}
                     className="hidden min-w-0 flex-1 items-stretch gap-3 md:flex"
                 >
-                    <label className="border-border focus-within:border-primary flex h-10 min-w-0 flex-1 items-center border">
+                    <label className="border-background/25 bg-background/10 focus-within:border-primary flex h-10 min-w-0 flex-1 items-center border">
                         <span className="sr-only">Cari buku</span>
                         <input
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Cari judul buku, penulis, atau ISBN..."
-                            className="h-full min-w-0 flex-1 bg-transparent px-3 text-xs outline-none"
+                            className="text-background placeholder:text-background/60 h-full min-w-0 flex-1 bg-transparent px-3 text-xs outline-none"
                         />
                         <button
                             type="submit"
-                            className="text-foreground hover:bg-secondary border-l px-3 transition"
+                            className="border-background/25 text-background hover:bg-background/15 border-l px-3 transition"
                             aria-label="Cari buku"
                         >
                             <Search className="size-5" />
@@ -111,8 +115,8 @@ export function CustomerHeader() {
                                 href={item.href}
                                 className={
                                     isActive
-                                        ? 'text-primary font-semibold'
-                                        : 'text-muted-foreground hover:text-foreground transition-colors'
+                                        ? 'text-background decoration-primary font-semibold underline decoration-2 underline-offset-8'
+                                        : 'text-background/70 hover:text-background transition-colors'
                                 }
                             >
                                 {item.label}
@@ -126,7 +130,7 @@ export function CustomerHeader() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="ml-auto md:hidden"
+                            className="text-background hover:bg-background/15 hover:text-background ml-auto md:hidden"
                             aria-label="Buka navigasi"
                         >
                             <Menu />
@@ -135,7 +139,7 @@ export function CustomerHeader() {
                     <SheetContent side="right" className="w-[320px] px-6">
                         <SheetHeader className="border-b px-0 py-5 text-left">
                             <SheetTitle>
-                                <Brand />
+                                <Brand logoSrc={logoSrc} />
                             </SheetTitle>
                         </SheetHeader>
                         <form

@@ -255,12 +255,6 @@ export function BookOrderDialog({
                             </span>
                             <span>{form.data.quantity}</span>
                         </div>
-                        <div className="mt-2 flex justify-between">
-                            <span className="text-muted-foreground">
-                                Biaya Pengiriman
-                            </span>
-                            <span>{rupiah(0)}</span>
-                        </div>
                         <div className="mt-3 flex justify-between text-base font-bold">
                             <span>Total</span>
                             <span>{rupiah(subtotal)}</span>
