@@ -29,7 +29,7 @@ class HomeController extends Controller
 
         $latestBooks = $bookQuery()
             ->latest()
-            ->limit(5)
+            ->limit(8)
             ->get();
 
         return Inertia::render('customer/home', [

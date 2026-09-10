@@ -115,3 +115,27 @@
         color: var(--foreground);
     }
 }
+
+@keyframes book-marquee {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.book-marquee-track {
+    animation: book-marquee 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .book-marquee-viewport {
+        overflow-x: auto;
+    }
+
+    .book-marquee-track {
+        animation: none;
+    }
+
+    .book-marquee-track > [aria-hidden='true'] {
+        display: none;
+    }
+}

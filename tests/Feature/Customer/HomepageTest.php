@@ -56,4 +56,16 @@ class HomepageTest extends TestCase
 
         $this->assertDatabaseHas('books', ['id' => $hiddenBook->id, 'is_active' => false]);
     }
+
+    public function test_homepage_exposes_eight_latest_active_books(): void
+    {
+        Book::factory()->count(9)->create(['is_active' => true]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('customer/home')
+                ->has('latestBooks', 8),
+            );
+    }
 }

@@ -1,19 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
-import {
-    ArrowRight,
-    Baby,
-    BookOpen,
-    BriefcaseBusiness,
-    Globe2,
-    Headphones,
-    Laptop,
-    Leaf,
-    ShieldCheck,
-    Star,
-    Truck,
-    Undo2,
-} from 'lucide-react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import { BookDetailDialog } from '@/components/customer/books/book-detail-dialog';
 import { BookOrderDialog } from '@/components/customer/books/book-order-dialog';
 import { HeroSection } from '@/components/customer/home/hero-section';
@@ -33,120 +20,81 @@ interface HomeProps {
     storeSettings: CustomerStoreSettings;
 }
 
-const categoryIcons = [
-    Leaf,
-    BookOpen,
-    BriefcaseBusiness,
-    Globe2,
-    Laptop,
-    Star,
-    Baby,
-];
-
-const benefits = [
-    {
-        title: '100% Original',
-        description: 'Buku Original & Resmi',
-        icon: ShieldCheck,
-    },
-    {
-        title: 'Pengiriman Cepat',
-        description: 'Ke Seluruh Indonesia',
-        icon: Truck,
-    },
-    {
-        title: '14 Hari Pengembalian',
-        description: 'Mudah & Tanpa Ribet',
-        icon: Undo2,
-    },
-    {
-        title: 'Layanan Pelanggan',
-        description: 'Senin - Minggu 08.00 - 21.00',
-        icon: Headphones,
-    },
-];
-
-export default function Home({
-    categories,
-    featuredBooks,
-    latestBooks,
-    storeSettings,
-}: HomeProps) {
+export default function Home({ featuredBooks, latestBooks }: HomeProps) {
     const [detailBookId, setDetailBookId] = useState<number | null>(null);
     const [orderBookId, setOrderBookId] = useState<number | null>(null);
+    const [isMarqueeCardHovered, setIsMarqueeCardHovered] = useState(false);
+    const [isMarqueeCardFocused, setIsMarqueeCardFocused] = useState(false);
     const books = featuredBooks.slice(0, 8);
-    const categoryList = categories.slice(0, 8);
-    const galleryBooks = Array.from(
-        new Map(
-            [...latestBooks, ...featuredBooks].map((book) => [book.id, book]),
-        ).values(),
-    ).slice(0, 8);
-    const galleryTileClasses = [
-        'col-span-2 row-span-2',
-        'row-span-1',
-        'row-span-1',
-        'col-span-2 row-span-1',
-        'row-span-2',
-        'row-span-1',
-        'row-span-1',
-        'col-span-2 row-span-1',
-    ];
+    const latestCollection = latestBooks.slice(0, 8);
 
     const selectedDetailBook = useMemo(
-        () => featuredBooks.find((book) => book.id === detailBookId) ?? null,
-        [featuredBooks, detailBookId],
+        () =>
+            featuredBooks.find((book) => book.id === detailBookId) ??
+            latestBooks.find((book) => book.id === detailBookId) ??
+            null,
+        [featuredBooks, latestBooks, detailBookId],
     );
     const selectedOrderBook = useMemo(
-        () => featuredBooks.find((book) => book.id === orderBookId) ?? null,
-        [featuredBooks, orderBookId],
+        () =>
+            featuredBooks.find((book) => book.id === orderBookId) ??
+            latestBooks.find((book) => book.id === orderBookId) ??
+            null,
+        [featuredBooks, latestBooks, orderBookId],
     );
+    const isMarqueePaused =
+        isMarqueeCardHovered ||
+        isMarqueeCardFocused ||
+        selectedDetailBook !== null ||
+        selectedOrderBook !== null;
 
     return (
         <>
             <Head title={'Home'} />
             <HeroSection />
 
-            {galleryBooks.length > 0 && (
-                <section className="bg-secondary/30 border-y py-10 sm:py-12 lg:py-16">
+            {latestCollection.length > 0 && (
+                <section className="overflow-hidden py-10 lg:py-14">
                     <SectionContainer>
-                        <div className="mb-6 flex flex-col justify-between gap-3 sm:mb-8 sm:flex-row sm:items-end">
-                            <div>
-                                <p className="text-primary text-xs font-bold tracking-[.24em] uppercase">
-                                    Koleksi Wonderbook
-                                </p>
-                                <h2 className="font-heading text-3xl font-semibold sm:text-4xl">
-                                    Cerita di setiap sampul
-                                </h2>
-                            </div>
-                            <p className="text-muted-foreground max-w-sm text-xs leading-5 sm:text-right">
-                                Temukan judul-judul pilihan dalam kolase koleksi buku kami.
-                            </p>
-                        </div>
-                        <div className="grid auto-rows-[130px] grid-cols-2 gap-3 sm:auto-rows-[170px] sm:grid-cols-4 lg:auto-rows-[210px] lg:gap-4">
-                            {galleryBooks.map((book, index) => (
-                                <figure
-                                    key={book.id}
-                                    className={`border-border bg-card group relative min-h-0 overflow-hidden border ${galleryTileClasses[index]}`}
-                                >
-                                    {book.primary_image ? (
-                                        <img
-                                            src={book.primary_image.url}
-                                            alt={`Cover buku ${book.title}`}
-                                            className="size-full object-cover transition duration-500 group-hover:scale-105"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <div className="bg-muted text-muted-foreground flex size-full items-center justify-center">
-                                            <BookOpen className="size-8" aria-hidden="true" />
-                                        </div>
-                                    )}
-                                    <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-8 text-xs font-semibold text-white">
-                                        {book.title}
-                                    </figcaption>
-                                </figure>
-                            ))}
+                        <div className="flex items-end justify-between border-b pb-3">
+                            <h2 className="font-heading text-3xl font-semibold">
+                                Koleksi Pilihan
+                            </h2>
+                            <Link
+                                href="/books"
+                                className="hover:text-primary hidden items-center gap-1 text-xs font-semibold sm:flex"
+                            >
+                                Lihat Semua <ArrowRight className="size-3.5" />
+                            </Link>
                         </div>
                     </SectionContainer>
+                    <div className="book-marquee-viewport group mt-5 overflow-hidden">
+                        <div
+                            className="book-marquee-track flex w-max gap-4 pr-4"
+                            style={{
+                                animationPlayState: isMarqueePaused
+                                    ? 'paused'
+                                    : 'running',
+                            }}
+                        >
+                            <MarqueeBooks
+                                books={latestCollection}
+                                onView={(book) => setDetailBookId(book.id)}
+                                onHoverChange={setIsMarqueeCardHovered}
+                                onFocusChange={setIsMarqueeCardFocused}
+                            />
+                            <div
+                                aria-hidden="true"
+                                inert
+                                className="flex gap-4"
+                            >
+                                <MarqueeBooks
+                                    books={latestCollection}
+                                    onView={() => undefined}
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </section>
             )}
 
@@ -194,6 +142,41 @@ export default function Home({
     );
 }
 
+function MarqueeBooks({
+    books,
+    onView,
+    onHoverChange,
+    onFocusChange,
+}: {
+    books: CustomerBook[];
+    onView: (book: CustomerBook) => void;
+    onHoverChange?: (hovered: boolean) => void;
+    onFocusChange?: (focused: boolean) => void;
+}) {
+    return (
+        <div className="flex gap-4">
+            {books.map((book) => (
+                <div
+                    key={book.id}
+                    className="w-40 shrink-0 sm:w-48 lg:w-52"
+                    onMouseEnter={() => onHoverChange?.(true)}
+                    onMouseLeave={() => onHoverChange?.(false)}
+                    onFocus={() => onFocusChange?.(true)}
+                    onBlur={(event) => {
+                        if (
+                            !event.currentTarget.contains(event.relatedTarget)
+                        ) {
+                            onFocusChange?.(false);
+                        }
+                    }}
+                >
+                    <HomeBookCard book={book} onView={onView} />
+                </div>
+            ))}
+        </div>
+    );
+}
+
 function HomeBookCard({
     book,
     onView,
@@ -232,7 +215,7 @@ function HomeBookCard({
                     {book.author}
                 </p>
                 <div className="mt-2 flex items-center justify-between">
-                    <p className="text-xs font-bold text-foreground">
+                    <p className="text-foreground text-xs font-bold">
                         {rupiah(book.price)}
                     </p>
                     <span
