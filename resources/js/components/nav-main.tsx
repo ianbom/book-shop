@@ -13,14 +13,14 @@ export function NavMain({ items }: { items: NavItem[] }) {
     const { isCurrentUrl } = useCurrentUrl();
 
     return (
-        <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel className="text-sidebar-foreground/60 font-semibold tracking-wider uppercase text-[11px]">Platform</SidebarGroupLabel>
-            <SidebarMenu>
+            <SidebarGroup className="px-0 py-0">
+                <SidebarGroupLabel className="text-sidebar-foreground/55 px-3 font-semibold tracking-[0.14em] uppercase text-[10px]">Menu Utama</SidebarGroupLabel>
+                <SidebarMenu className="gap-1">
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         {item.children ? (
                             <div className="space-y-1 py-1">
-                                <div className="text-sidebar-foreground/70 flex items-center gap-2 px-2 py-1 text-xs font-semibold tracking-wide group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                                <div className="text-sidebar-foreground/65 flex items-center gap-3 px-3 py-2 text-xs font-semibold tracking-wide group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
                                     {item.icon && (
                                         <item.icon className="size-4" />
                                     )}
@@ -34,7 +34,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                                         asChild
                                         isActive={isCurrentUrl(child.href)}
                                         tooltip={{ children: child.title }}
-                                        className="ml-2 group-data-[collapsible=icon]:ml-0"
+                                        className="ml-3 h-10 rounded-xl px-3 text-[13px] group-data-[collapsible=icon]:ml-0"
                                     >
                                         <Link href={child.href} prefetch>
                                             {child.icon && <child.icon />}
@@ -48,6 +48,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                                 asChild
                                 isActive={isCurrentUrl(item.href)}
                                 tooltip={{ children: item.title }}
+                                className="h-11 rounded-xl px-3 text-[13px] font-semibold group-data-[collapsible=icon]:justify-center"
                             >
                                 <Link href={item.href} prefetch>
                                     {item.icon && <item.icon />}

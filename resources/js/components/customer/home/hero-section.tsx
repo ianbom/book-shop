@@ -1,40 +1,55 @@
-import { ArrowRight } from 'lucide-react';
 import { Link } from '@inertiajs/react';
+import {
+    ArrowRight,
+    BookOpen,
+    ShieldCheck,
+    Sparkles,
+    Truck,
+} from 'lucide-react';
 import { SectionContainer } from '@/components/customer/shared/section-container';
+
+const benefits = [
+    { icon: BookOpen, title: 'Buku Pilihan', detail: 'untuk Semua Usia' },
+    { icon: ShieldCheck, title: '100% Original', detail: 'Garansi Keaslian' },
+    { icon: Truck, title: 'Pengiriman Aman', detail: 'ke Seluruh Indonesia' },
+];
 
 export function HeroSection() {
     return (
-        <section className="bg-background relative isolate min-h-[calc(100svh-74px)] overflow-hidden lg:min-h-[calc(100svh-86px)]">
-            <img
-                src="/hero.png"
-                alt="Koleksi buku Wonderbook"
-                className="absolute inset-0 -z-20 size-full object-cover object-[64%_center]"
-                fetchPriority="high"
-            />
-            <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(255,255,255,.98)_0%,rgba(255,255,255,.9)_34%,rgba(255,255,255,.36)_62%,rgba(255,255,255,0)_82%)]" />
-            <SectionContainer className="flex min-h-[calc(100svh-74px)] items-center py-16 lg:min-h-[calc(100svh-86px)]">
-                <div className="text-foreground max-w-xl">
-                    <p className="text-primary mb-3 text-xs font-bold tracking-[0.24em] uppercase">
-                        Wonderbook
-                    </p>
-                    <h1 className="font-heading text-5xl leading-[.98] font-semibold tracking-tight sm:text-6xl lg:text-7xl">
-                        Temukan
+        <section className="bg-secondary/35 relative isolate overflow-hidden">
+            <div className="pointer-events-none absolute -top-24 right-[-3rem] -z-10 size-96 rounded-full bg-background/80 blur-3xl" />
+            <SectionContainer className="grid min-h-[480px] items-center gap-2 py-8 md:grid-cols-[0.94fr_1.06fr] md:py-7 lg:min-h-[500px] lg:gap-0">
+                <div className="relative z-10 py-5 md:py-8">
+                    <p className="text-primary mb-3 text-[10px] font-extrabold tracking-[0.28em] uppercase sm:text-xs">WonderBookLibrary</p>
+                    <h1 className="font-heading text-foreground max-w-2xl text-[2.8rem] leading-[0.98] font-bold tracking-tight sm:text-6xl lg:text-[4.25rem]">
+                        Buka Buku,
                         <br />
-                        Buku Favoritmu
-                        <br />
-                        di Wonderbook
+                        Temukan Dunia Baru
                     </h1>
-                    <p className="text-muted-foreground mt-6 max-w-md text-base leading-7 sm:text-lg">
-                        Ribuan buku inspiratif, dari kisah yang menghibur
-                        hingga ilmu yang mengubah hidup. Mulai petualangan
-                        membacamu hari ini.
+                    <p className="text-muted-foreground mt-4 max-w-lg text-sm leading-6 sm:text-base">
+                        Temukan buku-buku pilihan yang seru dan penuh inspirasi untuk menemani rasa ingin tahu, imajinasi, dan perjalanan membaca setiap hari.
                     </p>
-                    <Link
-                        href="/books"
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-foreground mt-8 inline-flex h-11 items-center gap-2 rounded-md px-5 text-sm font-semibold shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                        Lihat Semua Buku <ArrowRight size={17} />
-                    </Link>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                        <Link href="/books" className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-11 items-center gap-2 rounded-lg px-5 text-xs font-bold shadow-sm transition">
+                            Jelajahi Buku <ArrowRight className="size-4" />
+                        </Link>
+                        <a href="#koleksi" className="border-primary/35 bg-background text-primary hover:bg-secondary inline-flex h-11 items-center justify-center rounded-lg border px-5 text-xs font-bold transition">Lihat Koleksi</a>
+                    </div>
+                    <div className="mt-7 grid max-w-xl grid-cols-3 gap-2 border-t border-primary/15 pt-5 sm:gap-4">
+                        {benefits.map(({ icon: Icon, title, detail }) => (
+                            <div key={title} className="flex items-center gap-2">
+                                <span className="text-primary grid size-8 shrink-0 place-items-center rounded-md bg-background sm:size-9"><Icon className="size-4 sm:size-[18px]" /></span>
+                                <span className="min-w-0"><span className="text-foreground block text-[9px] leading-4 font-bold sm:text-[10px]">{title}</span><span className="text-muted-foreground block text-[8px] leading-3 sm:text-[9px]">{detail}</span></span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="relative mx-auto flex min-h-[250px] w-full max-w-[650px] items-center justify-center md:min-h-[390px]">
+                    <div className="absolute inset-6 rounded-[48%] bg-background/70 blur-2xl" />
+                    <img src="/dashboard/pesanan.png" alt="Anak-anak membaca buku bersama" className="relative z-10 max-h-[320px] w-full object-contain sm:max-h-[390px] lg:max-h-[440px]" fetchPriority="high" />
+                    <span aria-hidden="true" className="font-handwritten text-primary absolute top-5 right-2 z-20 hidden rotate-[-8deg] text-3xl leading-none md:block">Good books,<br />brighter days</span>
+                    <Sparkles aria-hidden="true" className="text-warning absolute top-8 left-[12%] size-6" />
+                    <Sparkles aria-hidden="true" className="text-warning absolute right-[14%] bottom-12 size-5" />
                 </div>
             </SectionContainer>
         </section>

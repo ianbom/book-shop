@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -8,6 +8,7 @@
 @theme {
     --font-sans: var(--font-body);
     --font-heading: var(--font-heading);
+    --font-handwritten: var(--font-handwritten);
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -48,43 +49,65 @@
 }
 
 :root {
-    --background: #ffffff;
-    --foreground: #0b1f3a;
+    --background: #fcf8f8;
+    --foreground: #123565;
     --card: #ffffff;
-    --card-foreground: #0b1f3a;
+    --card-foreground: #123565;
     --popover: #ffffff;
-    --popover-foreground: #0b1f3a;
-    --primary: #2563eb;
+    --popover-foreground: #123565;
+    --primary: #244f80;
     --primary-foreground: #ffffff;
-    --secondary: #eaf2ff;
-    --secondary-foreground: #0b1f3a;
-    --muted: #f3f7ff;
-    --muted-foreground: #475569;
-    --accent: #eaf2ff;
-    --accent-foreground: #0b1f3a;
-    --destructive: #b94a5a;
+    --secondary: #e7f1ff;
+    --secondary-foreground: #123565;
+    --muted: #f4f7fb;
+    --muted-foreground: #62718a;
+    --accent: #dbeafe;
+    --accent-foreground: #123565;
+    --destructive: #c84c5d;
     --destructive-foreground: #ffffff;
-    --success: #3f8065;
-    --warning: #9a6b2f;
-    --border: #e2e8f0;
-    --input: #e2e8f0;
-    --ring: #2563eb;
-    --chart-1: #2563eb;
-    --chart-2: #071426;
-    --chart-3: #0b1f3a;
-    --chart-4: #9a6b2f;
-    --chart-5: #3f8065;
-    --sidebar: #0b1f3a;
-    --sidebar-foreground: #cbd5e1;
-    --sidebar-primary: #2563eb;
+    --success: #188766;
+    --warning: #c77b1e;
+    --border: #e0e7ef;
+    --input: #d8e0ea;
+    --ring: #244f80;
+    --chart-1: #244f80;
+    --chart-2: #123565;
+    --chart-3: #607fc0;
+    --chart-4: #c77b1e;
+    --chart-5: #188766;
+    --sidebar: #fffdf8;
+    --sidebar-foreground: #123565;
+    --sidebar-primary: #244f80;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #162e50;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: #162e50;
-    --sidebar-ring: #2563eb;
-    --font-heading: 'Cormorant Garamond', serif;
+    --sidebar-accent: #d9e8f7;
+    --sidebar-accent-foreground: #123565;
+    --sidebar-border: #e7e0d4;
+    --sidebar-ring: #244f80;
+    --font-heading: 'Lora', serif;
     --font-body: 'Manrope', sans-serif;
-    --radius: 0.75rem;
+    --font-handwritten: 'Caveat', cursive;
+    --radius: 0.625rem;
+}
+
+@layer components {
+    .font-handwritten {
+        font-family: var(--font-handwritten);
+    }
+
+    .admin-dashboard-shell {
+        min-height: 100svh;
+        background: radial-gradient(circle at 70% 0%, rgb(231 241 255 / 0.7), transparent 28rem), var(--background);
+    }
+
+    .admin-topbar {
+        min-height: 4.75rem;
+        background: rgb(255 255 255 / 0.94);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .admin-orders-book-placeholder {
+        background: linear-gradient(145deg, rgb(36 79 128 / 0.88), rgb(96 127 192 / 0.75)), var(--secondary);
+    }
 }
 
 @layer base {

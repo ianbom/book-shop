@@ -18,8 +18,8 @@ export default function CustomerLayout({
     }>().props.storeSettings;
 
     return (
-        <div className="bg-background text-foreground flex min-h-screen flex-col">
-            <CustomerHeader logoSrc="/wonderbok.webp" />
+        <div className="bg-card text-foreground flex min-h-screen flex-col">
+            <CustomerHeader logoSrc="/dashboard/header-sidebar.png" />
             <main className="flex-1">{children}</main>
             <CustomerFooter
                 storeSettings={storeSettings ?? pageStoreSettings}
