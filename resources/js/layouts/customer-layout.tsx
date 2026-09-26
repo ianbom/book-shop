@@ -19,7 +19,7 @@ export default function CustomerLayout({
 
     return (
         <div className="bg-card text-foreground flex min-h-screen flex-col">
-            <CustomerHeader logoSrc="/dashboard/header-sidebar.png" />
+            <CustomerHeader logoSrc="/dashboard-image/header-sidebar.png" />
             <main className="flex-1">{children}</main>
             <CustomerFooter
                 storeSettings={storeSettings ?? pageStoreSettings}

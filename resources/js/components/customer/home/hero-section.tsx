@@ -46,7 +46,7 @@ export function HeroSection() {
                 </div>
                 <div className="relative mx-auto flex min-h-[250px] w-full max-w-[650px] items-center justify-center md:min-h-[390px]">
                     <div className="absolute inset-6 rounded-[48%] bg-background/70 blur-2xl" />
-                    <img src="/dashboard/pesanan.png" alt="Anak-anak membaca buku bersama" className="relative z-10 max-h-[320px] w-full object-contain sm:max-h-[390px] lg:max-h-[440px]" fetchPriority="high" />
+                    <img src="/dashboard-image/pesanan.png" alt="Anak-anak membaca buku bersama" className="relative z-10 max-h-[320px] w-full object-contain sm:max-h-[390px] lg:max-h-[440px]" fetchPriority="high" />
                     <span aria-hidden="true" className="font-handwritten text-primary absolute top-5 right-2 z-20 hidden rotate-[-8deg] text-3xl leading-none md:block">Good books,<br />brighter days</span>
                     <Sparkles aria-hidden="true" className="text-warning absolute top-8 left-[12%] size-6" />
                     <Sparkles aria-hidden="true" className="text-warning absolute right-[14%] bottom-12 size-5" />

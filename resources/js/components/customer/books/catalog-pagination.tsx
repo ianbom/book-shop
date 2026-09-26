@@ -17,8 +17,10 @@ export function CatalogPagination<T>({ books }: { books: PaginatedData<T> }) {
                     variant={link.active ? 'default' : 'outline'}
                     size="sm"
                     disabled={!link.url}
-                    className={`rounded-none ${
-                        link.active ? 'bg-foreground hover:bg-foreground' : ''
+                    className={`rounded-md ${
+                        link.active
+                            ? 'bg-primary text-primary-foreground hover:bg-primary'
+                            : 'border-primary/20 hover:bg-secondary/50'
                     }`}
                 >
                     <Link

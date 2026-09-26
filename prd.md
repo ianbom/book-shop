@@ -1,81 +1,93 @@
-# PRD — Wonder Book E-Commerce
+# PRD — Buku Order E-Commerce
 
 ## 1. Document Information
 
-**Product Name:** Wonder Book  
+**Product Name:** Buku Order  
 **Document Type:** Product Requirements Document (PRD)  
 **Platform:** Web Application  
-**Primary Stack:** Laravel, Inertia.js, React, TypeScript, Tailwind CSS, shadcn/ui, MySQL  
-**Primary Roles:** Admin, Customer  
 **Architecture Type:** Single-store e-commerce  
-**Authentication:** Admin only  
-**Customer Account:** Not required  
-**Payment Flow:** Manual via WhatsApp  
-**Order Model:** One book type per order, multiple quantity allowed  
-**Last Updated:** September 2, 2026
+**Primary Roles:** Admin, Customer  
+**Primary Stack:** Laravel, Inertia.js, React, TypeScript, Tailwind CSS, shadcn/ui, MySQL  
+**Shipping Provider:** Biteship  
+**Order Payment:** Internal wallet / saldo  
+**Wallet Top-up:** Manual transfer proof upload + admin verification  
+**Order Model:** Multi-book order via cart  
+**Book Fulfillment:** Ready Stock and Preorder  
+**Last Updated:** September 26, 2026  
+**PRD Source of Truth:** Database design `db.md` terbaru dan keputusan bisnis terbaru proyek Buku Order.
 
 ---
 
 # 2. Product Overview
 
-Wonder Book adalah website e-commerce buku sederhana yang berfokus pada katalog buku, pemesanan tanpa login, komunikasi transaksi melalui WhatsApp, dan tracking pesanan menggunakan kode order.
+Buku Order adalah website e-commerce buku single-store yang menyediakan katalog buku publik dan area dashboard terautentikasi untuk customer serta admin.
 
-Website dirancang untuk satu toko buku dan tidak menggunakan konsep tenant atau multi-store.
+Customer wajib memiliki akun untuk menggunakan fitur transaksi. Setelah login, customer dapat menyimpan alamat, menambahkan beberapa buku ke keranjang, memilih layanan pengiriman, menggunakan voucher, dan menyelesaikan checkout menggunakan saldo internal.
 
-Customer tidak perlu membuat akun. Customer cukup memilih sebuah buku, menentukan jumlah buku yang ingin dibeli, mengisi data diri dan alamat, kemudian membuat pesanan.
+Saldo customer diperoleh melalui proses top-up manual. Customer menentukan nominal top-up dan mengunggah bukti transfer melalui website. Sistem tidak menyimpan data bank, nomor rekening, nama rekening, kartu ATM, atau metadata bank customer. Admin memverifikasi bukti transfer secara manual. Jika top-up disetujui, saldo wallet customer bertambah dan transaksi saldo dicatat dalam immutable wallet ledger.
 
-Setelah pesanan berhasil dibuat, sistem menghasilkan kode order unik dan customer diarahkan ke WhatsApp admin untuk melanjutkan komunikasi pembayaran.
+Pengiriman terintegrasi dengan Biteship. Sistem menggunakan data asal pengiriman toko, alamat tujuan customer, berat/dimensi buku, serta isi cart untuk memperoleh pilihan dan biaya pengiriman. Setelah order siap dikirim, sistem dapat membuat shipment dan menyimpan data tracking Biteship.
 
-Customer dapat menggunakan kode order untuk mengecek perkembangan pesanan tanpa perlu login.
+Satu order dapat berisi banyak jenis buku dan dapat menghasilkan satu atau beberapa shipment. Dukungan multiple shipment disediakan untuk mengakomodasi split fulfillment, terutama ketika satu order berisi kombinasi ready stock dan preorder.
 
-Admin memiliki dashboard terproteksi untuk mengelola buku, kategori, stok, pesanan, pembayaran, dan perubahan status pesanan.
+Website mendukung pembatalan order selama barang belum dikirim. Ketika order yang telah dibayar dibatalkan secara valid, saldo yang sebelumnya dipotong harus dikembalikan ke wallet customer dan dicatat sebagai transaksi refund.
 
 ---
 
 # 3. Product Goals
 
-Tujuan utama produk:
+Tujuan utama Buku Order adalah:
 
-1. Menyediakan katalog buku yang mudah dijelajahi.
-2. Memungkinkan customer membeli buku tanpa registrasi atau login.
-3. Menyederhanakan proses checkout.
-4. Menghubungkan order website dengan komunikasi WhatsApp.
-5. Memberikan kode order unik untuk setiap transaksi.
-6. Menyediakan sistem tracking order tanpa akun customer.
-7. Memudahkan admin mengelola buku, kategori, stok, pembayaran, dan pesanan.
-8. Menyimpan histori perubahan status pesanan.
-9. Menyimpan histori perubahan stok.
-10. Menjaga histori transaksi tetap konsisten walaupun data buku berubah di masa depan.
+1. Menyediakan katalog buku yang mudah dijelajahi oleh pengunjung.
+2. Menyediakan akun customer dengan dashboard pribadi.
+3. Mendukung pembelian beberapa buku dalam satu checkout.
+4. Menyediakan cart yang persisten per customer.
+5. Menyediakan wallet sebagai metode pembayaran internal.
+6. Menyediakan top-up saldo manual dengan bukti transfer.
+7. Memastikan setiap perubahan saldo memiliki audit trail.
+8. Mendukung voucher fixed maupun percentage.
+9. Mendukung buku ready stock dan preorder.
+10. Mengintegrasikan perhitungan tarif dan proses shipment melalui Biteship.
+11. Menyimpan alamat customer agar dapat digunakan kembali.
+12. Menyimpan snapshot alamat dan item agar histori order tidak berubah ketika data master berubah.
+13. Mendukung tracking order dan shipment dari dashboard customer.
+14. Mendukung pembatalan order sebelum pengiriman dengan refund saldo otomatis.
+15. Menyediakan inventory audit trail.
+16. Menyediakan dashboard admin untuk mengelola seluruh operasi toko.
+17. Menjaga integritas data dengan database transaction, row locking, authorization, dan immutable ledger/history.
+18. Menjaga arsitektur tetap sederhana sebagai single-store e-commerce tanpa multi-tenant.
 
 ---
 
-# 4. Non-Goals
+# 4. Product Non-Goals
 
-Fitur berikut tidak termasuk dalam scope awal:
+Fitur berikut tidak termasuk dalam scope inti versi ini:
 
-- Login customer
-- Registrasi customer
-- Customer dashboard
-- Customer profile
-- Wishlist
-- Shopping cart multi-product
-- Multi-store
-- Multi-tenant
-- Marketplace
-- Seller dashboard
-- Payment gateway
-- Upload bukti pembayaran oleh customer melalui website
-- Live chat internal
-- Voucher
-- Coupon
-- Loyalty point
-- Product review
-- Product rating
-- Checkout multi-book
-- Shipping API integration
-- Automatic shipping fee calculation
-- Automatic payment verification
-- Inventory multi-warehouse
+- multi-store
+- multi-tenant
+- marketplace
+- seller dashboard
+- multiple seller
+- COD
+- penyimpanan rekening atau data bank customer
+- penyimpanan data kartu ATM customer
+- payment gateway untuk checkout order
+- checkout langsung menggunakan kartu kredit/debit
+- multi-currency
+- multi-warehouse
+- product review
+- product rating
+- wishlist
+- loyalty tier
+- affiliate system
+- live chat internal
+- bidding / auction
+- subscription book service
+- automatic top-up verification
+- direct bank API integration
+- complex warehouse management system
+
+Fitur di atas dapat dipertimbangkan pada fase berikutnya apabila kebutuhan bisnis berubah.
 
 ---
 
@@ -83,34 +95,58 @@ Fitur berikut tidak termasuk dalam scope awal:
 
 ## 5.1 Customer
 
-Customer tidak memiliki akun.
+Customer memiliki akun dan harus login untuk menggunakan fitur transaksi.
 
 Customer dapat:
 
-- membuka website
+- register
+- login
+- logout
+- melihat dashboard
+- mengelola profil
 - melihat katalog buku
 - mencari buku
-- melihat kategori
-- membuka detail buku
-- melihat stok buku
-- memilih jumlah buku
-- melakukan checkout
-- mengisi data diri
-- membuat order
-- mendapatkan kode order
-- diarahkan ke WhatsApp admin
-- melakukan pembayaran secara manual
-- mengirim bukti pembayaran melalui WhatsApp
-- mengecek status order menggunakan kode order
+- memfilter buku berdasarkan kategori
+- melihat detail buku
+- melihat informasi ready stock / preorder
+- melihat estimasi tanggal preorder
+- menambahkan buku ke cart
+- mengubah quantity cart
+- menghapus item cart
+- menyimpan beberapa alamat
+- menentukan alamat default
+- memilih alamat ketika checkout
+- melihat estimasi/tarif pengiriman
+- memilih courier/service
+- memasukkan voucher
+- melihat subtotal, diskon, ongkir, dan total
+- melihat saldo wallet
+- membuat top-up
+- upload bukti transfer top-up
+- melihat status top-up
+- checkout menggunakan saldo
+- melihat daftar order miliknya
+- melihat detail order miliknya
+- melihat order status timeline
+- melihat daftar shipment miliknya
+- melihat detail/tracking shipment
+- membatalkan order yang masih memenuhi syarat cancellation
+- menerima refund kembali ke wallet ketika cancellation valid
+- melihat riwayat transaksi wallet
 
 Customer tidak dapat:
 
-- login
-- register
-- melihat order lain
-- membeli lebih dari satu jenis buku dalam satu order
-- mengubah status pesanan
-- mengubah informasi pembayaran
+- melihat order customer lain
+- melihat shipment customer lain
+- melihat wallet customer lain
+- menyetujui top-up
+- mengubah saldo secara manual
+- mengubah status order secara administratif
+- mengubah data master buku
+- mengubah stok
+- membuat voucher
+- mengakses route admin
+- membatalkan order yang sudah memasuki fase pengiriman yang tidak dapat dibatalkan
 
 ---
 
@@ -120,656 +156,1743 @@ Admin memiliki akun dan harus login.
 
 Admin dapat:
 
-- login ke dashboard
+- login
 - logout
-- melihat dashboard
+- melihat dashboard admin
 - mengelola buku
 - mengelola gambar buku
 - mengelola kategori
 - mengelola stok
+- melihat inventory movement
+- melihat semua customer
 - melihat seluruh order
-- mencari order
-- memfilter order
 - melihat detail order
-- melihat data customer dari order
-- mengubah status order
-- mengelola status pembayaran
-- upload bukti pembayaran
-- melihat histori perubahan status
-- melihat histori perubahan stok
-- mengubah informasi toko
+- mencari, memfilter, dan mengurutkan order
+- mengubah status order sesuai transition rules
+- mengelola proses preorder
+- melihat seluruh shipment
+- membuat/memproses shipment melalui Biteship
+- melihat tracking shipment
+- melihat request top-up
+- melihat bukti transfer top-up
+- approve top-up
+- reject top-up
+- melihat wallet transaction history
+- melakukan wallet adjustment jika benar-benar diperlukan
+- membuat voucher
+- mengedit voucher
+- mengaktifkan/menonaktifkan voucher
+- melihat voucher usage
+- mengelola store settings
+- mengelola origin shipping data
+- menentukan daftar courier yang digunakan
+- membatalkan order jika masih memenuhi cancellation rules
+- melihat order status history
+- melihat shipment status history
 
 ---
 
-# 6. Core Business Rules
+# 6. Authentication and Authorization
 
-## 6.1 Single Store
+## 6.1 Shared User Model
 
-Website hanya memiliki satu toko.
+Admin dan customer menggunakan tabel `users` yang sama.
 
-Tidak ada:
+Role:
 
-- tenant
-- tenant_id
-- store_id pada setiap resource
-- konsep multi-store
+```text
+admin
+customer
+```
 
----
+Default role untuk akun baru adalah `customer`.
 
-## 6.2 Customer Without Account
+Informasi user:
 
-Customer tidak memiliki akun.
-
-Data customer disimpan sebagai snapshot pada tabel `orders`.
-
-Data customer meliputi:
-
-- nama
-- nomor WhatsApp
+- name
 - email
-- alamat
-- catatan opsional
+- phone
+- password
+- role
+- email verification timestamp
+- remember token
 
 ---
 
-## 6.3 One Book Type Per Order
+## 6.2 Authorization
 
-Satu order hanya dapat memiliki satu jenis buku.
+Frontend role-based hiding tidak boleh menjadi satu-satunya security layer.
 
-Contoh valid:
+Laravel harus membatasi akses melalui:
 
-```text
-Atomic Habits × 1
-Atomic Habits × 3
-Atomic Habits × 10
-```
-
-Contoh tidak valid:
-
-```text
-Atomic Habits × 1
-Clean Code × 2
-```
-
-Karena aturan tersebut:
-
-- tidak diperlukan tabel `order_items`
-- tidak diperlukan cart multi-product
-- order langsung berelasi dengan satu `book_id`
-- quantity dapat lebih dari satu
-
----
-
-## 6.4 Book Snapshot
-
-Order harus menyimpan snapshot informasi buku.
-
-Field snapshot:
-
-- book_title
-- book_isbn
-- book_author
-- unit_price
-
-Tujuan:
-
-Jika admin mengubah:
-
-- judul
-- ISBN
-- author
-- harga
-
-maka transaksi lama tetap menampilkan data buku pada saat transaksi dilakukan.
-
----
-
-## 6.5 Customer Snapshot
-
-Data customer tersimpan langsung di order.
-
-Order tidak bergantung pada tabel customer.
-
-Hal ini penting karena:
-
-- customer tidak login
-- tidak ada customer account
-- alamat customer pada transaksi lama tidak boleh berubah apabila data customer berbeda pada transaksi berikutnya
-
----
-
-# 7. Customer Journey
-
-## 7.1 Browse Catalog
-
-Flow:
-
-```text
-Home
-↓
-Catalog
-↓
-Book Detail
-↓
-Select Quantity
-↓
-Buy Now
-```
-
-Tidak ada cart multi-product.
-
----
-
-## 7.2 Book Detail
-
-Customer dapat melihat:
-
-- gambar utama
-- galeri gambar
-- judul buku
-- author
-- ISBN
-- kategori
-- harga
-- stok
-- sinopsis / deskripsi
-- quantity selector
-- tombol Buy Now
-
-Apabila:
-
-```text
-stock = 0
-```
-
-maka customer tidak dapat melakukan checkout.
-
----
-
-## 7.3 Quantity Selection
-
-Customer dapat menentukan quantity.
+- authentication middleware
+- role middleware
+- policy / gate bila dibutuhkan
+- ownership validation
+- route grouping
 
 Contoh:
 
 ```text
-[-] 3 [+]
+/admin/*
+→ auth
+→ role:admin
 ```
 
-Validasi:
+Customer routes:
 
 ```text
-quantity >= 1
-quantity <= current stock
+/dashboard
+/orders/*
+/shipments/*
+/wallet/*
+/topups/*
+/addresses/*
+/cart/*
+/checkout/*
 ```
+
+harus memerlukan `auth` dan role customer bila route tidak memang dibagi untuk kedua role.
 
 ---
 
-# 8. Checkout Flow
+## 6.3 Resource Ownership
 
-Checkout dilakukan langsung dari satu buku.
+Customer hanya boleh mengakses resource yang dimilikinya.
 
-Flow:
+Contoh:
 
 ```text
-Book Detail
-↓
-Select Quantity
-↓
-Buy Now
-↓
-Checkout
-↓
-Fill Customer Information
-↓
-Review Order
-↓
-Create Order
-↓
-Generate Order Code
-↓
-Order Success
-↓
-WhatsApp Admin
+order.user_id == auth.user.id
 ```
+
+Hal yang sama berlaku untuk:
+
+- address
+- cart
+- wallet
+- top-up
+- order
+- shipment melalui order
+- wallet transaction
+
+Ownership harus diverifikasi di backend.
 
 ---
 
-# 9. Checkout Form
+# 7. Application Layout Architecture
 
-Field customer:
+Admin dan customer menggunakan authenticated dashboard layout yang sama secara visual apabila struktur UI memang identik.
 
-## Required
+Recommended:
 
-- Nama lengkap
-- Nomor WhatsApp
-- Alamat
+```text
+resources/js/layouts/app-layout.tsx
+```
 
-## Optional
+Layout tersebut menangani:
 
-- Email
-- Catatan
+- sidebar
+- header
+- breadcrumb
+- user dropdown
+- responsive navigation
+- page content container
 
-System information:
+Navigation item disesuaikan berdasarkan role.
 
-- book_id
-- quantity
+Customer storefront publik menggunakan layout terpisah:
 
-Frontend tidak boleh menentukan harga final.
+```text
+resources/js/layouts/customer-layout.tsx
+```
 
-Backend harus mengambil harga dari tabel `books`.
+Contoh pemisahan:
+
+```text
+CustomerLayout
+├── Homepage
+├── Catalog
+├── Book Detail
+└── Public informational pages
+
+AppLayout
+├── Admin Dashboard
+└── Customer Dashboard
+```
+
+Page, route, controller, query, dan authorization admin/customer tetap dipisahkan walaupun layout digunakan bersama.
 
 ---
 
-# 10. Order Calculation
+# 8. Public Storefront
 
-Backend menentukan:
+## 8.1 Homepage
+
+Homepage berfungsi sebagai storefront utama.
+
+Minimal menampilkan:
+
+- brand/logo
+- navigation
+- hero section
+- featured books
+- kategori
+- buku terbaru
+- highlight / benefit section
+- CTA menuju katalog
+- footer
+- login/register access
+- cart indicator ketika user sudah login
+
+Homepage tetap dapat dibuka tanpa login.
+
+---
+
+## 8.2 Catalog
+
+Customer/public dapat membuka daftar buku.
+
+Kemampuan minimum:
+
+- pagination server-side
+- search
+- filter kategori
+- sorting
+- link/detail action
+
+Search minimal:
+
+- title
+- author
+- ISBN
+
+Filter minimal:
+
+- category
+- sale type jika dibutuhkan UI
+- availability jika dibutuhkan UI
+
+Sorting yang dapat disediakan:
+
+- terbaru
+- harga terendah
+- harga tertinggi
+- judul
+
+Hanya buku aktif yang dapat ditawarkan untuk pembelian.
+
+---
+
+# 9. Book Management
+
+## 9.1 Book Master Data
+
+Setiap buku memiliki:
+
+- title
+- slug
+- ISBN optional
+- SKU optional
+- author
+- description
+- price
+- shipping category
+- weight
+- height optional
+- length optional
+- width optional
+- stock
+- sale type
+- preorder estimated date
+- preorder note
+- active status
+
+---
+
+## 9.2 Shipping Physical Information
+
+Buku membutuhkan data fisik untuk integrasi shipping.
+
+`weight` disimpan dalam gram.
+
+Dimensi:
+
+- height
+- length
+- width
+
+disimpan dalam sentimeter.
+
+Weight wajib tersedia karena digunakan ketika meminta shipping rate.
+
+Dimensi dapat bersifat optional sesuai kebutuhan shipping provider.
+
+---
+
+## 9.3 Ready Stock
+
+Jika:
 
 ```text
-unit_price = books.price
-
-subtotal =
-unit_price × quantity
-
-total =
-subtotal + shipping_cost
+sale_type = ready_stock
 ```
+
+maka `books.stock` merepresentasikan physical ready stock.
+
+Customer hanya boleh membeli quantity yang masih tersedia.
+
+Backend harus memvalidasi stok ulang ketika checkout.
+
+---
+
+## 9.4 Preorder
+
+Jika:
+
+```text
+sale_type = preorder
+```
+
+buku dapat tetap dibeli meskipun physical ready stock belum tersedia.
+
+Informasi yang dapat ditampilkan:
+
+- label preorder
+- preorder estimated date
+- preorder note
+
+Estimasi PO pada saat order harus disnapshot ke `order_items`.
+
+Hal ini memastikan perubahan estimasi master buku tidak mengubah histori order lama.
+
+---
+
+## 9.5 Active / Inactive Book
+
+`is_active` menentukan apakah buku tersedia untuk ditawarkan.
+
+Jika:
+
+```text
+is_active = false
+```
+
+customer tidak boleh melakukan pembelian baru.
+
+Data lama tetap dipertahankan untuk histori transaksi.
+
+---
+
+# 10. Book Images
+
+Satu buku dapat mempunyai banyak gambar.
+
+Informasi:
+
+- image path
+- alt text
+- sort order
+- primary flag
+
+Admin dapat:
+
+- upload beberapa gambar
+- menghapus gambar
+- menentukan primary image
+- mengubah urutan gambar
+
+Idealnya satu buku hanya mempunyai satu primary image aktif.
+
+File disimpan melalui Laravel Storage.
+
+Database hanya menyimpan path.
+
+---
+
+# 11. Categories
+
+Buku dan kategori menggunakan relasi many-to-many.
+
+Satu buku dapat memiliki beberapa kategori.
 
 Contoh:
 
 ```text
 Atomic Habits
-
-Price:
-Rp125.000
-
-Quantity:
-3
-
-Subtotal:
-Rp375.000
-
-Shipping:
-Rp20.000
-
-Total:
-Rp395.000
+├── Self Improvement
+├── Productivity
+└── Psychology
 ```
 
-Frontend tidak boleh menjadi sumber kebenaran untuk:
+Admin dapat:
 
-- unit_price
-- subtotal
-- total
+- membuat kategori
+- edit kategori
+- soft delete kategori
+- melihat jumlah buku per kategori
+
+Relasi buku-kategori yang sama tidak boleh duplicate.
 
 ---
 
-# 11. Order Creation Transaction
+# 12. Customer Addresses
 
-Order creation wajib dilakukan menggunakan database transaction.
+## 12.1 Address Book
 
-Flow backend:
+Customer dapat mempunyai banyak alamat reusable.
+
+Informasi alamat:
+
+- label, misalnya Rumah/Kantor
+- destination contact name
+- destination contact phone
+- destination contact email optional
+- destination address
+- destination note
+- postal code
+- Biteship area ID
+- Biteship location ID
+- latitude
+- longitude
+- province
+- city
+- district
+- subdistrict
+- default flag
+
+---
+
+## 12.2 Default Address
+
+Satu customer dapat menentukan alamat default.
+
+UI checkout sebaiknya otomatis memilih default address jika tersedia.
+
+Application logic harus mencegah kondisi ambigu di mana terlalu banyak alamat dianggap default untuk customer yang sama.
+
+---
+
+## 12.3 Biteship Location Requirement
+
+Address harus mempunyai data lokasi yang cukup untuk melakukan shipping request.
+
+Sistem menggunakan salah satu atau kombinasi:
+
+- destination postal code
+- destination area ID
+- destination coordinate
+
+Untuk layanan yang memerlukan coordinate, latitude dan longitude harus tersedia.
+
+---
+
+# 13. Cart
+
+## 13.1 One Active Cart Per Customer
+
+Setiap customer mempunyai satu current cart.
+
+Cart digunakan sebelum checkout.
+
+---
+
+## 13.2 Cart Items
+
+Cart dapat berisi beberapa buku.
+
+Data utama:
+
+- cart
+- book
+- quantity
+
+Constraint:
+
+```text
+(cart_id, book_id) unique
+```
+
+Artinya buku yang sama tidak membuat row kedua.
+
+Jika customer menambahkan buku yang sama:
+
+```text
+quantity lama + quantity baru
+```
+
+---
+
+## 13.3 Cart Validation
+
+Backend harus memvalidasi:
+
+- book exists
+- book active
+- quantity >= 1
+- ready stock quantity tidak melebihi stock
+- preorder masih tersedia untuk dibeli sesuai policy aplikasi
+- harga di frontend bukan source of truth
+
+Cart dapat menampilkan estimated subtotal, tetapi total final dihitung ulang ketika checkout.
+
+---
+
+# 14. Wallet
+
+## 14.1 Wallet Concept
+
+Setiap customer mempunyai satu wallet.
+
+`wallets.balance` menyimpan current balance.
+
+Contoh:
+
+```text
+Customer: Ian
+Balance: Rp500.000
+```
+
+Wallet bukan ledger.
+
+Seluruh perubahan saldo wajib dicatat pada `wallet_transactions`.
+
+---
+
+## 14.2 Wallet Creation
+
+Wallet sebaiknya dibuat ketika:
+
+- customer register, atau
+- pertama kali wallet dibutuhkan
+
+Recommended:
+
+```text
+new customer
+→ create wallet
+→ balance = 0
+```
+
+---
+
+## 14.3 Wallet Transaction Ledger
+
+Wallet transaction bersifat immutable audit trail.
+
+Transaction types:
+
+```text
+topup_credit
+order_payment
+order_refund
+admin_adjustment_credit
+admin_adjustment_debit
+```
+
+Direction:
+
+```text
+credit
+debit
+```
+
+`amount` selalu bernilai positif.
+
+Direction menentukan apakah saldo naik atau turun.
+
+Setiap transaction menyimpan:
+
+- wallet
+- topup reference optional
+- order reference optional
+- created by optional
+- type
+- direction
+- amount
+- balance before
+- balance after
+- note
+- created at
+
+---
+
+# 15. Wallet Top-up
+
+## 15.1 Top-up User Flow
+
+Customer tidak mengisi data bank.
+
+Customer hanya perlu:
+
+1. menentukan nominal top-up
+2. melakukan transfer sesuai instruksi pembayaran toko
+3. upload bukti transfer
+4. submit request
+5. menunggu admin melakukan review
+
+Tidak disimpan:
+
+- nama bank customer
+- nomor rekening customer
+- nama pemilik rekening customer
+- nomor kartu ATM
+- transfer timestamp yang diketik customer
+- metadata rekening pengirim
+
+---
+
+## 15.2 Top-up Data
+
+Top-up menyimpan:
+
+- topup code
+- customer
+- requested amount
+- credited amount
+- payment proof image
+- status
+- reviewing admin
+- reviewed at
+- admin note
+- created at
+- updated at
+
+---
+
+## 15.3 Top-up Status
+
+Status:
+
+```text
+pending
+approved
+rejected
+```
+
+### Pending
+
+Request baru dan belum diverifikasi.
+
+### Approved
+
+Bukti diterima dan admin menyetujui saldo.
+
+### Rejected
+
+Bukti tidak valid atau request ditolak.
+
+---
+
+## 15.4 Top-up Approval Transaction
+
+Approval harus atomic.
+
+Recommended flow:
 
 ```text
 START TRANSACTION
 
-1. Get book
-2. Validate book is active
-3. Validate stock
-4. Lock stock if required
-5. Calculate current price
-6. Generate unique order code
-7. Create order
-8. Reduce book stock
-9. Create stock movement
-10. Create initial order status history
-11. COMMIT
+1. Lock wallet_topups row
+2. Validate status == pending
+3. Lock customer wallet
+4. Determine credited_amount
+5. Change top-up status to approved
+6. Set reviewed_by
+7. Set reviewed_at
+8. Increase wallet.balance
+9. Create wallet transaction:
+   type = topup_credit
+   direction = credit
+10. COMMIT
 ```
 
-Jika terjadi error:
+Jika proses gagal:
 
 ```text
 ROLLBACK
 ```
 
-Tujuannya menghindari:
-
-- order tercipta tetapi stok tidak berkurang
-- stok berkurang tetapi order gagal tercipta
-- histori status tidak tercatat
+Top-up yang sudah approved tidak boleh di-credit ulang.
 
 ---
 
-# 12. Order Code
+## 15.5 Top-up Rejection
 
-Setiap order mempunyai kode unik.
+Rejection:
+
+- status menjadi rejected
+- reviewed_by disimpan
+- reviewed_at disimpan
+- admin_note dapat disimpan
+- wallet balance tidak berubah
+- wallet transaction tidak dibuat
+
+---
+
+# 16. Voucher
+
+## 16.1 Voucher Types
+
+Voucher mendukung:
+
+```text
+fixed
+percentage
+```
+
+---
+
+## 16.2 Voucher Data
+
+Voucher mempunyai:
+
+- code
+- name
+- description
+- type
+- value
+- max discount optional
+- minimum order amount
+- usage limit optional
+- per user limit
+- starts at
+- ends at
+- active flag
+- creator admin
+
+---
+
+## 16.3 Fixed Voucher
 
 Contoh:
 
 ```text
-BK-K7X29P4D
-BK-X92LM81Q
-BK-A82PD4L7
+Code: HEMAT50
+Type: fixed
+Value: 50.000
+```
+
+Subtotal:
+
+```text
+Rp300.000
+```
+
+Discount:
+
+```text
+Rp50.000
+```
+
+---
+
+## 16.4 Percentage Voucher
+
+Contoh:
+
+```text
+Code: HEMAT20
+Type: percentage
+Value: 20
+Max Discount: Rp50.000
+```
+
+Subtotal:
+
+```text
+Rp300.000
+```
+
+20%:
+
+```text
+Rp60.000
+```
+
+Karena maksimum:
+
+```text
+Rp50.000
+```
+
+diskon aktual:
+
+```text
+Rp50.000
+```
+
+---
+
+## 16.5 Voucher Validation
+
+Backend harus memvalidasi:
+
+- voucher exists
+- voucher active
+- current time >= starts_at jika ada
+- current time <= ends_at jika ada
+- subtotal memenuhi minimum order
+- usage limit global belum habis
+- per-user limit belum habis
+
+Satu order menggunakan maksimum satu voucher pada rancangan saat ini.
+
+---
+
+## 16.6 Voucher Usage
+
+Setelah checkout berhasil, sistem mencatat:
+
+- voucher
+- user
+- order
+- discount amount
+- timestamp
+
+Record ini digunakan untuk:
+
+- global usage limit
+- per-user usage limit
+- audit discount
+
+Policy pemulihan voucher setelah cancellation harus ditetapkan pada business layer. Default implementation harus konsisten dan diuji; jangan mengubah usage tanpa aturan eksplisit.
+
+---
+
+# 17. Checkout Overview
+
+Checkout hanya tersedia untuk customer yang login.
+
+Flow utama:
+
+```text
+Cart
+↓
+Validate Items
+↓
+Select Address
+↓
+Retrieve Shipping Rates
+↓
+Select Shipping Service
+↓
+Apply Voucher (optional)
+↓
+Review Order
+↓
+Validate Wallet Balance
+↓
+Create Order Transaction
+↓
+Wallet Debit
+↓
+Order Success
+```
+
+---
+
+# 18. Shipping Rate Retrieval
+
+Sistem menggunakan Biteship untuk memperoleh shipping rates.
+
+Source data:
+
+### Origin
+
+Dari `store_settings`:
+
+- origin contact
+- origin address
+- postal code / area ID / coordinate
+
+### Destination
+
+Dari selected `user_addresses`.
+
+### Items
+
+Dari:
+
+- books
+- cart_items
+
+Minimum item data yang tersedia pada sistem:
+
+- name
+- value
+- quantity
+- weight
+
+Optional item data:
+
+- description
+- category
+- SKU
+- height
+- length
+- width
+
+---
+
+# 19. Store Shipping Settings
+
+Karena single-store, origin disimpan pada `store_settings`.
+
+Store settings mencakup:
+
+- store name
+- WhatsApp number
+- email
+- phone
+- address
+- couriers
+- shipper contact
+- shipper organization
+- origin contact
+- origin address
+- origin location data
+
+Biteship API credential tidak boleh disimpan di database.
+
+Credential harus berada pada:
+
+```text
+.env
+config/services.php
+```
+
+---
+
+# 20. Shipping Service Selection
+
+Customer memilih salah satu shipping option hasil rate retrieval.
+
+Data penting selected rate yang dipakai UI dan persisted ke shipment:
+
+- courier company
+- courier type
+- courier service name
+- price
+- duration
+
+Response lengkap provider dapat disimpan sebagai JSON `rate_response` untuk audit/debugging.
+
+Tidak perlu menormalisasi seluruh field response menjadi kolom database jika website tidak menggunakannya.
+
+---
+
+# 21. Order Calculation
+
+Backend adalah source of truth.
+
+## 21.1 Item Subtotal
+
+Untuk setiap item:
+
+```text
+item subtotal =
+current book price × quantity
+```
+
+---
+
+## 21.2 Order Subtotal
+
+```text
+subtotal =
+SUM(order item subtotal)
+```
+
+---
+
+## 21.3 Voucher Discount
+
+```text
+voucher_discount =
+validated voucher result
+```
+
+Jika tidak ada voucher:
+
+```text
+voucher_discount = 0
+```
+
+---
+
+## 21.4 Shipping Cost
+
+```text
+shipping_cost =
+selected shipping rate charged to customer
+```
+
+Jika satu order menggunakan beberapa shipment, business layer harus memastikan total biaya shipping order konsisten dengan shipment strategy.
+
+---
+
+## 21.5 Total
+
+```text
+total =
+subtotal
+- voucher_discount
++ shipping_cost
+```
+
+---
+
+## 21.6 Wallet Amount
+
+Pada wallet-only checkout:
+
+```text
+wallet_amount = total
+```
+
+`wallet_amount` menyimpan saldo yang benar-benar didebit dari customer.
+
+Nilai ini menjadi referensi refund ketika full cancellation.
+
+---
+
+# 22. Checkout Transaction
+
+Checkout wajib menggunakan database transaction dan row locking pada resource kritis.
+
+Recommended flow:
+
+```text
+START TRANSACTION
+
+1. Load authenticated customer
+2. Lock wallet
+3. Load cart and items
+4. Reload/lock relevant ready-stock books
+5. Validate all books active
+6. Validate quantities
+7. Validate ready stock
+8. Recalculate current prices
+9. Validate voucher
+10. Validate selected shipping data
+11. Calculate subtotal
+12. Calculate voucher discount
+13. Calculate shipping cost
+14. Calculate total
+15. Validate wallet balance >= total
+16. Generate unique order code
+17. Create order
+18. Create order item snapshots
+19. Create immutable shipping address snapshot
+20. Create voucher usage if applicable
+21. Reduce ready stock
+22. Create stock movements
+23. Debit wallet
+24. Create wallet transaction (order_payment)
+25. Set payment status paid
+26. Create initial order status history
+27. Clear cart
+28. COMMIT
+```
+
+Jika salah satu langkah gagal:
+
+```text
+ROLLBACK
+```
+
+Tidak boleh terjadi kondisi seperti:
+
+- wallet terpotong tetapi order gagal dibuat
+- order dibuat tetapi wallet tidak terpotong
+- stok berkurang tetapi order gagal
+- voucher usage tercatat tetapi checkout gagal
+
+---
+
+# 23. Order Code
+
+Setiap order mempunyai public identifier unik.
+
+Contoh:
+
+```text
+ORD-K7X29P4D
 ```
 
 Requirement:
 
-- unik
-- sulit ditebak
-- bukan database ID
-- dapat digunakan customer untuk tracking
-- dapat disertakan pada pesan WhatsApp
+- unique
+- tidak menggunakan database ID langsung
+- mudah ditampilkan
+- digunakan untuk support/customer reference
 
-Database ID tidak boleh digunakan sebagai public order identifier.
+Database ID tetap digunakan sebagai internal key.
 
 ---
 
-# 13. Order Success Page
+# 24. Order Item Snapshot
 
-Setelah order berhasil, customer melihat:
+Order tidak boleh bergantung sepenuhnya pada current book master.
 
-- informasi bahwa order berhasil dibuat
-- kode order
-- nama buku
+Setiap `order_items` menyimpan snapshot:
+
+- name
+- description
+- category
+- SKU
+- value
 - quantity
-- total
-- status awal
-- tombol WhatsApp admin
-- tombol Track Order
+- weight
+- dimensions
+- ISBN
+- author
+- subtotal
+- sale type
+- preorder estimated date
+- preorder ready timestamp
 
-Customer harus diberi informasi bahwa kode order perlu disimpan.
+Tujuan:
+
+Jika admin mengubah:
+
+- title
+- price
+- description
+- author
+- ISBN
+- dimensions
+- weight
+- preorder estimation
+
+histori order lama tetap menampilkan informasi pada saat checkout.
 
 ---
 
-# 14. WhatsApp Integration
+# 25. Shipping Address Snapshot
 
-Website tidak menggunakan payment gateway.
+Alamat reusable customer disimpan di `user_addresses`.
 
-Setelah order dibuat, customer diarahkan ke WhatsApp admin.
-
-Nomor WhatsApp admin berasal dari:
+Saat checkout, selected address disalin ke:
 
 ```text
-store_settings.whatsapp_number
+order_shipping_addresses
 ```
 
-Pesan WhatsApp dapat dibuat otomatis.
+Snapshot mencakup seluruh destination data yang relevan.
+
+Jika customer kemudian:
+
+- mengedit alamat
+- mengganti nomor telepon
+- mengganti penerima
+- menghapus address
+
+historical order tetap menggunakan alamat yang digunakan pada checkout.
+
+---
+
+# 26. Order Status
+
+Order status:
+
+```text
+pending
+waiting_preorder
+processing
+packing
+shipping
+completed
+cancelled
+```
+
+---
+
+## 26.1 Pending
+
+Order baru berhasil dibuat dan masuk ke proses fulfillment.
+
+---
+
+## 26.2 Waiting Preorder
+
+Order mengandung item preorder yang belum siap dipenuhi.
+
+---
+
+## 26.3 Processing
+
+Item order sedang diproses dan disiapkan untuk fulfillment.
+
+---
+
+## 26.4 Packing
+
+Barang sedang dikemas.
+
+---
+
+## 26.5 Shipping
+
+Barang telah masuk proses pengiriman.
+
+---
+
+## 26.6 Completed
+
+Pesanan selesai.
+
+---
+
+## 26.7 Cancelled
+
+Pesanan dibatalkan.
+
+---
+
+# 27. Order Status Lifecycle
+
+## 27.1 Ready Stock Order
+
+Recommended:
+
+```text
+pending
+↓
+processing
+↓
+packing
+↓
+shipping
+↓
+completed
+```
+
+---
+
+## 27.2 Order Containing Preorder
+
+Recommended:
+
+```text
+pending
+↓
+waiting_preorder
+↓
+processing
+↓
+packing
+↓
+shipping
+↓
+completed
+```
+
+---
+
+## 27.3 Cancellation
+
+Cancellation dapat terjadi dari eligible pre-shipment states.
 
 Contoh:
 
 ```text
-Halo Admin,
-
-Saya ingin melanjutkan pesanan.
-
-Kode Order:
-BK-K7X29P4D
-
-Nama:
-Ian
-
-Buku:
-Atomic Habits
-
-Jumlah:
-3
-
-Total:
-Rp395.000
-
-Mohon informasi pembayaran.
+pending → cancelled
+waiting_preorder → cancelled
+processing → cancelled
+packing → cancelled
 ```
+
+Namun cancellation hanya diperbolehkan jika shipment belum berada pada kondisi yang dianggap sudah dikirim.
 
 ---
 
-# 15. Payment Flow
+# 28. Order Payment Status
 
-Flow pembayaran:
-
-```text
-Customer membuat order
-↓
-Status = Pending
-↓
-Payment Status = Unpaid
-↓
-Customer membuka WhatsApp
-↓
-Admin memberikan informasi pembayaran
-↓
-Customer transfer
-↓
-Customer mengirim bukti transfer melalui WhatsApp
-↓
-Admin memverifikasi
-↓
-Admin upload bukti pembayaran ke dashboard
-↓
-Payment Status diperbarui
-```
-
----
-
-# 16. Payment Status
-
-Status pembayaran:
+Payment status:
 
 ```text
 unpaid
 paid
-rejected
+partially_refunded
+refunded
 ```
 
-## unpaid
+Dalam successful wallet checkout, payment status harus menjadi:
 
-Belum ada pembayaran terverifikasi.
+```text
+paid
+```
 
-## paid
+setelah wallet debit berhasil.
 
-Pembayaran sudah diterima / diverifikasi admin.
+`unpaid` dapat digunakan sebagai transitional/internal state sebelum wallet debit selesai dalam transaction, tetapi successful committed checkout seharusnya konsisten dengan pembayaran wallet.
 
-## rejected
+`partially_refunded` disediakan untuk kebutuhan partial refund/future use.
 
-Bukti pembayaran tidak valid atau ditolak.
+Full cancellation refund:
+
+```text
+paid → refunded
+```
 
 ---
 
-# 17. Payment Proof
+# 29. Order Status History
 
-Customer tidak upload bukti pembayaran melalui website.
+`orders.status` menyimpan current state.
+
+`order_status_histories` menyimpan immutable timeline.
+
+Setiap perubahan status wajib membuat history.
+
+History menyimpan:
+
+- order
+- status
+- changed by
+- note
+- created at
+
+Contoh:
+
+```text
+26 Sep 10:00 - pending
+26 Sep 10:05 - processing
+26 Sep 13:00 - packing
+27 Sep 09:00 - shipping
+29 Sep 15:00 - completed
+```
+
+---
+
+# 30. Preorder Fulfillment
+
+## 30.1 Preorder Identification
+
+`order_items.sale_type = preorder`
+
+menandai item sebagai PO.
+
+---
+
+## 30.2 Estimated Date Snapshot
+
+`preorder_estimated_date` merupakan snapshot estimasi pada saat purchase.
+
+---
+
+## 30.3 Preorder Ready
+
+Ketika item sudah tersedia:
+
+```text
+preorder_ready_at
+```
+
+diisi.
+
+Jika semua requirement fulfillment order sudah terpenuhi, order dapat berubah dari:
+
+```text
+waiting_preorder
+→ processing
+```
+
+---
+
+## 30.4 Preorder Stock Policy
+
+`books.stock` merepresentasikan physical ready stock.
+
+Membuat preorder tidak otomatis berarti physical stock dikurangi.
+
+Ketika physical preorder stock datang atau dialokasikan, perubahan inventory dapat menggunakan:
+
+```text
+preorder_fulfillment
+```
+
+pada stock movement sesuai implementation policy.
+
+---
+
+# 31. Shipment Architecture
+
+Satu order dapat mempunyai satu atau lebih shipment.
+
+Relasi:
+
+```text
+orders
+  └── shipments
+        └── shipment_items
+              └── order_items
+```
+
+Tujuan:
+
+- mendukung split shipment
+- mendukung ready-stock + preorder dalam satu checkout
+- mengetahui item apa saja yang terdapat di setiap shipment
+
+---
+
+# 32. Shipment Code
+
+Setiap shipment mempunyai kode unik.
+
+Contoh:
+
+```text
+SHP-20260926-A82KD
+```
+
+Kode dapat digunakan sebagai provider reference identifier ketika membuat shipment Biteship.
+
+---
+
+# 33. Shipment Required Data
+
+Shipment menyimpan data inti yang benar-benar digunakan aplikasi:
+
+- order
+- shipment code
+- courier company
+- courier type
+- delivery type
+- courier service name
+- selected rate price
+- duration
+- selected rate response JSON
+- Biteship order ID
+- tracking ID
+- waybill ID
+- courier link
+- Biteship status
+- raw response payload
+- normalized shipment status
+
+Website tidak menyediakan COD sehingga field COD tidak diperlukan.
+
+---
+
+# 34. Shipment Items
+
+`shipment_items` menentukan item dan quantity yang benar-benar terdapat dalam sebuah shipment.
+
+Data:
+
+- shipment
+- order item
+- quantity
+
+Constraint:
+
+```text
+(shipment_id, order_item_id) unique
+```
+
+Contoh:
+
+```text
+Order:
+Atomic Habits × 2
+Limited Edition × 1 PO
+
+Shipment A:
+Atomic Habits × 2
+
+Shipment B:
+Limited Edition × 1
+```
+
+---
+
+# 35. Biteship Create Shipment Flow
+
+Recommended flow:
+
+```text
+Order Ready for Shipment
+↓
+Determine shipment items
+↓
+Use order shipping address snapshot
+↓
+Use store origin settings
+↓
+Use selected courier/company/type
+↓
+Build item payload from order_items + shipment_items
+↓
+Create Biteship order
+↓
+Store biteship_order_id
+↓
+Store tracking_id
+↓
+Store waybill_id
+↓
+Update shipment status
+```
+
+If provider call fails, local fulfillment state must remain recoverable and must not falsely mark shipment as shipped.
+
+---
+
+# 36. Shipment Status
+
+Normalized shipment status:
+
+```text
+pending
+booked
+pickup
+in_transit
+delivered
+cancelled
+failed
+```
+
+---
+
+## 36.1 Pending
+
+Shipment record exists but provider booking/process has not completed.
+
+## 36.2 Booked
+
+Shipment has been successfully registered/booked.
+
+## 36.3 Pickup
+
+Courier has picked up the package.
+
+## 36.4 In Transit
+
+Package is moving through courier network.
+
+## 36.5 Delivered
+
+Package has been delivered.
+
+## 36.6 Cancelled
+
+Shipment was cancelled.
+
+## 36.7 Failed
+
+Shipment creation/process failed.
+
+---
+
+# 37. Shipment Tracking History
+
+`shipments.status` menyimpan current normalized state.
+
+`shipment_status_histories` menyimpan timeline provider events.
+
+History menyimpan:
+
+- shipment
+- normalized status
+- provider status
+- description
+- occurred_at
+- raw payload
+- created_at
+
+Webhook/tracking update dapat menambahkan history baru.
+
+Raw payload disimpan untuk:
+
+- troubleshooting
+- audit
+- debugging provider differences
+
+---
+
+# 38. Customer Shipment Page
+
+Customer dapat melihat daftar shipment yang terkait dengan order miliknya.
+
+Minimal informasi list:
+
+- shipment code
+- order code
+- courier
+- service
+- tracking/waybill jika tersedia
+- current shipment status
+- duration/estimate yang tersedia
+
+Detail dapat menampilkan:
+
+- item dalam shipment
+- courier
+- tracking identifiers
+- tracking timeline
+- destination summary
+- link courier jika tersedia
+
+---
+
+# 39. Order Cancellation
+
+## 39.1 Cancellation Requirement
+
+Customer atau admin dapat membatalkan order **sebelum buku benar-benar dikirim**.
+
+Cancellation tidak boleh hanya bergantung pada tombol frontend.
+
+Backend harus memvalidasi:
+
+- order ownership / admin authority
+- current order state
+- payment state
+- shipment state
+- stock restoration state
+- refund state
+
+---
+
+## 39.2 Recommended Cancellable States
+
+Order dapat dipertimbangkan cancellable ketika:
+
+```text
+pending
+waiting_preorder
+processing
+packing
+```
+
+dengan syarat tidak ada shipment yang sudah memasuki:
+
+```text
+pickup
+in_transit
+delivered
+```
+
+Jika shipment sudah booked tetapi belum pickup, cancellation provider perlu diselesaikan sesuai integration flow sebelum order dianggap aman untuk direfund.
+
+---
+
+## 39.3 Non-Cancellable States
+
+Customer tidak boleh cancel ketika fulfillment telah dianggap dikirim.
+
+Minimal:
+
+```text
+shipping
+completed
+```
+
+atau ketika salah satu shipment sudah:
+
+```text
+pickup
+in_transit
+delivered
+```
+
+---
+
+# 40. Cancellation Refund
+
+Jika order telah dibayar menggunakan wallet dan cancellation valid:
+
+```text
+refund amount = orders.wallet_amount
+```
+
+Bukan voucher discount dan bukan arbitrary frontend total.
 
 Flow:
 
 ```text
-Customer
+Cancel Request
 ↓
-WhatsApp
+Validate Cancellable
 ↓
-Send Payment Proof
+Lock Order
 ↓
-Admin Downloads Image
+Validate payment_status != refunded
 ↓
-Admin Uploads to Dashboard
-```
-
-Admin dapat memasukkan:
-
-- image_path
-- payment_amount
-- paid_at
-- note
-
-Satu order dapat mempunyai beberapa payment proof apabila diperlukan.
-
----
-
-# 18. Order Status
-
-Status pesanan:
-
-```text
-pending
-packing
-shipping
-completed
-cancelled
-```
-
-Display label:
-
-| Internal  | Display           |
-| --------- | ----------------- |
-| pending   | Pending           |
-| packing   | Proses Packing    |
-| shipping  | Proses Pengiriman |
-| completed | Selesai           |
-| cancelled | Cancel            |
-
----
-
-# 19. Order Status Lifecycle
-
-Flow normal:
-
-```text
-pending
+Cancel eligible provider shipment if required
 ↓
-packing
+Lock Wallet
 ↓
-shipping
+Credit wallet by wallet_amount
 ↓
-completed
-```
-
-Cancellation:
-
-```text
-pending
+Create wallet transaction:
+  type = order_refund
+  direction = credit
 ↓
-cancelled
-```
-
-atau sesuai policy admin yang ditentukan kemudian.
-
----
-
-# 20. Current Status vs History
-
-Tabel `orders` menyimpan:
-
-```text
-status
-```
-
-sebagai current status.
-
-Tabel:
-
-```text
-order_status_histories
-```
-
-menyimpan seluruh histori.
-
-Contoh:
-
-```text
-02 Sep 10:00 - pending
-02 Sep 14:20 - packing
-03 Sep 08:30 - shipping
-05 Sep 13:00 - completed
-```
-
-Tidak diperlukan field:
-
-- ordered_at
-- completed_at
-- cancelled_at
-
-Karena:
-
-- waktu order dibuat = `orders.created_at`
-- waktu perubahan status = `order_status_histories.created_at`
-
----
-
-# 21. Order Tracking
-
-Customer dapat membuka halaman:
-
-```text
-/track-order
-```
-
-Customer memasukkan:
-
-```text
-order_code
-```
-
-Contoh:
-
-```text
-BK-K7X29P4D
-```
-
-System menampilkan:
-
-- kode order
-- buku
-- quantity
-- total
-- current status
-- payment status
-- timeline status
-
----
-
-# 22. Tracking Timeline
-
-Contoh:
-
-```text
-✓ Pesanan Dibuat
-  02 Sep 2026, 10:00
-
-✓ Proses Packing
-  02 Sep 2026, 14:20
-
-● Proses Pengiriman
-  03 Sep 2026, 08:30
-
-○ Selesai
-```
-
-Timeline diambil dari:
-
-```text
-order_status_histories
+Restore eligible ready stock
+↓
+Create stock movement cancellation
+↓
+Set order.payment_status = refunded
+↓
+Set order.status = cancelled
+↓
+Create order status history
+↓
+COMMIT
 ```
 
 ---
 
-# 23. Stock Management
+# 41. Cancellation Atomicity
 
-`books.stock` merupakan stok terkini.
+Cancellation harus menggunakan database transaction dan row locking.
 
-Setiap perubahan stok dicatat pada:
+Tujuan:
+
+- mencegah double refund
+- mencegah stock restore dua kali
+- mencegah order berubah saat cancellation
+- menjaga wallet ledger konsisten
+
+Recommended:
+
+```text
+lock order
+lock wallet
+lock relevant inventory rows
+```
+
+Idempotency guard:
+
+```text
+if payment_status == refunded
+→ do not refund again
+```
+
+---
+
+# 42. Stock Management
+
+## 42.1 Current Stock
+
+`books.stock` menyimpan current physical ready stock.
+
+---
+
+## 42.2 Stock Ledger
+
+Setiap perubahan stock dicatat di:
 
 ```text
 book_stock_movements
 ```
 
-Tujuan:
-
-- audit stok
-- mengetahui sumber perubahan stok
-- mengetahui stok sebelum dan sesudah perubahan
-- membantu debugging inventory mismatch
-
----
-
-# 24. Stock Movement Types
+Movement types:
 
 ```text
 initial
@@ -777,42 +1900,47 @@ adjustment_in
 adjustment_out
 order
 cancellation
+preorder_fulfillment
 ```
-
-## initial
-
-Stok awal buku.
-
-## adjustment_in
-
-Admin menambah stok secara manual.
-
-## adjustment_out
-
-Admin mengurangi stok secara manual.
-
-## order
-
-Stok berkurang karena customer membuat order.
-
-## cancellation
-
-Stok dikembalikan karena order dibatalkan.
 
 ---
 
-# 25. Stock Movement Example
+## 42.3 Initial Stock
 
-Initial stock:
+Contoh:
 
 ```text
 stock_before = 0
-quantity = 20
+quantity = +20
 stock_after = 20
 type = initial
 ```
 
-Customer membeli 3:
+---
+
+## 42.4 Manual Adjustment In
+
+```text
+stock_before = 20
+quantity = +5
+stock_after = 25
+type = adjustment_in
+```
+
+---
+
+## 42.5 Manual Adjustment Out
+
+```text
+stock_before = 25
+quantity = -2
+stock_after = 23
+type = adjustment_out
+```
+
+---
+
+## 42.6 Ready Stock Order
 
 ```text
 stock_before = 20
@@ -821,7 +1949,11 @@ stock_after = 17
 type = order
 ```
 
-Order dibatalkan:
+---
+
+## 42.7 Cancellation Restore
+
+Jika item memang sebelumnya mengurangi stock:
 
 ```text
 stock_before = 17
@@ -830,687 +1962,602 @@ stock_after = 20
 type = cancellation
 ```
 
----
-
-# 26. Order Cancellation & Stock Restore
-
-Ketika order dibatalkan dan stok sebelumnya sudah dikurangi:
-
-1. Update order status menjadi `cancelled`
-2. Create `order_status_histories`
-3. Restore stock
-4. Create `book_stock_movements` dengan type `cancellation`
-
-Semua operasi disarankan dilakukan di dalam satu database transaction.
-
-System harus mencegah stok dikembalikan dua kali untuk order yang sama.
+System tidak boleh mengembalikan stok untuk preorder yang tidak pernah mengurangi physical stock.
 
 ---
 
-# 27. Admin Authentication
+# 43. Inventory Concurrency
 
-Route admin wajib diproteksi.
+Checkout ready stock harus mencegah overselling.
 
-Flow:
+Backend harus:
 
-```text
-/admin/login
-↓
-Authentication
-↓
-Admin Dashboard
-```
+- reload current stock
+- lock relevant book row jika perlu
+- validate quantity
+- update stock dalam transaction
+- create movement dalam transaction
 
-Admin menggunakan:
-
-- email
-- password
-
-Customer tidak dapat mengakses route admin.
+Dua concurrent checkout tidak boleh dapat membeli unit fisik yang sama melebihi stock.
 
 ---
 
-# 28. Admin Dashboard
+# 44. Customer Dashboard
 
-Dashboard memberikan ringkasan informasi utama.
+Dashboard customer menggunakan shared authenticated layout.
 
-Contoh data:
+Recommended summary:
 
-- jumlah buku aktif
-- total stok buku
-- total order
-- pending order
-- packing order
-- shipping order
-- completed order
-- cancelled order
-- unpaid order
-- paid order
+- current wallet balance
+- pending top-up
+- active orders
+- preorder orders
+- active shipments
+- completed orders
+- recent wallet transactions
 - recent orders
 
-Dashboard tidak perlu terlalu kompleks.
+Quick actions:
+
+- Belanja Buku
+- Lihat Cart
+- Top Up Saldo
+- Lihat Pesanan
+- Kelola Alamat
 
 ---
 
-# 29. Book Management
+# 45. Customer Navigation
+
+Recommended:
+
+```text
+Dashboard
+Pesanan Saya
+Pengiriman
+Keranjang
+Saldo
+  - Top Up
+  - Riwayat Saldo
+Alamat Saya
+Profile
+Kembali ke Toko
+```
+
+Navigation dapat dibuat role-aware dari satu shared sidebar.
+
+---
+
+# 46. Customer Order List
+
+Customer hanya melihat order miliknya.
+
+List minimal:
+
+- order code
+- item summary
+- total
+- order status
+- payment status
+- created date
+- shipment summary
+
+Filter recommended:
+
+- active
+- preorder
+- shipping
+- completed
+- cancelled
+
+---
+
+# 47. Customer Order Detail
+
+Menampilkan:
+
+## Order
+
+- order code
+- created at
+- status
+- payment status
+
+## Items
+
+- cover
+- name
+- author
+- quantity
+- unit value
+- subtotal
+- ready stock / preorder
+- preorder estimated date jika ada
+
+## Pricing
+
+- subtotal
+- voucher discount
+- shipping cost
+- total
+- wallet amount
+
+## Address
+
+- immutable order shipping address snapshot
+
+## Voucher
+
+- voucher code/name jika ada
+- discount amount
+
+## Shipment
+
+- one or multiple shipment
+- courier
+- tracking
+- status
+
+## Timeline
+
+- order status history
+
+## Cancellation
+
+Tombol cancel hanya tampil jika backend menyatakan order masih cancellable.
+
+Frontend visibility bukan security rule.
+
+---
+
+# 48. Customer Wallet Page
+
+Menampilkan:
+
+- current balance
+- top-up CTA
+- transaction history
+
+Transaction list:
+
+- date
+- type
+- direction
+- amount
+- balance after
+- related order/top-up jika ada
+
+Credit/debit harus mudah dibedakan secara visual.
+
+---
+
+# 49. Customer Top-up Page
+
+## Create Top-up
+
+Form:
+
+- requested amount
+- payment proof image
+
+Tidak ada input:
+
+- bank name
+- account number
+- account holder
+- ATM information
+
+## Top-up List
+
+Menampilkan:
+
+- topup code
+- requested amount
+- credited amount
+- status
+- created date
+- reviewed date
+- admin note jika relevan
+
+---
+
+# 50. Admin Dashboard
+
+Admin dashboard menampilkan operational overview.
+
+Recommended metrics:
+
+- total customers
+- active books
+- ready stock books
+- preorder books
+- total stock
+- orders today
+- pending orders
+- waiting preorder
+- processing
+- packing
+- shipping
+- completed
+- cancelled
+- pending top-ups
+- approved top-ups
+- active shipments
+- low-stock books
+
+Recommended sections:
+
+- recent orders
+- pending top-up reviews
+- low stock
+- preorder needing attention
+- shipments needing attention
+
+---
+
+# 51. Admin Navigation
+
+Recommended:
+
+```text
+Dashboard
+
+Catalog
+  Books
+  Categories
+
+Orders
+
+Shipping
+  Shipments
+
+Customers
+
+Wallet
+  Top Up Requests
+  Wallet Transactions
+
+Promotions
+  Vouchers
+
+Inventory
+  Stock
+  Stock History
+
+Settings
+```
+
+---
+
+# 52. Admin Customer Management
+
+Admin dapat melihat customer list.
+
+Minimal:
+
+- name
+- email
+- phone
+- current wallet balance
+- total order count
+- account created date
+
+Detail customer dapat menampilkan:
+
+- profile
+- addresses
+- wallet balance
+- wallet transaction history
+- top-up history
+- order history
+- shipment history
+
+Admin tidak boleh melihat atau menyimpan customer bank/ATM information karena data tersebut bukan bagian sistem.
+
+---
+
+# 53. Admin Top-up Management
+
+Admin top-up list:
+
+- topup code
+- customer
+- requested amount
+- current status
+- created at
+
+Detail:
+
+- customer
+- requested amount
+- proof image
+- status
+- credited amount
+- review information
+- admin note
+
+Actions:
+
+```text
+Approve
+Reject
+```
+
+Top-up yang bukan pending tidak boleh diproses ulang.
+
+---
+
+# 54. Admin Voucher Management
 
 Admin dapat:
 
-- melihat daftar buku
-- menambah buku
-- membuka detail buku
-- edit buku
-- soft delete buku
-- mengaktifkan / menonaktifkan buku
-- mengelola stok
-- mengelola kategori buku
-- mengelola gambar buku
+- create
+- edit
+- activate/deactivate
+- soft delete
+- view usage
+
+Form fields:
+
+- code
+- name
+- description
+- type
+- value
+- max discount
+- min order
+- usage limit
+- per-user limit
+- starts at
+- ends at
+- active
+
+Validation harus sesuai voucher type.
 
 ---
 
-# 30. Book Fields
+# 55. Admin Book Management
 
-Data utama buku:
+Admin dapat:
+
+- list books
+- create
+- detail
+- edit
+- soft delete
+- activate/deactivate
+- upload multiple images
+- manage categories
+- edit ready stock / preorder configuration
+- maintain shipping physical data
+
+Book form minimal:
 
 - title
 - slug
 - ISBN
+- SKU
 - author
-- description / synopsis
+- description
 - price
 - stock
-- is_active
+- category
+- shipping category
+- weight
+- dimensions
+- sale type
+- preorder estimated date
+- preorder note
+- active
 
 ---
 
-# 31. Book Images
+# 56. Admin Inventory Management
 
-Satu buku dapat memiliki banyak gambar.
+Inventory page menampilkan current stock.
 
-Field:
-
-- book_id
-- image_path
-- alt_text
-- sort_order
-- is_primary
-
-Admin dapat:
-
-- upload gambar
-- menghapus gambar
-- menentukan gambar utama
-- mengubah urutan gambar
-
-Satu buku idealnya hanya mempunyai satu primary image.
-
----
-
-# 32. Categories
-
-Admin dapat:
-
-- melihat kategori
-- membuat kategori
-- mengedit kategori
-- menghapus kategori
-
-Relasi:
+Admin dapat membuat manual adjustment:
 
 ```text
-Books ↔ Categories
+adjustment_in
+adjustment_out
 ```
 
-bersifat many-to-many.
+Setiap adjustment wajib mencatat:
+
+- book
+- admin
+- quantity signed
+- stock before
+- stock after
+- type
+- note
+- created at
+
+Tidak boleh mengubah stock tanpa corresponding stock movement.
+
+---
+
+# 57. Admin Order Management
+
+Order list minimal:
+
+- order code
+- customer
+- item count
+- subtotal
+- discount
+- shipping
+- total
+- status
+- payment status
+- created at
+
+Search:
+
+- order code
+- customer name
+- email
+- phone
+- item/book name
+
+Filter:
+
+- order status
+- payment status
+- date
+- ready/preorder composition jika dibutuhkan
+
+Admin detail menampilkan seluruh data yang juga tersedia pada customer order detail ditambah operational actions.
+
+---
+
+# 58. Admin Shipment Management
+
+Shipment list:
+
+- shipment code
+- order code
+- customer
+- courier
+- service
+- price
+- tracking/waybill
+- provider status
+- normalized status
+- updated at
+
+Admin dapat:
+
+- membuka detail
+- membuat provider shipment ketika ready
+- retry ketika creation failed sesuai policy
+- melihat raw response
+- melihat tracking history
+- cancel shipment jika provider/business state mengizinkan
+
+---
+
+# 59. Admin Store Settings
+
+Store setting merupakan single row / single-store configuration.
+
+Admin dapat mengelola:
+
+- store name
+- WhatsApp
+- email
+- phone
+- address
+- enabled couriers
+- shipper contact
+- shipper organization
+- origin contact
+- origin address
+- origin postal code
+- origin area ID
+- origin location ID
+- origin coordinates
+
+API key Biteship tidak boleh diedit melalui database settings apabila credential dikelola melalui environment.
+
+---
+
+# 60. Shared UI Components
+
+Komponen reusable direkomendasikan untuk admin dan customer jika behavior sama.
 
 Contoh:
 
 ```text
-Atomic Habits
+OrderStatusBadge
+PaymentStatusBadge
+ShipmentStatusBadge
+TopupStatusBadge
+OrderTimeline
+ShipmentTimeline
+MoneyFormatter
+BookThumbnail
+Pagination
+EmptyState
+```
 
-Self Improvement
-Psychology
-Productivity
+Page admin/customer tetap boleh terpisah karena query dan actions berbeda.
+
+---
+
+# 61. Suggested Frontend Structure
+
+```text
+resources/js/
+├── layouts/
+│   ├── app-layout.tsx
+│   └── customer-layout.tsx
+│
+├── pages/
+│   ├── admin/
+│   │   ├── dashboard.tsx
+│   │   ├── books/
+│   │   ├── categories/
+│   │   ├── orders/
+│   │   ├── shipments/
+│   │   ├── customers/
+│   │   ├── topups/
+│   │   ├── vouchers/
+│   │   ├── inventory/
+│   │   └── settings/
+│   │
+│   └── customer/
+│       ├── dashboard.tsx
+│       ├── cart/
+│       ├── checkout/
+│       ├── orders/
+│       ├── shipments/
+│       ├── wallet/
+│       ├── topups/
+│       └── addresses/
+│
+└── components/
+    ├── shared/
+    ├── admin/
+    └── customer/
 ```
 
 ---
 
-# 33. Book Activation
+# 62. Suggested Backend Structure
 
-`books.is_active` digunakan untuk menentukan apakah buku dapat dijual.
-
-Jika:
+Recommended controller grouping:
 
 ```text
-is_active = false
+app/Http/Controllers/
+├── Admin/
+└── Customer/
 ```
 
-maka buku tidak ditampilkan sebagai buku yang dapat dibeli.
+Business logic tidak diletakkan seluruhnya di controller.
 
-Data buku tetap tersimpan untuk kebutuhan histori.
+Recommended Services / Actions:
+
+```text
+CheckoutService
+TopupApprovalService
+OrderCancellationService
+VoucherService
+WalletService
+BiteshipService
+ShipmentService
+StockService
+PreorderFulfillmentService
+```
+
+Form Request digunakan untuk input validation.
+
+Enums Laravel digunakan untuk status/type yang berkorespondensi dengan enum database.
 
 ---
 
-# 34. Admin Order Management
-
-Admin dapat melihat daftar order dengan informasi:
-
-- order code
-- customer name
-- WhatsApp
-- book
-- quantity
-- total
-- order status
-- payment status
-- created_at
-
-Admin dapat:
-
-- search
-- filter
-- sort
-- open detail
-
----
-
-# 35. Admin Order Filters
-
-Minimal filter:
-
-- Pending
-- Packing
-- Shipping
-- Completed
-- Cancelled
-- Unpaid
-- Paid
-- Rejected
-
-Search dapat mencakup:
-
-- order code
-- customer name
-- phone
-- email
-- book title
-
----
-
-# 36. Admin Order Detail
-
-Halaman order detail menampilkan:
-
-## Order
-
-- order code
-- created_at
-- status
-- payment status
-
-## Customer
-
-- name
-- phone
-- email
-- address
-- note
-
-## Book
-
-- title
-- ISBN
-- author
-- unit price
-- quantity
-
-## Payment
-
-- subtotal
-- shipping cost
-- total
-- payment proofs
-
-## Timeline
-
-- seluruh order status history
-
----
-
-# 37. Admin Status Update
-
-Ketika admin mengubah status:
-
-```text
-pending → packing
-```
-
-system harus:
-
-1. update `orders.status`
-2. insert `order_status_histories`
-3. simpan `changed_by`
-4. simpan `created_at`
-5. optional note
-
-Update status dan histori idealnya berada dalam satu database transaction.
-
----
-
-# 38. Store Settings
-
-Karena website hanya memiliki satu toko, konfigurasi disimpan pada:
-
-```text
-store_settings
-```
-
-Informasi:
-
-- store_name
-- whatsapp_number
-- email
-- address
-
-Nomor WhatsApp digunakan untuk redirect customer setelah order.
-
----
-
-# 39. Database Design
-
-Implementasi database menggunakan migration Laravel terpisah untuk setiap tabel domain. Model Eloquent menggunakan typed relationship, cast backed enum untuk status, serta default model yang mencerminkan default database.
-
-## Enums
-
-```dbml
-Enum order_status {
-  pending
-  packing
-  shipping
-  completed
-  cancelled
-}
-
-Enum payment_status {
-  unpaid
-  paid
-  rejected
-}
-
-Enum stock_movement_type {
-  initial
-  adjustment_in
-  adjustment_out
-  order
-  cancellation
-}
-```
-
----
-
-# 40. Final Database Schema
-
-```dbml
-Enum order_status {
-  pending
-  packing
-  shipping
-  completed
-  cancelled
-}
-
-Enum payment_status {
-  unpaid
-  paid
-  rejected
-}
-
-Enum stock_movement_type {
-  initial
-  adjustment_in
-  adjustment_out
-  order
-  cancellation
-}
-
-Table users {
-  id bigint [pk, increment]
-  name varchar(150) [not null]
-  email varchar(150) [not null, unique]
-  password varchar(255) [not null]
-  email_verified_at timestamp
-  remember_token varchar(100)
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-
-  indexes {
-    email [unique]
-  }
-}
-
-Table store_settings {
-  id bigint [pk, increment]
-  store_name varchar(150) [not null]
-  whatsapp_number varchar(30) [not null]
-  email varchar(150)
-  address text
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-}
-
-Table categories {
-  id bigint [pk, increment]
-  name varchar(150) [not null]
-  slug varchar(180) [not null, unique]
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-
-  indexes {
-    name
-    slug [unique]
-  }
-}
-
-Table books {
-  id bigint [pk, increment]
-  title varchar(255) [not null]
-  slug varchar(255) [not null, unique]
-  isbn varchar(50)
-  author varchar(200) [not null]
-  description text
-  price decimal(15,2) [not null]
-  stock integer [not null, default: 0]
-  is_active boolean [not null, default: true]
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-
-  indexes {
-    slug [unique]
-    isbn
-    title
-    author
-    is_active
-  }
-}
-
-Table book_images {
-  id bigint [pk, increment]
-  book_id bigint [not null]
-  image_path varchar(500) [not null]
-  alt_text varchar(255)
-  sort_order integer [not null, default: 0]
-  is_primary boolean [not null, default: false]
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-
-  indexes {
-    book_id
-    (book_id, sort_order)
-  }
-}
-
-Table book_categories {
-  id bigint [pk, increment]
-  book_id bigint [not null]
-  category_id bigint [not null]
-  created_at timestamp
-  updated_at timestamp
-
-  indexes {
-    (book_id, category_id) [unique]
-    book_id
-    category_id
-  }
-}
-
-Table orders {
-  id bigint [pk, increment]
-
-  order_code varchar(50) [not null, unique]
-
-  customer_name varchar(150) [not null]
-  customer_phone varchar(30) [not null]
-  customer_email varchar(150)
-  customer_address text [not null]
-  customer_note text
-
-  book_id bigint [not null]
-
-  book_title varchar(255) [not null]
-  book_isbn varchar(50)
-  book_author varchar(200)
-
-  unit_price decimal(15,2) [not null]
-  quantity integer [not null]
-  subtotal decimal(15,2) [not null]
-  shipping_cost decimal(15,2) [not null, default: 0]
-  total decimal(15,2) [not null]
-
-  status order_status [not null, default: 'pending']
-  payment_status payment_status [not null, default: 'unpaid']
-
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-
-  indexes {
-    order_code [unique]
-    book_id
-    customer_phone
-    customer_email
-    status
-    payment_status
-    created_at
-  }
-}
-
-Table payment_proofs {
-  id bigint [pk, increment]
-  order_id bigint [not null]
-  uploaded_by bigint [not null]
-  image_path varchar(500) [not null]
-  payment_amount decimal(15,2)
-  paid_at timestamp
-  note text
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-
-  indexes {
-    order_id
-    uploaded_by
-  }
-}
-
-Table order_status_histories {
-  id bigint [pk, increment]
-  order_id bigint [not null]
-  status order_status [not null]
-  changed_by bigint
-  note text
-  created_at timestamp [not null]
-  deleted_at timestamp
-
-  indexes {
-    order_id
-    status
-    created_at
-  }
-}
-
-Table book_stock_movements {
-  id bigint [pk, increment]
-  book_id bigint [not null]
-  order_id bigint
-  changed_by bigint
-  type stock_movement_type [not null]
-  quantity integer [not null]
-  stock_before integer [not null]
-  stock_after integer [not null]
-  note text
-  created_at timestamp [not null]
-  deleted_at timestamp
-
-  indexes {
-    book_id
-    order_id
-    changed_by
-    type
-    created_at
-  }
-}
-
-Ref: book_images.book_id > books.id
-
-Ref: book_categories.book_id > books.id
-Ref: book_categories.category_id > categories.id
-
-Ref: orders.book_id > books.id
-
-Ref: payment_proofs.order_id > orders.id
-Ref: payment_proofs.uploaded_by > users.id
-
-Ref: order_status_histories.order_id > orders.id
-Ref: order_status_histories.changed_by > users.id
-
-Ref: book_stock_movements.book_id > books.id
-Ref: book_stock_movements.order_id > orders.id
-Ref: book_stock_movements.changed_by > users.id
-```
-
----
-
-# 41. Entity Relationships
-
-```text
-USERS
-  │
-  ├──────────── PAYMENT_PROOFS
-  │
-  ├──────────── ORDER_STATUS_HISTORIES
-  │
-  └──────────── BOOK_STOCK_MOVEMENTS
-
-
-CATEGORIES
-    │
-    │ N:M
-    ▼
-BOOK_CATEGORIES
-    │
-    ▼
-BOOKS
-  │
-  ├──────────── BOOK_IMAGES
-  │
-  ├──────────── ORDERS
-  │                │
-  │                ├──── PAYMENT_PROOFS
-  │                │
-  │                └──── ORDER_STATUS_HISTORIES
-  │
-  └──────────── BOOK_STOCK_MOVEMENTS
-
-
-STORE_SETTINGS
-```
-
-## Foreign Key Deletion Rules
-
-- `book_images.book_id` menggunakan cascade untuk penghapusan permanen buku.
-- `book_categories.book_id` dan `book_categories.category_id` menggunakan cascade.
-- `orders.book_id` menggunakan restrict untuk menjaga snapshot dan histori transaksi.
-- `payment_proofs.order_id` dan `payment_proofs.uploaded_by` menggunakan restrict.
-- `order_status_histories.order_id` menggunakan restrict; `changed_by` menjadi `NULL` jika user dihapus permanen.
-- `book_stock_movements.book_id` dan `order_id` menggunakan restrict; `changed_by` menjadi `NULL` jika user dihapus permanen.
-
----
-
-# 42. Recommended Laravel Model Relationships
-
-## User
-
-```text
-hasMany(PaymentProof)
-hasMany(OrderStatusHistory)
-hasMany(BookStockMovement)
-```
-
-## StoreSetting
-
-```text
-Tidak memiliki relasi database langsung.
-```
-
-## Book
-
-```text
-hasMany(BookImage)
-belongsToMany(Category)
-hasMany(Order)
-hasMany(BookStockMovement)
-```
-
-## Category
-
-```text
-belongsToMany(Book)
-```
-
-## BookImage
-
-```text
-belongsTo(Book)
-```
-
-## BookCategory
-
-```text
-belongsTo(Book)
-belongsTo(Category)
-```
-
-`BookCategory` adalah model pivot incrementing dengan primary key bigint.
-
-## Order
-
-```text
-belongsTo(Book)
-hasMany(PaymentProof)
-hasMany(OrderStatusHistory)
-hasMany(BookStockMovement)
-```
-
-## PaymentProof
-
-```text
-belongsTo(Order)
-belongsTo(User, uploaded_by)
-```
-
-## OrderStatusHistory
-
-```text
-belongsTo(Order)
-belongsTo(User, changed_by)
-```
-
-## BookStockMovement
-
-```text
-belongsTo(Book)
-belongsTo(Order)
-belongsTo(User, changed_by)
-```
-
----
-
-# 43. Suggested Public Routes
+# 63. Suggested Public Routes
 
 ```text
 /
@@ -1522,7 +2569,7 @@ Homepage.
 /books
 ```
 
-Book catalog.
+Catalog.
 
 ```text
 /books/{slug}
@@ -1530,112 +2577,560 @@ Book catalog.
 
 Book detail.
 
-```text
-/books/{slug}/checkout
-```
-
-Checkout.
+Authentication routes:
 
 ```text
-/order-success/{orderCode}
+/login
+/register
 ```
-
-Order success.
-
-```text
-/track-order
-```
-
-Order tracking form.
-
-```text
-/track-order/{orderCode}
-```
-
-Order tracking result.
 
 ---
 
-# 44. Suggested Admin Routes
+# 64. Suggested Customer Routes
 
 ```text
-/admin/login
+/dashboard
+
+/cart
+
+/checkout
+
+/orders
+/orders/{order}
+
+/shipments
+/shipments/{shipment}
+
+/wallet
+/wallet/transactions
+
+/topups
+/topups/create
+/topups/{topup}
+
+/addresses
+/addresses/create
+/addresses/{address}/edit
+
+/profile
 ```
 
-Authentication.
+Action routes dapat menggunakan POST/PATCH/DELETE sesuai Laravel conventions.
+
+---
+
+# 65. Suggested Admin Routes
 
 ```text
 /admin
-```
 
-Dashboard.
-
-```text
 /admin/books
-/admin/books/create
-/admin/books/{book}
-```
-
-Book management.
-
-```text
 /admin/categories
-```
 
-Category management.
-
-```text
 /admin/orders
 /admin/orders/{order}
-```
 
-Order management.
+/admin/shipments
+/admin/shipments/{shipment}
 
-```text
-/admin/stock
-```
+/admin/customers
+/admin/customers/{customer}
 
-Stock history / management.
+/admin/topups
+/admin/topups/{topup}
 
-```text
+/admin/wallet-transactions
+
+/admin/vouchers
+
+/admin/inventory
+/admin/inventory/history
+
 /admin/settings
 ```
 
-Store configuration.
+Semua route admin harus protected.
 
 ---
 
-# 45. UI / UX Direction
+# 66. Database Domain Map
 
-Frontend customer harus terasa seperti toko buku modern:
+Database mempunyai domain utama berikut:
 
-- catalog-first
+## Identity
+
+- `users`
+
+## Store / Shipping Origin
+
+- `store_settings`
+
+## Customer Address
+
+- `user_addresses`
+
+## Catalog
+
+- `categories`
+- `books`
+- `book_images`
+- `book_categories`
+
+## Wallet
+
+- `wallets`
+- `wallet_topups`
+- `wallet_transactions`
+
+## Cart
+
+- `carts`
+- `cart_items`
+
+## Promotion
+
+- `vouchers`
+- `voucher_usages`
+
+## Orders
+
+- `orders`
+- `order_items`
+- `order_shipping_addresses`
+- `order_status_histories`
+
+## Shipping
+
+- `shipments`
+- `shipment_items`
+- `shipment_status_histories`
+
+## Inventory
+
+- `book_stock_movements`
+
+---
+
+# 67. Key Entity Relationships
+
+```text
+USERS
+├── USER_ADDRESSES
+├── WALLET
+│   └── WALLET_TRANSACTIONS
+├── WALLET_TOPUPS
+├── CART
+│   └── CART_ITEMS
+├── ORDERS
+│   ├── ORDER_ITEMS
+│   ├── ORDER_SHIPPING_ADDRESSES
+│   ├── ORDER_STATUS_HISTORIES
+│   ├── VOUCHER_USAGE
+│   └── SHIPMENTS
+│       ├── SHIPMENT_ITEMS
+│       └── SHIPMENT_STATUS_HISTORIES
+└── VOUCHER_USAGES
+
+BOOKS
+├── BOOK_IMAGES
+├── BOOK_CATEGORIES
+├── CART_ITEMS
+├── ORDER_ITEMS
+└── BOOK_STOCK_MOVEMENTS
+
+VOUCHERS
+└── VOUCHER_USAGES
+```
+
+---
+
+# 68. Soft Delete and Historical Data
+
+Master/business data yang memiliki `deleted_at` menggunakan soft delete sesuai database design:
+
+- users
+- user addresses
+- categories
+- books
+- vouchers
+
+Historical immutable/ledger records sebaiknya tidak dihapus dari normal application flow.
+
+Contoh:
+
+- wallet transactions
+- order status histories
+- shipment status histories
+- stock movements
+
+Order tidak perlu dihapus ketika customer membatalkan.
+
+Gunakan:
+
+```text
+status = cancelled
+```
+
+untuk menjaga audit trail.
+
+---
+
+# 69. Data Integrity Requirements
+
+System harus menjamin:
+
+1. Email user unique.
+2. Satu wallet per user.
+3. Satu cart per user.
+4. Satu book hanya muncul sekali per cart.
+5. Category relation tidak duplicate.
+6. Order code unique.
+7. Shipment code unique.
+8. Voucher code unique.
+9. Top-up code unique.
+10. Quantity cart/order/shipment harus positif.
+11. Harga final tidak dipercaya dari frontend.
+12. Wallet balance tidak dapat menjadi negatif akibat checkout.
+13. Wallet mutation selalu mempunyai ledger record.
+14. Top-up approved tidak dapat di-credit dua kali.
+15. Refund tidak dapat dilakukan dua kali.
+16. Ready stock tidak dapat oversell.
+17. Stock mutation mempunyai stock movement.
+18. Cancellation restore tidak dapat dilakukan dua kali.
+19. Status change mempunyai status history.
+20. Customer hanya melihat resource miliknya.
+21. Order item snapshot tidak berubah mengikuti master book.
+22. Order address snapshot tidak berubah mengikuti user address.
+23. Voucher usage limit divalidasi server-side.
+24. Shipment items tidak boleh melebihi quantity order item yang belum dialokasikan.
+25. Sum shipment item quantity untuk satu order item tidak boleh melebihi purchased quantity.
+26. Successful wallet checkout harus menghasilkan order, debit wallet, wallet transaction, dan item snapshot secara konsisten.
+27. Tidak ada customer banking data tersimpan dalam top-up.
+28. Tidak ada COD flow.
+
+---
+
+# 70. Validation Requirements
+
+## 70.1 User
+
+- name required
+- email required
+- email unique
+- email valid
+- password memenuhi security policy
+- role controlled by server/admin, bukan arbitrary customer input
+
+---
+
+## 70.2 Book
+
+- title required
+- slug required and unique
+- author required
+- price >= 0
+- stock >= 0
+- weight > 0
+- dimensions >= 0 jika diisi
+- sale type valid
+- preorder estimated date required by UI/business policy untuk preorder jika ditetapkan
+- active boolean
+
+---
+
+## 70.3 Address
+
+- destination contact name required
+- destination contact phone required
+- destination address required
+- email valid jika ada
+- harus mempunyai data lokasi yang cukup untuk shipping service yang digunakan
+
+---
+
+## 70.4 Cart
+
+- book exists
+- book active
+- quantity integer
+- quantity >= 1
+- ready stock quantity <= available stock
+
+---
+
+## 70.5 Top-up
+
+- requested amount > 0
+- proof required
+- proof valid image
+- MIME allowlist
+- max upload size
+- pending status required before approve/reject
+
+---
+
+## 70.6 Voucher
+
+- code unique
+- type valid
+- value > 0
+- percentage mempunyai nilai dalam range business-valid
+- max discount >= 0 jika ada
+- min order >= 0
+- usage limits positif jika ada
+- ends_at > starts_at jika keduanya ada
+
+---
+
+## 70.7 Checkout
+
+- authenticated customer
+- cart not empty
+- valid address owned by customer
+- current prices recalculated
+- current stock validated
+- voucher revalidated
+- selected shipping rate valid
+- wallet balance sufficient
+- transaction atomic
+
+---
+
+## 70.8 Cancellation
+
+- order owned by customer atau admin authorized
+- order eligible
+- shipment belum dikirim
+- payment not already refunded
+- cancellation processed atomically
+
+---
+
+# 71. File Upload Requirements
+
+File upload saat ini:
+
+- book images
+- top-up proof image
+
+Recommended storage:
+
+```text
+storage/app/public/books/
+storage/app/public/topups/
+```
+
+Requirements:
+
+- MIME validation
+- file size limit
+- generated safe filename
+- do not trust original filename
+- database stores path only
+
+Production dapat menggunakan S3-compatible object storage tanpa mengubah domain model secara besar.
+
+---
+
+# 72. Security Requirements
+
+## Authentication
+
+- Laravel authentication
+- secure password hashing
+- session protection
+- CSRF protection
+
+## Authorization
+
+- role middleware
+- policies/ownership checks
+- no frontend-only permission enforcement
+
+## Wallet
+
+- wallet balance mutation hanya dari trusted backend service
+- row locking untuk critical mutation
+- immutable ledger
+- no arbitrary amount from frontend
+
+## Checkout
+
+- backend calculates price
+- backend validates stock
+- backend validates voucher
+- backend validates wallet
+
+## Upload
+
+- MIME allowlist
+- extension validation
+- file size validation
+- randomized filename
+
+## Biteship
+
+- API key only in environment/config
+- raw provider errors tidak diexpose ke customer
+
+## Sensitive Data
+
+System tidak menyimpan customer bank/ATM information pada top-up.
+
+---
+
+# 73. Concurrency Requirements
+
+Critical operations harus concurrency-safe:
+
+- checkout
+- top-up approval
+- wallet adjustment
+- order cancellation/refund
+- stock adjustment
+- voucher usage allocation
+
+Gunakan:
+
+- DB transaction
+- `lockForUpdate()` pada row yang relevan
+- unique constraints
+- server-side idempotency guards
+
+---
+
+# 74. Error Handling
+
+Customer-facing errors:
+
+- login failed
+- book not found
+- book inactive
+- insufficient stock
+- invalid quantity
+- cart empty
+- invalid address
+- shipping rate unavailable
+- voucher invalid
+- voucher expired
+- voucher limit reached
+- insufficient wallet balance
+- checkout failed
+- top-up upload failed
+- order not found
+- cancellation not allowed
+- shipment not found
+
+Admin errors:
+
+- invalid status transition
+- top-up already reviewed
+- wallet conflict
+- duplicate voucher code
+- duplicate slug
+- stock adjustment conflict
+- provider shipment failure
+- invalid shipment state
+
+Technical stack traces tidak boleh ditampilkan kepada end user.
+
+---
+
+# 75. Logging Requirements
+
+Recommended application logs:
+
+- authentication anomalies
+- checkout failures
+- stock conflicts
+- wallet transaction failures
+- top-up approvals/rejections
+- cancellation/refund failures
+- voucher validation issues
+- Biteship rate failures
+- Biteship create shipment failures
+- webhook processing failures
+- upload failures
+- admin stock adjustments
+- admin wallet adjustments
+
+Logging tidak boleh memasukkan password atau secrets.
+
+---
+
+# 76. Performance Requirements
+
+Minimum:
+
+- server-side pagination
+- eager loading
+- avoid N+1
+- index fields sesuai database
+- image optimization
+- lazy loading book images
+- cache static category/store configuration bila diperlukan
+- debounce catalog search
+- paginate large wallet/order/shipment history
+
+Important indexed/filter fields telah dirancang pada database untuk:
+
+- email
+- role
+- slug
+- book title/author
+- order code
+- order status
+- payment status
+- top-up status
+- shipment code/status
+- wallet transaction references
+
+---
+
+# 77. UI/UX Direction
+
+Customer storefront:
+
+- modern
 - clean
 - editorial
-- minimal
+- premium
 - book-cover focused
+- white dominant
+- navy identity
+- easy to browse
+- mobile responsive
+- not marketplace-like
+- not dashboard-like
+
+Authenticated dashboard:
+
+- consistent shared layout
+- clear sidebar
+- compact data presentation
+- status badges
+- useful empty states
 - responsive
-- mudah dipahami
-- tidak seperti dashboard
-- tidak seperti marketplace besar
 
-Book covers menjadi focal point utama.
+Avoid:
 
-Hindari:
-
-- terlalu banyak cards
-- dashboard-like customer UI
 - excessive gradients
 - glassmorphism
-- excessive shadows
-- floating decorative elements
-- generic SaaS layout
+- oversized shadows
+- generic SaaS visuals
+- unnecessary card nesting
 
 ---
 
-# 46. Design Color Direction
+# 78. Brand Color Direction
 
-Brand direction yang sebelumnya dipilih:
+Recommended brand colors:
+
+## White
+
+```text
+#FFFFFF
+```
 
 ## Primary Navy
 
@@ -1661,19 +3156,13 @@ Brand direction yang sebelumnya dipilih:
 #EAF2FF
 ```
 
-## Base
-
-```text
-#FFFFFF
-```
-
-UI menggunakan putih sebagai fondasi dengan navy dan blue yang cukup terlihat untuk brand identity.
+UI menggunakan putih sebagai foundation dengan navy/blue sebagai identity dan actions.
 
 ---
 
-# 47. Frontend Technology
+# 79. Frontend Technology Requirements
 
-Frontend menggunakan:
+Frontend:
 
 - React
 - TypeScript
@@ -1683,15 +3172,17 @@ Frontend menggunakan:
 
 Principles:
 
-- reusable components
 - strict TypeScript
+- reusable components
+- server-driven data melalui Inertia
+- avoid unnecessary global client state
 - responsive design
-- server-driven navigation melalui Inertia
-- minimal unnecessary client state
+- accessible form labels
+- consistent loading/error/empty states
 
 ---
 
-# 48. Backend Technology
+# 80. Backend Technology Requirements
 
 Backend:
 
@@ -1700,181 +3191,175 @@ Backend:
 
 Responsibilities:
 
-- authentication admin
-- CRUD buku
-- category management
-- image handling
-- order processing
-- stock calculation
-- status management
-- payment proof
-- WhatsApp redirect preparation
-- order tracking
-- validation
-- database transaction
+- authentication
+- authorization
+- catalog management
+- cart
+- address management
+- voucher validation
+- wallet
+- top-up
+- checkout
+- order lifecycle
+- preorder fulfillment
+- cancellation/refund
+- stock
+- Biteship integration
+- shipment tracking
+- file storage
+- transactional integrity
 
 ---
 
-# 49. Security Requirements
+# 81. Recommended Laravel Models
 
-## Admin Authentication
-
-Admin routes menggunakan authentication middleware.
-
-## Order Code
-
-Jangan expose database ID untuk tracking customer.
-
-Gunakan:
+Models:
 
 ```text
-order_code
+User
+StoreSetting
+UserAddress
+Category
+Book
+BookImage
+BookCategory
+Wallet
+WalletTopup
+WalletTransaction
+Cart
+CartItem
+Voucher
+Order
+OrderItem
+OrderShippingAddress
+VoucherUsage
+OrderStatusHistory
+Shipment
+ShipmentItem
+ShipmentStatusHistory
+BookStockMovement
 ```
 
-yang sulit ditebak.
+---
 
-## Pricing
+# 82. Recommended Model Relationships
 
-Harga tidak boleh dipercaya dari frontend.
-
-Selalu:
+## User
 
 ```text
-Book::find(book_id)->price
+hasMany(UserAddress)
+hasOne(Wallet)
+hasMany(WalletTopup)
+hasOne(Cart)
+hasMany(Order)
+hasMany(VoucherUsage)
 ```
 
-sebagai source of truth.
-
-## Quantity
-
-Backend wajib validasi:
+Admin-side relation:
 
 ```text
-quantity >= 1
-quantity <= available stock
+hasMany(WalletTopup, reviewed_by)
+hasMany(Voucher, created_by)
+hasMany(OrderStatusHistory, changed_by)
+hasMany(BookStockMovement, changed_by)
+hasMany(WalletTransaction, created_by)
 ```
 
-## Upload
-
-Payment proof harus divalidasi berdasarkan:
-
-- image MIME
-- extension
-- size
-
-## Mass Assignment
-
-Gunakan:
-
-- Form Request validation
-- controlled fillable / guarded strategy
-
----
-
-# 50. Data Integrity Requirements
-
-System harus memastikan:
-
-1. Order code selalu unik.
-2. Quantity tidak boleh nol atau negatif.
-3. Quantity tidak boleh melebihi stok.
-4. Harga order berasal dari database.
-5. Subtotal dihitung backend.
-6. Total dihitung backend.
-7. Stock movement selalu sesuai perubahan stok.
-8. Status history tercatat ketika status berubah.
-9. Stock tidak dikembalikan dua kali saat cancellation.
-10. Satu buku-category relation tidak boleh duplicate.
-11. Satu order hanya terhubung ke satu buku.
-12. Foreign key menjaga audit trail order; hard delete order diblokir selama payment proof atau histori masih ada.
-13. `changed_by` pada status history dan stock movement menjadi `NULL` bila user dihapus permanen.
-14. Semua tabel bisnis menggunakan soft delete kecuali `book_categories`.
-
----
-
-# 51. Soft Delete
-
-Tables yang menggunakan soft delete:
-
-- users
-- store_settings
-- categories
-- books
-- book_images
-- orders
-- payment_proofs
-- order_status_histories
-- book_stock_movements
-
-`book_categories` tidak menggunakan soft delete. Pivot dihapus permanen agar unique constraint `(book_id, category_id)` tetap dijamin database.
-
-Tujuan:
-
-- menjaga histori
-- menghindari kehilangan reference lama
-- memungkinkan restore jika diperlukan
-
-Order dan tabel audit tidak dihapus permanen melalui alur aplikasi.
-
-Gunakan:
+## Book
 
 ```text
-cancelled
+hasMany(BookImage)
+belongsToMany(Category)
+hasMany(CartItem)
+hasMany(OrderItem)
+hasMany(BookStockMovement)
 ```
 
-untuk membatalkan pesanan.
-
----
-
-# 52. Order Deletion Policy
-
-Admin tidak disarankan mempunyai fitur hard delete order. Order menggunakan soft delete bila pengarsipan diperlukan.
-
-Order yang salah atau tidak dilanjutkan harus:
+## Wallet
 
 ```text
-status = cancelled
+belongsTo(User)
+hasMany(WalletTransaction)
 ```
 
-Hal ini menjaga:
+## Cart
 
-- histori transaksi
-- stock movement
-- payment proof
-- status history
-- audit trail
+```text
+belongsTo(User)
+hasMany(CartItem)
+```
 
----
+## Order
 
-# 53. Category Deletion Policy
+```text
+belongsTo(User)
+belongsTo(UserAddress, address_id)
+belongsTo(Voucher)
+hasMany(OrderItem)
+hasOne(OrderShippingAddress)
+hasMany(OrderStatusHistory)
+hasMany(Shipment)
+```
 
-Kategori menggunakan soft delete pada alur normal.
+## Shipment
 
-Jika kategori dihapus permanen, foreign key menghapus record `book_categories` terkait, tetapi tidak menghapus buku.
-
----
-
-# 54. Book Deletion Policy
-
-Buku menggunakan soft delete. `book_images` juga menggunakan soft delete.
-
-Order lama tetap menyimpan:
-
-- book_id jika tersedia
-- book_title
-- book_isbn
-- book_author
-- unit_price
-
-Sehingga detail transaksi historis tetap dapat ditampilkan.
-
-Jika force delete diperlukan, relasi pivot dan gambar dapat ikut terhapus, tetapi database menolak penghapusan buku yang masih dipakai order atau stock movement.
+```text
+belongsTo(Order)
+hasMany(ShipmentItem)
+hasMany(ShipmentStatusHistory)
+```
 
 ---
 
-# 55. Search Requirements
+# 83. Dashboard Data Separation
 
-## Customer Catalog
+Walaupun admin dan customer menggunakan visual layout yang sama:
+
+- controller dipisah
+- route dipisah
+- query dipisah
+- authorization dipisah
+- page boleh dipisah
+- reusable UI component boleh shared
+
+Contoh:
+
+```text
+Admin/OrderController
+Customer/OrderController
+```
+
+Customer query selalu scoped ke:
+
+```text
+user_id = authenticated user
+```
+
+---
+
+# 84. Pagination
+
+Server-side pagination digunakan untuk:
+
+- public catalog
+- admin books
+- admin customers
+- admin orders
+- admin shipments
+- admin top-ups
+- admin wallet transactions
+- vouchers jika banyak
+- stock movement history
+- customer orders
+- customer shipments
+- customer wallet transactions
+- customer top-ups
+
+---
+
+# 85. Search and Filter Requirements
+
+## Catalog
 
 Search:
 
@@ -1885,426 +3370,561 @@ Search:
 Filter:
 
 - category
+- ready/preorder jika dibutuhkan
+- active only untuk public
 
-Optional future:
+## Admin Books
 
-- price
-- availability
+Search:
 
-## Admin Order
+- title
+- author
+- ISBN
+- SKU
+
+Filter:
+
+- active
+- sale type
+- category
+- stock state
+
+## Admin Orders
 
 Search:
 
 - order code
-- customer name
-- phone
-- email
-- book title
+- customer
+- item name
+
+Filter:
+
+- status
+- payment status
+- date
+
+## Admin Top-ups
+
+Search:
+
+- topup code
+- customer
+
+Filter:
+
+- pending
+- approved
+- rejected
+
+## Shipments
+
+Search:
+
+- shipment code
+- order code
+- Biteship order ID
+- tracking ID
+- waybill
+
+Filter:
+
+- shipment status
+- courier
+- date
 
 ---
 
-# 56. Pagination
-
-Gunakan pagination untuk:
-
-- catalog
-- books admin
-- orders admin
-- stock movements
-- categories jika jumlah data besar
-
-Pagination sebaiknya diproses server-side oleh Laravel.
-
----
-
-# 57. Validation
-
-## Book
-
-- title required
-- slug unique
-- price >= 0
-- stock >= 0
-- ISBN optional
-- author required
-- is_active boolean
-
-## Checkout
-
-- book_id exists
-- quantity integer
-- quantity >= 1
-- name required
-- phone required
-- email valid jika diisi
-- address required
-
-## Category
-
-- name required
-- slug unique
-
-## Payment Proof
-
-- order exists
-- valid image
-- payment amount >= 0 jika diisi
-
----
-
-# 58. Order Status Update Validation
-
-System sebaiknya membatasi transisi status yang tidak valid.
-
-Contoh recommended transition:
-
-```text
-pending → packing
-pending → cancelled
-
-packing → shipping
-packing → cancelled
-
-shipping → completed
-
-completed → no further transition
-
-cancelled → no further transition
-```
-
-Apabila bisnis mengizinkan perubahan lain, policy dapat disesuaikan.
-
----
-
-# 59. Admin Dashboard Recommended Metrics
-
-Minimal:
-
-```text
-Books
-Active Books
-Total Stock
-
-Orders Today
-Pending
-Packing
-Shipping
-Completed
-Cancelled
-
-Unpaid
-Paid
-```
-
-Optional:
-
-- revenue
-- most ordered book
-- low stock
-- recent transactions
-
----
-
-# 60. Low Stock
-
-Future-ready feature.
-
-Admin dapat melihat buku dengan:
-
-```text
-stock <= threshold
-```
-
-Threshold dapat ditentukan di aplikasi.
-
-Tidak perlu field database khusus pada versi awal.
-
----
-
-# 61. Empty State
+# 86. Empty States
 
 Public:
 
-- no books available
-- no search result
+- no books
+- no category results
+- no search results
+
+Customer:
+
+- empty cart
+- no addresses
+- no orders
+- no shipments
+- no wallet transactions
+- no top-ups
 
 Admin:
 
+- no pending top-up
 - no orders
-- no books
-- no categories
-- no payment proof
-- no status history
+- no shipment
+- no voucher
+- no stock history
 
-UI harus memberikan action yang relevan.
+Empty states harus memberikan action relevan.
 
 ---
 
-# 62. Responsive Requirements
+# 87. Responsive Requirements
 
-Website customer harus optimal pada:
+Public/customer storefront:
 
 - mobile
 - tablet
 - desktop
 
-Customer checkout sangat penting untuk mobile karena proses dilanjutkan melalui WhatsApp.
+Customer dashboard:
 
-Admin dashboard minimal usable pada:
-
+- mobile
 - tablet
 - desktop
 
-Mobile admin support tetap dianjurkan.
+Admin dashboard:
+
+- desktop-first
+- tablet usable
+- mobile support recommended
+
+Checkout dan top-up harus sangat usable pada mobile karena customer mungkin upload proof dari smartphone.
 
 ---
 
-# 63. Notifications
+# 88. Notifications
 
-Versi awal tidak membutuhkan:
+Database saat ini tidak mendefinisikan notification domain.
+
+MVP tidak mewajibkan:
 
 - email notification
 - SMS
-- WhatsApp API
+- push notification
+- WhatsApp Business API
 
-WhatsApp dilakukan melalui redirect URL dengan prefilled message.
+UI dashboard sendiri menjadi source informasi status.
 
-Future enhancement dapat menggunakan WhatsApp Business API.
-
----
-
-# 64. Error Handling
-
-Customer-facing error:
-
-- book not found
-- book inactive
-- insufficient stock
-- invalid quantity
-- order not found
-- invalid order code
-- checkout failed
-
-Admin errors:
-
-- invalid status transition
-- image upload failure
-- stock adjustment error
-- duplicate category
-- duplicate slug
-
-Error message harus user-friendly.
+Future enhancement dapat menambahkan notification system tanpa mengubah core order domain.
 
 ---
 
-# 65. Logging
+# 89. Testing Scope
 
-Recommended logging:
+Automated tests minimal mencakup domain kritis.
 
-- checkout failures
-- stock conflicts
-- stock adjustments
-- payment changes
-- order status changes
-- upload failures
+## 89.1 Authentication
 
-Tidak perlu expose technical exception ke user.
-
----
-
-# 66. Performance Requirements
-
-Minimum considerations:
-
-- eager load relations pada catalog dan admin list
-- pagination
-- index order_code
-- index status
-- index payment_status
-- index book_id
-- image optimization
-- lazy-load book gallery
-- avoid N+1 queries
+- customer register
+- customer login
+- admin login
+- customer tidak dapat membuka admin route
+- guest tidak dapat membuka protected dashboard
 
 ---
 
-# 67. Image Storage
+## 89.2 Cart
 
-Book images dan payment proof disimpan menggunakan Laravel Storage.
-
-Recommended:
-
-```text
-storage/app/public/books/
-storage/app/public/payment-proofs/
-```
-
-Production dapat menggunakan object storage seperti S3-compatible service jika dibutuhkan.
-
-Database hanya menyimpan path.
+- add item
+- duplicate add increases quantity
+- update quantity
+- remove item
+- ready stock quantity validation
+- inactive book cannot be purchased
 
 ---
 
-# 68. Seed Data
+## 89.3 Address
 
-Recommended seed:
+- customer CRUD own address
+- customer cannot modify other user address
+- default address behavior
+- address snapshot remains after source edit
+
+---
+
+## 89.4 Top-up
+
+- customer can upload proof
+- no bank data required
+- top-up starts pending
+- admin can approve pending request
+- approve credits wallet once
+- approve creates wallet ledger
+- second approve is blocked
+- reject does not change balance
+
+---
+
+## 89.5 Voucher
+
+- fixed voucher
+- percentage voucher
+- max discount
+- min order
+- start/end time
+- usage limit
+- per-user limit
+- inactive voucher rejected
+
+---
+
+## 89.6 Checkout
+
+- multi-book checkout succeeds
+- price recalculated server-side
+- voucher applied
+- shipping included
+- wallet sufficient
+- wallet debit created
+- order items snapshotted
+- address snapshotted
+- stock reduced for ready stock
+- stock movements created
+- cart cleared
+- insufficient wallet fails without partial mutation
+- insufficient stock fails without wallet debit
+
+---
+
+## 89.7 Preorder
+
+- preorder can be ordered according to policy
+- preorder snapshot retained
+- waiting_preorder status
+- preorder ready timestamp
+- transition to processing
+
+---
+
+## 89.8 Cancellation
+
+- eligible order can cancel
+- non-eligible shipped order cannot cancel
+- wallet refunded
+- order payment becomes refunded
+- order status becomes cancelled
+- wallet transaction order_refund created
+- ready stock restored only if previously deducted
+- stock movement cancellation created
+- double cancellation cannot double refund
+- double cancellation cannot restore stock twice
+
+---
+
+## 89.9 Shipment
+
+- shipment can contain subset of order items
+- shipment quantity cannot exceed purchased quantity
+- Biteship response identifiers saved
+- tracking history inserted
+- customer cannot view other user's shipment
+- failed provider request handled safely
+
+---
+
+## 89.10 Inventory
+
+- initial stock
+- adjustment in
+- adjustment out
+- order deduction
+- cancellation restoration
+- concurrent ready-stock checkout does not oversell
+
+---
+
+# 90. Seed Data
+
+Development seed recommended:
 
 ## Admin
 
-Satu akun admin development.
-
-## Store Settings
-
-Satu konfigurasi toko.
-
-## Categories
-
-Beberapa kategori contoh.
-
-## Books
-
-Beberapa sample books.
-
----
-
-# 69. Testing Scope
-
-## Unit / Feature Tests
-
-Minimal mencakup:
-
-### Checkout
-
-- order dapat dibuat
-- stok berkurang
-- snapshot harga tersimpan
-- status history tercipta
-- stock movement tercipta
-- order code unik
-
-### Insufficient Stock
-
-- order gagal
-- stok tidak berubah
-
-### Cancellation
-
-- status berubah
-- status history tercipta
-- stock dikembalikan
-- cancellation movement tercipta
-- stock tidak dapat direstore dua kali
-
-### Admin
-
-- guest tidak dapat masuk admin
-- admin dapat CRUD book
-- admin dapat mengubah status
-- admin dapat upload payment proof
-
-### Tracking
-
-- valid order code menampilkan order
-- invalid order code menghasilkan error / not found
-
-### Database dan Model
-
-- migration membuat seluruh tabel domain dan soft delete column yang ditentukan
-- relasi `hasMany`, `belongsTo`, dan `belongsToMany` mengarah ke model yang benar
-- `BookCategory` tetap pivot incrementing tanpa soft delete
-- status order, status pembayaran, dan tipe stock movement tercast ke backed enum
-
----
-
-# 70. MVP Scope
-
-MVP dianggap selesai ketika:
+One admin account.
 
 ## Customer
 
-- dapat membuka katalog
-- dapat melihat detail buku
-- dapat memilih quantity
-- dapat checkout
-- dapat membuat order
-- dapat menerima order code
-- dapat redirect ke WhatsApp admin
-- dapat track order
+One sample customer.
+
+## Store Setting
+
+One store configuration including shipping origin.
+
+## Categories
+
+Sample categories.
+
+## Books
+
+Sample ready-stock and preorder books.
+
+## Wallet
+
+Sample customer wallet.
+
+## Voucher
+
+At least:
+
+- one fixed
+- one percentage
+
+---
+
+# 91. MVP Scope
+
+MVP dianggap selesai ketika fitur berikut berfungsi end-to-end.
+
+## Customer
+
+- register/login/logout
+- browse catalog
+- book detail
+- multi-book cart
+- manage addresses
+- see wallet balance
+- submit top-up proof
+- see top-up status
+- receive approved top-up balance
+- retrieve shipping options
+- select courier
+- apply voucher
+- checkout using wallet
+- see orders
+- see preorder state
+- see shipment
+- see tracking timeline
+- cancel eligible order
+- receive wallet refund after cancellation
+- view wallet transaction history
 
 ## Admin
 
-- dapat login
-- dapat CRUD buku
-- dapat upload multiple book images
-- dapat CRUD categories
-- dapat melihat orders
-- dapat melihat detail order
-- dapat mengubah status
-- dapat mengubah payment status
-- dapat upload payment proof
-- dapat mengelola stok
-- dapat melihat histori status
-- dapat melihat histori stock
-- dapat mengubah store settings
+- login/logout
+- dashboard
+- customer list/detail
+- CRUD books
+- multiple book images
+- categories
+- inventory adjustment/history
+- top-up review
+- wallet transaction history
+- voucher management
+- order list/detail
+- order status management
+- preorder handling
+- shipment/Biteship handling
+- shipment tracking
+- store/shipping settings
 
 ---
 
-# 71. Future Enhancements
+# 92. Future Enhancements
 
-Fitur yang dapat ditambahkan tanpa mengubah core business model:
+Potential future features:
 
+- payment gateway for automatic wallet top-up
+- automatic bank transfer verification
 - WhatsApp Business API
-- email notification
-- shipping API
-- automatic shipping fee
-- courier tracking number
-- printable invoice
-- downloadable invoice
-- dashboard analytics
+- email notifications
+- push notifications
+- wishlist
+- product review/rating
+- invoice PDF
+- printable packing slip
 - revenue report
-- low-stock alert
-- export orders CSV
-- export report
-- SEO management
-- book recommendation
-- featured books
-- bestseller section
-- promotional banner
+- inventory threshold configuration
+- low-stock notification
+- export CSV/Excel
+- dashboard analytics
+- bestseller
+- book recommendations
+- promotional banners
+- loyalty/reward program
+- multi-warehouse
+- advanced returns/RMA
+- partial cancellation UI
+- partial refund workflow
+
+Future features should not compromise immutable wallet/order/inventory audit trails.
 
 ---
 
-# 72. Acceptance Criteria
+# 93. Acceptance Criteria
 
-Produk dapat dianggap memenuhi requirement apabila:
+Produk dianggap memenuhi requirement ketika:
 
-1. Admin dapat login.
-2. Customer tidak perlu login.
-3. Admin dapat membuat buku dengan banyak gambar.
-4. Buku dapat memiliki banyak kategori.
-5. Customer hanya dapat membeli satu jenis buku per order.
-6. Customer dapat membeli quantity lebih dari satu.
-7. Customer dapat mengisi nama, WhatsApp, email, alamat, dan catatan.
-8. Backend menghasilkan order code unik.
-9. Harga order berasal dari database.
-10. Order menyimpan snapshot data buku.
-11. Order menyimpan snapshot data customer.
-12. Stok berkurang ketika order dibuat.
-13. Stock movement tercatat.
-14. Status awal order adalah pending.
-15. Payment status awal adalah unpaid.
-16. Initial status history tercatat.
-17. Customer dapat diarahkan ke WhatsApp admin.
-18. Customer dapat track order menggunakan order code.
-19. Admin dapat mengubah status order.
-20. Setiap perubahan status tercatat dalam history.
-21. Admin dapat mengubah payment status.
-22. Admin dapat upload bukti pembayaran.
-23. Cancellation mengembalikan stock.
-24. Order yang completed atau cancelled tetap memiliki histori transaksi yang utuh.
-25. Tidak ada tenant atau tenant_id.
-26. Tidak ada customer account.
-27. Tidak ada order_items.
-28. Seluruh primary key menggunakan bigint auto increment.
-29. Migration domain dipisahkan satu file untuk setiap tabel.
-30. Model mendefinisikan relasi Eloquent bertipe benar untuk seluruh foreign key.
-31. Soft delete diterapkan pada seluruh tabel bisnis kecuali `book_categories`.
+1. Admin dan customer dapat login sesuai role.
+2. Customer baru dapat mempunyai wallet.
+3. Customer dapat mempunyai satu active cart.
+4. Customer dapat menambahkan beberapa jenis buku ke cart.
+5. Satu buku tidak duplicate sebagai row terpisah dalam cart.
+6. Public dapat melihat buku aktif.
+7. Admin dapat CRUD buku.
+8. Buku dapat memiliki banyak gambar.
+9. Buku dapat mempunyai banyak kategori.
+10. Buku memiliki physical shipping information termasuk weight.
+11. Buku mendukung ready stock.
+12. Buku mendukung preorder.
+13. Customer dapat menyimpan beberapa alamat.
+14. Customer dapat menentukan alamat checkout.
+15. Address snapshot tersimpan pada order.
+16. Sistem dapat meminta shipping rate menggunakan data store/address/item.
+17. Customer dapat memilih shipping option.
+18. Customer dapat melihat saldo.
+19. Customer dapat membuat top-up.
+20. Top-up hanya membutuhkan requested amount dan proof image dari customer.
+21. Tidak ada data bank/ATM customer disimpan.
+22. Admin dapat approve top-up.
+23. Approved top-up menambah wallet.
+24. Approved top-up membuat immutable wallet transaction.
+25. Top-up tidak dapat di-credit dua kali.
+26. Admin dapat reject top-up tanpa mengubah wallet.
+27. Admin dapat membuat fixed voucher.
+28. Admin dapat membuat percentage voucher.
+29. Voucher limit tervalidasi server-side.
+30. Customer dapat menggunakan maksimum satu voucher pada sebuah order.
+31. Checkout mendukung beberapa order items.
+32. Backend menghitung ulang harga.
+33. Backend menghitung subtotal.
+34. Backend menghitung discount.
+35. Backend menghitung shipping cost.
+36. Backend menghitung total.
+37. Wallet balance divalidasi.
+38. Successful checkout mendebit wallet.
+39. Successful checkout membuat `order_payment` ledger.
+40. Successful checkout menyimpan item snapshot.
+41. Successful checkout menyimpan address snapshot.
+42. Successful ready-stock checkout mengurangi stock.
+43. Perubahan stock menghasilkan stock movement.
+44. Cart dikosongkan setelah checkout sukses.
+45. Checkout gagal tidak boleh meninggalkan partial mutation.
+46. Preorder order dapat masuk `waiting_preorder`.
+47. Preorder estimated date tersnapshot.
+48. Order dapat memiliki lebih dari satu shipment.
+49. Shipment mempunyai shipment items.
+50. Shipment menyimpan courier company/type/service.
+51. Shipment menyimpan selected price dan duration.
+52. Shipment dapat menyimpan Biteship order/tracking/waybill IDs.
+53. Shipment mempunyai current normalized status.
+54. Shipment mempunyai tracking history.
+55. Customer hanya melihat shipment miliknya.
+56. Customer hanya melihat order miliknya.
+57. Admin dapat melihat semua order/shipment.
+58. Eligible order dapat dicancel sebelum dikirim.
+59. Cancelled paid order mengembalikan wallet amount.
+60. Refund membuat `order_refund` wallet transaction.
+61. Refund tidak dapat terjadi dua kali.
+62. Ready stock yang pernah dikurangi dikembalikan ketika cancellation.
+63. Stock restore tidak dapat terjadi dua kali.
+64. Order berubah menjadi `cancelled`.
+65. Payment berubah menjadi `refunded` pada full refund.
+66. Setiap perubahan order status tercatat dalam history.
+67. Admin/customer authorization dilakukan di backend.
+68. Wallet mutation menggunakan transaction/locking.
+69. Checkout menggunakan transaction/locking.
+70. Cancellation/refund menggunakan transaction/locking.
+71. Inventory update concurrency-safe.
+72. Biteship API key tidak tersimpan di database.
+73. Sistem tidak menyediakan COD.
+74. Website tetap single-store tanpa tenant.
+75. Seluruh primary key domain menggunakan bigint auto increment sesuai database design.
+
+---
+
+# 94. Definition of Done
+
+Feature dianggap selesai jika:
+
+- functional requirement terpenuhi
+- backend authorization tersedia
+- Form Request validation tersedia
+- transaction digunakan untuk operasi finansial/inventory kritis
+- database relationship benar
+- TypeScript types tersedia
+- responsive UI tersedia
+- loading state tersedia
+- empty state tersedia
+- error state tersedia
+- feature test untuk critical business flow tersedia
+- tidak ada N+1 yang jelas
+- tidak ada frontend price sebagai source of truth
+- tidak ada sensitive credential disimpan di database
+- data audit/history yang diperlukan tercatat
+
+---
+
+# 95. Final Product Summary
+
+Buku Order merupakan single-store book e-commerce dengan dua role utama: admin dan customer.
+
+Core transaction flow:
+
+```text
+Customer Register/Login
+↓
+Browse Catalog
+↓
+Add Multiple Books to Cart
+↓
+Manage/Select Address
+↓
+Retrieve Biteship Shipping Rate
+↓
+Select Courier
+↓
+Apply Voucher
+↓
+Check Wallet
+↓
+Checkout
+↓
+Wallet Debit
+↓
+Create Multi-Item Order
+↓
+Ready Stock / Preorder Fulfillment
+↓
+Create One or Multiple Shipments
+↓
+Biteship Tracking
+↓
+Completed
+```
+
+Wallet funding flow:
+
+```text
+Customer Top Up
+↓
+Enter Amount
+↓
+Upload Transfer Proof
+↓
+Pending
+↓
+Admin Review
+↓
+Approved
+↓
+Wallet Credit
+↓
+Wallet Transaction Ledger
+```
+
+Cancellation flow:
+
+```text
+Eligible Pre-Shipment Order
+↓
+Validate Shipment State
+↓
+Cancel Provider Shipment if Necessary
+↓
+Refund Wallet
+↓
+Restore Eligible Stock
+↓
+Create Wallet + Stock Audit Records
+↓
+Order Cancelled
+↓
+Payment Refunded
+```
+
+Arsitektur ini dirancang agar histori order, saldo, stock, voucher, address, preorder, dan shipment tetap dapat diaudit serta konsisten meskipun master data berubah di masa depan.

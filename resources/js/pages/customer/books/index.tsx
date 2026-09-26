@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { BookCard } from '@/components/customer/books/book-card';
 import { BookDetailDialog } from '@/components/customer/books/book-detail-dialog';
 import { BookFilters } from '@/components/customer/books/book-filters';
@@ -40,7 +41,7 @@ export default function BooksIndex({
     );
 
     const navigate = (next: CatalogFilters) => {
-        const payload: Record<string, unknown> = {
+        const payload: Record<string, string | string[]> = {
             search: next.search,
             availability: next.availability,
             sort: next.sort,
@@ -49,16 +50,12 @@ export default function BooksIndex({
             payload.categories = next.categories;
         }
 
-        router.get(
-            '/books',
-            payload,
-            {
-                preserveScroll: true,
-                preserveState: true,
-                replace: true,
-                only: ['books', 'filters'],
-            },
-        );
+        router.get('/books', payload, {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+            only: ['books', 'filters'],
+        });
     };
 
     useEffect(() => setSearch(filters.search), [filters.search]);
@@ -85,22 +82,33 @@ export default function BooksIndex({
     return (
         <>
             <Head title="Katalog Buku" />
-            <section className="bg-background border-b py-10 sm:py-14">
-                <SectionContainer>
-                    <p className="text-primary text-xs font-bold tracking-[.24em] uppercase">
-                        Wonderbook
-                    </p>
-                    <h1 className="font-heading text-foreground mt-3 text-4xl font-semibold sm:text-5xl">
-                        Katalog Buku
-                    </h1>
-                    <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
-                        Temukan ribuan buku inspiratif pilihan untuk menemani perjalanan
-                        membaca dan berkembang.
-                    </p>
+            <section className="bg-secondary/35 border-primary/10 overflow-hidden border-b">
+                <SectionContainer className="grid items-center gap-3 py-8 sm:py-10 md:grid-cols-[1fr_.9fr]">
+                    <div>
+                        <p className="text-primary inline-flex items-center gap-2 text-xs font-bold tracking-[.24em] uppercase">
+                            <Sparkles
+                                className="text-warning size-4"
+                                aria-hidden="true"
+                            />
+                            Wonderbook
+                        </p>
+                        <h1 className="font-heading text-foreground mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+                            Katalog Buku
+                        </h1>
+                        <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
+                            Temukan ribuan buku inspiratif pilihan untuk
+                            menemani perjalanan membaca dan berkembang.
+                        </p>
+                    </div>
+                    <img
+                        src="/dashboard-image/pesanan.png"
+                        alt="Anak membaca buku dengan gembira"
+                        className="hidden max-h-64 w-full object-contain md:block"
+                    />
                 </SectionContainer>
             </section>
-            <SectionContainer className="py-8 sm:py-12">
-                <div className="grid items-start gap-8 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
+            <SectionContainer className="py-8 sm:py-10">
+                <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
                     <BookFilters
                         categories={categories}
                         filters={filters}
@@ -111,7 +119,14 @@ export default function BooksIndex({
                     />
 
                     <div className="min-w-0">
-                        <div className="flex items-center justify-between border-b pb-3">
+                        <div className="border-primary/10 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+                            <h2 className="font-heading text-foreground flex items-center gap-2 text-xl font-bold sm:text-2xl">
+                                <Sparkles
+                                    className="text-warning size-5"
+                                    aria-hidden="true"
+                                />
+                                Temukan Bacaanmu
+                            </h2>
                             <p className="text-muted-foreground text-xs font-medium">
                                 Menampilkan{' '}
                                 <span className="text-foreground font-semibold">
@@ -121,7 +136,7 @@ export default function BooksIndex({
                             </p>
                         </div>
                         {books.data.length > 0 ? (
-                            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 lg:gap-4">
+                            <div className="mt-5 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
                                 {books.data.map((book) => (
                                     <BookCard
                                         key={book.id}

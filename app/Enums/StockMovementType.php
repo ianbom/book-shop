@@ -9,4 +9,5 @@ enum StockMovementType: string
     case AdjustmentOut = 'adjustment_out';
     case Order = 'order';
     case Cancellation = 'cancellation';
+    case PreorderFulfillment = 'preorder_fulfillment';
 }

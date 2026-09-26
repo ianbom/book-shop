@@ -13,9 +13,18 @@ type FormData = {
     title: string;
     slug: string;
     isbn: string;
+    sku: string;
     author: string;
     description: string;
     price: string;
+    shipping_category: string;
+    weight: string;
+    height: string;
+    length: string;
+    width: string;
+    sale_type: Book['sale_type'];
+    preorder_estimated_date: string;
+    preorder_note: string;
     initial_stock: number;
     category_ids: number[];
     is_active: boolean;
@@ -35,9 +44,18 @@ export function BookForm({
         title: book?.title ?? '',
         slug: book?.slug ?? '',
         isbn: book?.isbn ?? '',
+        sku: book?.sku ?? '',
         author: book?.author ?? '',
         description: book?.description ?? '',
         price: book?.price ?? '',
+        shipping_category: book?.shipping_category ?? 'others',
+        weight: book ? String(book.weight) : '',
+        height: book?.height ?? '',
+        length: book?.length ?? '',
+        width: book?.width ?? '',
+        sale_type: book?.sale_type ?? 'ready_stock',
+        preorder_estimated_date: book?.preorder_estimated_date ?? '',
+        preorder_note: book?.preorder_note ?? '',
         initial_stock: 0,
         category_ids: book?.categories?.map((category) => category.id) ?? [],
         is_active: book?.is_active ?? true,
@@ -75,6 +93,7 @@ export function BookForm({
                         <Label htmlFor="title">Judul</Label>
                         <Input
                             id="title"
+                            maxLength={255}
                             value={form.data.title}
                             onChange={(e) => {
                                 if (!touched.current)
@@ -102,6 +121,7 @@ export function BookForm({
                         <Label htmlFor="slug">Slug</Label>
                         <Input
                             id="slug"
+                            maxLength={255}
                             value={form.data.slug}
                             onChange={(e) => {
                                 touched.current = true;
@@ -119,6 +139,7 @@ export function BookForm({
                         <Label htmlFor="author">Penulis</Label>
                         <Input
                             id="author"
+                            maxLength={200}
                             value={form.data.author}
                             onChange={(e) =>
                                 form.setData('author', e.target.value)
@@ -135,6 +156,7 @@ export function BookForm({
                         <Label htmlFor="isbn">ISBN</Label>
                         <Input
                             id="isbn"
+                            maxLength={50}
                             value={form.data.isbn}
                             onChange={(e) =>
                                 form.setData('isbn', e.target.value)
@@ -147,6 +169,7 @@ export function BookForm({
                             id="price"
                             type="number"
                             min="0"
+                            max="9999999999999.99"
                             step="0.01"
                             value={form.data.price}
                             onChange={(e) =>
@@ -157,6 +180,22 @@ export function BookForm({
                         {error('price') && (
                             <p className="text-destructive text-sm">
                                 {error('price')}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="sku">SKU</Label>
+                        <Input
+                            id="sku"
+                            maxLength={100}
+                            value={form.data.sku}
+                            onChange={(event) =>
+                                form.setData('sku', event.target.value)
+                            }
+                        />
+                        {error('sku') && (
+                            <p className="text-destructive text-sm">
+                                {error('sku')}
                             </p>
                         )}
                     </div>
@@ -178,6 +217,7 @@ export function BookForm({
                                 id="initial_stock"
                                 type="number"
                                 min="0"
+                                max="2147483647"
                                 value={form.data.initial_stock}
                                 onChange={(e) =>
                                     form.setData(
@@ -198,6 +238,160 @@ export function BookForm({
                         />
                         Buku aktif dan tampil di katalog
                     </label>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Pengiriman dan Penjualan</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-5 md:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="shipping_category">
+                            Kategori Pengiriman
+                        </Label>
+                        <Input
+                            id="shipping_category"
+                            maxLength={50}
+                            value={form.data.shipping_category}
+                            onChange={(event) =>
+                                form.setData(
+                                    'shipping_category',
+                                    event.target.value,
+                                )
+                            }
+                            required
+                        />
+                        {error('shipping_category') && (
+                            <p className="text-destructive text-sm">
+                                {error('shipping_category')}
+                            </p>
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="weight">Berat (gram)</Label>
+                        <Input
+                            id="weight"
+                            type="number"
+                            min="1"
+                            max="2147483647"
+                            step="1"
+                            value={form.data.weight}
+                            onChange={(event) =>
+                                form.setData('weight', event.target.value)
+                            }
+                            required
+                        />
+                        {error('weight') && (
+                            <p className="text-destructive text-sm">
+                                {error('weight')}
+                            </p>
+                        )}
+                    </div>
+                    {(
+                        [
+                            { key: 'height', label: 'Tinggi (cm)' },
+                            { key: 'length', label: 'Panjang (cm)' },
+                            { key: 'width', label: 'Lebar (cm)' },
+                        ] as const
+                    ).map((field) => (
+                        <div key={field.key} className="grid gap-2">
+                            <Label htmlFor={field.key}>{field.label}</Label>
+                            <Input
+                                id={field.key}
+                                type="number"
+                                min="0"
+                                max="999999.99"
+                                step="0.01"
+                                value={form.data[field.key]}
+                                onChange={(event) =>
+                                    form.setData(field.key, event.target.value)
+                                }
+                            />
+                            {error(field.key) && (
+                                <p className="text-destructive text-sm">
+                                    {error(field.key)}
+                                </p>
+                            )}
+                        </div>
+                    ))}
+                    <div className="grid gap-2">
+                        <Label htmlFor="sale_type">Tipe Penjualan</Label>
+                        <select
+                            id="sale_type"
+                            value={form.data.sale_type}
+                            onChange={(event) => {
+                                const saleType = event.target
+                                    .value as Book['sale_type'];
+                                form.setData({
+                                    ...form.data,
+                                    sale_type: saleType,
+                                    ...(saleType === 'ready_stock'
+                                        ? {
+                                              preorder_estimated_date: '',
+                                              preorder_note: '',
+                                          }
+                                        : {}),
+                                });
+                            }}
+                            className="border-input bg-background focus:border-ring focus:ring-ring/20 h-10 rounded-md border px-3 text-sm outline-none focus:ring-4"
+                            required
+                        >
+                            <option value="ready_stock">Ready Stock</option>
+                            <option value="preorder">Preorder</option>
+                        </select>
+                        {error('sale_type') && (
+                            <p className="text-destructive text-sm">
+                                {error('sale_type')}
+                            </p>
+                        )}
+                    </div>
+                    {form.data.sale_type === 'preorder' && (
+                        <>
+                            <div className="grid gap-2">
+                                <Label htmlFor="preorder_estimated_date">
+                                    Tanggal Estimasi Preorder
+                                </Label>
+                                <Input
+                                    id="preorder_estimated_date"
+                                    type="date"
+                                    value={form.data.preorder_estimated_date}
+                                    onChange={(event) =>
+                                        form.setData(
+                                            'preorder_estimated_date',
+                                            event.target.value,
+                                        )
+                                    }
+                                    required
+                                />
+                                {error('preorder_estimated_date') && (
+                                    <p className="text-destructive text-sm">
+                                        {error('preorder_estimated_date')}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="grid gap-2 md:col-span-2">
+                                <Label htmlFor="preorder_note">
+                                    Catatan Preorder
+                                </Label>
+                                <Textarea
+                                    id="preorder_note"
+                                    value={form.data.preorder_note}
+                                    onChange={(event) =>
+                                        form.setData(
+                                            'preorder_note',
+                                            event.target.value,
+                                        )
+                                    }
+                                    rows={3}
+                                />
+                                {error('preorder_note') && (
+                                    <p className="text-destructive text-sm">
+                                        {error('preorder_note')}
+                                    </p>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
             <Card>

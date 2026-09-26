@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,12 +43,13 @@ class EmailVerificationTest extends TestCase
             ['id' => $user->id, 'hash' => sha1($user->email)],
         );
 
-        $response = $this->actingAs($user)->get($verificationUrl);
+        $response = $this->actingAs($user)->withSession(['url.intended' => '/admin'])->get($verificationUrl);
 
         Event::assertDispatched(Verified::class);
 
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        $response->assertRedirect(route('admin.dashboard', absolute: false).'?verified=1');
+        $response->assertRedirect(route('home').'?verified=1');
+        $response->assertSessionMissing('url.intended');
     }
 
     public function test_email_is_not_verified_with_invalid_hash()
@@ -88,7 +90,7 @@ class EmailVerificationTest extends TestCase
 
     public function test_verified_user_is_redirected_to_dashboard_from_verification_prompt(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Admin]);
 
         Event::fake();
 
@@ -98,9 +100,17 @@ class EmailVerificationTest extends TestCase
         $response->assertRedirect(route('admin.dashboard', absolute: false));
     }
 
-    public function test_already_verified_user_visiting_verification_link_is_redirected_without_firing_event_again(): void
+    public function test_verified_customer_is_redirected_to_store_from_verification_prompt(): void
     {
         $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('verification.notice'))
+            ->assertRedirect(route('home'));
+    }
+
+    public function test_already_verified_user_visiting_verification_link_is_redirected_without_firing_event_again(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Admin]);
 
         Event::fake();
 

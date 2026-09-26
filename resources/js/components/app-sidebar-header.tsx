@@ -33,10 +33,6 @@ export function AppSidebarHeader({
                 />
             </form>
             <div className="ml-auto flex items-center gap-3 sm:gap-5">
-                <Button variant="ghost" size="icon" className="text-primary relative" aria-label="Notifikasi">
-                    <Bell className="size-5" />
-                    <span className="bg-destructive text-destructive-foreground absolute top-1 right-1 flex size-4 items-center justify-center rounded-full text-[9px] font-bold">3</span>
-                </Button>
                 {user && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

@@ -2,12 +2,16 @@ import { Link } from '@inertiajs/react';
 import {
     BookOpen,
     Boxes,
+    CreditCard,
     History,
     LayoutDashboard,
+    PackageCheck,
     Settings2,
     ShoppingBag,
     Tags,
-    Warehouse,
+    TicketPercent,
+    Users,
+    Wallet,
 } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import {
@@ -31,7 +35,6 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Katalog',
         href: admin.books.index(),
-        icon: BookOpen,
         children: [
             { title: 'Buku', href: admin.books.index(), icon: BookOpen },
             { title: 'Kategori', href: admin.categories.index(), icon: Tags },
@@ -43,9 +46,35 @@ const mainNavItems: NavItem[] = [
         icon: ShoppingBag,
     },
     {
+        title: 'Pengiriman',
+        href: admin.shipments.index(),
+        children: [
+            { title: 'Shipment', href: admin.shipments.index(), icon: PackageCheck },
+        ],
+    },
+    {
+        title: 'Customer',
+        href: admin.customers.index(),
+        icon: Users,
+    },
+    {
+        title: 'Wallet',
+        href: admin.topUps.index(),
+        children: [
+            { title: 'Permintaan Top-up', href: admin.topUps.index(), icon: CreditCard },
+            { title: 'Transaksi Wallet', href: admin.walletTransactions.index(), icon: Wallet },
+        ],
+    },
+    {
+        title: 'Promosi',
+        href: admin.vouchers.index(),
+        children: [
+            { title: 'Voucher', href: admin.vouchers.index(), icon: TicketPercent },
+        ],
+    },
+    {
         title: 'Inventaris',
         href: admin.inventory.index(),
-        icon: Warehouse,
         children: [
             {
                 title: 'Manajemen Stok',
@@ -75,7 +104,7 @@ export function AppSidebar() {
                         <SidebarMenuButton size="lg" className="h-auto rounded-xl p-0 hover:bg-transparent group-data-[collapsible=icon]:size-10!" asChild>
                             <Link href={admin.dashboard()} prefetch>
                                 <img
-                                    src="/dashboard/header-sidebar.png"
+                                    src="/dashboard-image/header-sidebar.png"
                                     alt="Wonder Prince Library"
                                     className="h-28 w-full object-contain group-data-[collapsible=icon]:size-10"
                                 />
@@ -91,7 +120,7 @@ export function AppSidebar() {
 
             <SidebarFooter className="mx-3 mb-2 overflow-hidden p-0 group-data-[collapsible=icon]:hidden">
                 <img
-                    src="/dashboard/footer-sidebar.png"
+                    src="/dashboard-image/footer-sidebar.png"
                     alt="Good books, brighter days, happier kids"
                     className="h-28 w-full object-contain"
                 />

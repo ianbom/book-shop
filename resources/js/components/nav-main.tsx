@@ -20,21 +20,16 @@ export function NavMain({ items }: { items: NavItem[] }) {
                     <SidebarMenuItem key={item.title}>
                         {item.children ? (
                             <div className="space-y-1 py-1">
-                                <div className="text-sidebar-foreground/65 flex items-center gap-3 px-3 py-2 text-xs font-semibold tracking-wide group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-                                    {item.icon && (
-                                        <item.icon className="size-4" />
-                                    )}
-                                    <span className="group-data-[collapsible=icon]:hidden">
-                                        {item.title}
-                                    </span>
-                                </div>
+                                <SidebarGroupLabel className="text-sidebar-foreground/55 px-3 font-semibold tracking-[0.14em] uppercase text-[10px]">
+                                    {item.title}
+                                </SidebarGroupLabel>
                                 {item.children.map((child) => (
                                     <SidebarMenuButton
                                         key={child.title}
                                         asChild
                                         isActive={isCurrentUrl(child.href)}
                                         tooltip={{ children: child.title }}
-                                        className="ml-3 h-10 rounded-xl px-3 text-[13px] group-data-[collapsible=icon]:ml-0"
+                                        className="h-10 rounded-xl px-3 text-[13px]"
                                     >
                                         <Link href={child.href} prefetch>
                                             {child.icon && <child.icon />}

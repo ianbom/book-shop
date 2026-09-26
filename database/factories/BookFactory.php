@@ -22,7 +22,10 @@ class BookFactory extends Factory
             'author' => fake()->name(),
             'description' => fake()->optional()->paragraph(),
             'price' => fake()->randomFloat(2, 25000, 300000),
+            'shipping_category' => 'others',
+            'weight' => 500,
             'stock' => fake()->numberBetween(0, 100),
+            'sale_type' => 'ready_stock',
             'is_active' => true,
         ];
     }

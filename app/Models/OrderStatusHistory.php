@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use Database\Factories\OrderStatusHistoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['order_id', 'status', 'changed_by', 'note'])]
+#[Fillable(['order_id', 'status', 'changed_by', 'note', 'created_at'])]
 class OrderStatusHistory extends Model
 {
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<OrderStatusHistoryFactory> */
+    use HasFactory;
 
     public $timestamps = false;
 

@@ -28,10 +28,10 @@ export default function AuthSplitLayout({
                 </Link>
                 <div className="text-primary-foreground absolute right-10 bottom-10 left-10 z-10 max-w-lg">
                     <p className="mb-4 text-xs font-semibold tracking-[0.24em] uppercase opacity-75">
-                        Ruang kerja admin
+                        Temukan cerita berikutnya
                     </p>
                     <p className="font-heading text-4xl leading-tight font-semibold">
-                        Kelola setiap cerita yang sampai ke pembaca.
+                        Cerita baru selalu menunggu untuk ditemukan.
                     </p>
                 </div>
             </div>

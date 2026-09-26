@@ -1,7 +1,16 @@
 import { FormEvent, useState } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { PageHeader } from '@/components/admin/shared/page-header';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import {
+    ChevronRight,
+    House,
+    Pencil,
+    Plus,
+    RotateCcw,
+    Search,
+    SlidersHorizontal,
+    Tags,
+    Trash2,
+} from 'lucide-react';
 import { Pagination } from '@/components/admin/shared/pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,19 +59,54 @@ export default function CategoriesIndex({ categories, filters }: Props) {
     return (
         <>
             <Head title="Kategori" />
-            <main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-                <PageHeader
-                    title="Kategori"
-                    description="Kelompokkan buku agar katalog mudah dijelajahi."
-                    actions={
-                        <Button onClick={() => open()}>
-                            <Plus className="mr-2 size-4" />
-                            Tambah Kategori
-                        </Button>
-                    }
-                />
-                <Card>
-                    <CardContent className="p-4">
+            <main className="mx-auto flex w-full max-w-[1560px] flex-1 flex-col gap-5 px-4 py-5 md:px-7 md:py-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <nav
+                        className="text-muted-foreground flex items-center gap-2 text-xs"
+                        aria-label="Breadcrumb"
+                    >
+                        <Link
+                            href={admin.dashboard()}
+                            className="hover:text-primary inline-flex items-center gap-1.5"
+                        >
+                            <House className="size-3.5" /> Dashboard
+                        </Link>
+                        <ChevronRight className="size-3.5" />
+                        <span className="text-foreground font-semibold">
+                            Kategori
+                        </span>
+                    </nav>
+                    <Button onClick={() => open()} size="sm">
+                        <Plus /> Tambah Kategori
+                    </Button>
+                </div>
+                <section className="bg-muted/60 relative overflow-hidden rounded-2xl border border-white/80 px-5 py-6 sm:px-7 sm:py-7">
+                    <div className="relative z-10 max-w-2xl">
+                        <div className="flex items-center gap-3">
+                            <span className="bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl shadow-sm">
+                                <Tags className="size-6" />
+                            </span>
+                            <div>
+                                <p className="text-primary text-xs font-bold tracking-[0.16em] uppercase">
+                                    Manajemen Toko
+                                </p>
+                                <h1 className="font-heading text-foreground text-4xl leading-none font-bold sm:text-5xl">
+                                    Kategori
+                                </h1>
+                            </div>
+                        </div>
+                        <p className="text-muted-foreground mt-4 max-w-xl text-sm leading-6">
+                            Kelompokkan buku agar katalog mudah dijelajahi.
+                        </p>
+                    </div>
+                    <img
+                        src="/dashboard-image/pesanan.png"
+                        alt=""
+                        className="pointer-events-none absolute right-0 bottom-0 hidden h-full max-w-[56%] object-contain object-right lg:block"
+                    />
+                </section>
+                <Card className="border-border/90 shadow-sm">
+                    <CardContent className="py-3 sm:py-1">
                         <form
                             onSubmit={(event) => {
                                 event.preventDefault();
@@ -76,45 +120,73 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                                     { preserveState: true, replace: true },
                                 );
                             }}
+                            className="grid gap-4 sm:grid-cols-[1fr_auto_auto] sm:items-end"
                         >
-                            <Input
-                                name="search"
-                                defaultValue={filters.search}
-                                placeholder="Cari kategori…"
-                            />
+                            <label className="text-foreground grid gap-2 text-xs font-bold">
+                                <span className="flex items-center gap-2">
+                                    <Search className="text-primary size-4" />{' '}
+                                    Nama Kategori
+                                </span>
+                                <div className="relative">
+                                    <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                                    <Input
+                                        name="search"
+                                        defaultValue={filters.search}
+                                        placeholder="Cari kategori..."
+                                        className="bg-background h-10 pl-9"
+                                    />
+                                </div>
+                            </label>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() =>
+                                    router.get(admin.categories.index())
+                                }
+                                className="h-10 px-4"
+                            >
+                                <RotateCcw /> Reset
+                            </Button>
+                            <Button type="submit" className="h-10 px-5">
+                                <SlidersHorizontal /> Terapkan Filter
+                            </Button>
                         </form>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-border/90 overflow-hidden shadow-sm">
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
-                                <thead className="text-muted-foreground bg-muted border-b text-xs uppercase">
+                                <thead className="bg-muted/85 text-muted-foreground border-b text-xs font-semibold">
                                     <tr>
-                                        <th className="px-5 py-3">Nama</th>
-                                        <th className="px-5 py-3">Slug</th>
-                                        <th className="px-5 py-3">
+                                        <th className="px-4 py-4">Nama</th>
+                                        <th className="px-4 py-4">Slug</th>
+                                        <th className="px-4 py-4">
                                             Jumlah Buku
                                         </th>
-                                        <th className="px-5 py-3" />
+                                        <th className="px-4 py-4" />
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y">
+                                <tbody className="divide-border/80 divide-y bg-white">
                                     {categories.data.map((category) => (
-                                        <tr key={category.id}>
-                                            <td className="px-5 py-4 font-medium">
+                                        <tr
+                                            key={category.id}
+                                            className="hover:bg-muted/45 transition-colors"
+                                        >
+                                            <td className="px-4 py-3.5 font-medium">
                                                 {category.name}
                                             </td>
-                                            <td className="text-muted-foreground px-5 py-4">
+                                            <td className="text-muted-foreground px-4 py-3.5">
                                                 {category.slug}
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-4 py-3.5">
                                                 {category.books_count ?? 0}
                                             </td>
-                                            <td className="px-5 py-4 text-right">
+                                            <td className="px-4 py-3.5 text-right">
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
+                                                    aria-label={`Edit kategori ${category.name}`}
                                                     onClick={() =>
                                                         open(category)
                                                     }
@@ -124,6 +196,7 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
+                                                    aria-label={`Hapus kategori ${category.name}`}
                                                     onClick={() => {
                                                         if (
                                                             confirm(
@@ -148,8 +221,20 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="border-t p-4">
-                            <Pagination links={categories.meta.links} />
+                        {categories.data.length === 0 && (
+                            <p className="text-muted-foreground p-10 text-center text-sm">
+                                Kategori tidak ditemukan.
+                            </p>
+                        )}
+                        <div className="border-t bg-white px-4 py-4 sm:px-5">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-muted-foreground text-xs">
+                                    Menampilkan {categories.meta.from ?? 0}–
+                                    {categories.meta.to ?? 0} dari{' '}
+                                    {categories.meta.total} kategori
+                                </p>
+                                <Pagination links={categories.meta.links} />
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

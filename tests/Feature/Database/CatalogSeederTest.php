@@ -37,6 +37,9 @@ class CatalogSeederTest extends TestCase
             'title' => 'The World Without You',
             'author' => 'Joshua Henkin',
             'isbn' => null,
+            'shipping_category' => 'others',
+            'weight' => 500,
+            'sale_type' => 'ready_stock',
         ]);
         $this->assertDatabaseHas('book_images', [
             'image_path' => 'books/the-world-without-you/cover.jpeg',

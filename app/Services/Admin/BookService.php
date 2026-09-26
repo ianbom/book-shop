@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\BookSaleType;
 use App\Models\Book;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -27,6 +28,10 @@ class BookService
         $primaryImageIndex = Arr::pull($data, 'primary_image_index');
         $initialStock = (int) Arr::pull($data, 'initial_stock');
         $data['stock'] = $initialStock;
+        if ($data['sale_type'] === BookSaleType::ReadyStock->value) {
+            $data['preorder_estimated_date'] = null;
+            $data['preorder_note'] = null;
+        }
 
         return DB::transaction(function () use ($data, $categoryIds, $images, $altTexts, $primaryImageIndex, $initialStock, $admin): Book {
             $book = Book::create($data);
@@ -43,6 +48,10 @@ class BookService
     {
         /** @var array<int, int> $categoryIds */
         $categoryIds = Arr::pull($data, 'category_ids', []);
+        if ($data['sale_type'] === BookSaleType::ReadyStock->value) {
+            $data['preorder_estimated_date'] = null;
+            $data['preorder_note'] = null;
+        }
 
         return DB::transaction(function () use ($book, $data, $categoryIds): Book {
             $book->update($data);

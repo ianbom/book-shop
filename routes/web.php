@@ -3,15 +3,21 @@
 use App\Http\Controllers\Admin\BookController;
 use App\Http\Controllers\Admin\BookImageController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentProofController;
+use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\StoreSettingController;
+use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Admin\WalletTopupController;
+use App\Http\Controllers\Admin\WalletTransactionController;
 use App\Http\Controllers\Customer\BookController as CustomerBookController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\OrderTrackingController;
+use App\Http\Middleware\EnsureAdminRole;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -23,7 +29,7 @@ Route::get('track-order/{orderCode}', [OrderTrackingController::class, 'show'])-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('dashboard', '/admin')->name('dashboard');
 
-    Route::prefix('admin')->as('admin.')->group(function () {
+    Route::prefix('admin')->as('admin.')->middleware(EnsureAdminRole::class)->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::resource('books', BookController::class);
         Route::patch('books/{book}/status', [BookController::class, 'updateStatus'])->name('books.status');
@@ -38,6 +44,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+        Route::get('top-ups', [WalletTopupController::class, 'index'])->name('top-ups.index');
+        Route::get('wallet-transactions', [WalletTransactionController::class, 'index'])->name('wallet-transactions.index');
+        Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');

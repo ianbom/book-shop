@@ -6,5 +6,6 @@ enum PaymentStatus: string
 {
     case Unpaid = 'unpaid';
     case Paid = 'paid';
-    case Rejected = 'rejected';
+    case PartiallyRefunded = 'partially_refunded';
+    case Refunded = 'refunded';
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources\Admin;
 
+use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/** @mixin Book */
 class BookResource extends JsonResource
 {
     /**
@@ -20,10 +22,19 @@ class BookResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'isbn' => $this->isbn,
+            'sku' => $this->sku,
             'author' => $this->author,
             'description' => $this->description,
             'price' => $this->price,
+            'shipping_category' => $this->shipping_category,
+            'weight' => $this->weight,
+            'height' => $this->height,
+            'length' => $this->length,
+            'width' => $this->width,
             'stock' => $this->stock,
+            'sale_type' => $this->sale_type->value,
+            'preorder_estimated_date' => $this->preorder_estimated_date?->format('Y-m-d'),
+            'preorder_note' => $this->preorder_note,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

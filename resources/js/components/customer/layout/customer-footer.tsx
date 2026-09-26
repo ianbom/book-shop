@@ -22,7 +22,7 @@ export function CustomerFooter({ storeSettings }: { storeSettings?: CustomerStor
             <SectionContainer className="grid gap-8 py-8 sm:grid-cols-2 lg:grid-cols-[1.35fr_1fr_1fr_1.2fr_1.2fr] lg:gap-6">
                 <div>
                     <Link href="/" className="flex items-center gap-2.5">
-                        <span className="bg-secondary text-primary grid size-11 place-items-center rounded-xl"><img src="/dashboard/header-sidebar.png" alt="" className="size-full rounded-xl object-cover object-top" /></span>
+                        <span className="bg-secondary text-primary grid size-11 place-items-center rounded-xl"><img src="/dashboard-image/header-sidebar.png" alt="" className="size-full rounded-xl object-cover object-top" /></span>
                         <span><span className="font-heading block text-xl font-bold">WonderBookLibrary</span><span className="text-muted-foreground block text-[10px]">Little Books, Big Dreams</span></span>
                     </Link>
                     <p className="text-muted-foreground mt-3 max-w-[14rem] text-xs leading-5">Menemani setiap cerita dan petualangan kecil lewat buku pilihan.</p>
@@ -46,11 +46,6 @@ export function CustomerFooter({ storeSettings }: { storeSettings?: CustomerStor
                             <span key={index} aria-hidden="true" className="border-border grid size-8 place-items-center rounded-md border"><Icon className="size-4" /></span>
                         ))}
                     </div>
-                </div>
-                <div>
-                    <h2 className="mb-3 text-xs font-bold">Hubungi Kami</h2>
-                    <a href={`https://wa.me/${whatsapp}`} className="text-muted-foreground flex items-center gap-2 text-[11px] hover:text-primary"><span className="bg-success grid size-6 place-items-center rounded-full text-white">W</span>WhatsApp</a>
-                    {store.email && <a href={`mailto:${store.email}`} className="text-muted-foreground mt-2 block text-[11px] hover:text-primary">{store.email}</a>}
                 </div>
             </SectionContainer>
             <div className="border-border border-t">

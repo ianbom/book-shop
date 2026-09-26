@@ -18,7 +18,7 @@ class StoreSettingController extends Controller
 
     public function edit(Request $request): Response
     {
-        $setting = StoreSetting::withTrashed()->find(1);
+        $setting = StoreSetting::query()->find(1);
 
         return Inertia::render('admin/settings/index', [
             'setting' => $setting ? (new StoreSettingResource($setting))->resolve($request) : null,

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -28,14 +29,15 @@ class AdminUserSeeder extends Seeder
             throw new RuntimeException('ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD must be configured together.');
         }
 
-        User::withTrashed()->updateOrCreate(
+        $admin = User::withTrashed()->updateOrCreate(
             ['email' => $values['email']],
             [
                 'name' => $values['name'],
                 'password' => Hash::make($values['password']),
                 'email_verified_at' => now(),
-                'deleted_at' => null,
             ],
         );
+
+        $admin->forceFill(['role' => UserRole::Admin, 'deleted_at' => null])->save();
     }
 }

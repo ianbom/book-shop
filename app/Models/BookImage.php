@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\BookImageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['book_id', 'image_path', 'alt_text', 'sort_order', 'is_primary'])]
 class BookImage extends Model
 {
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<BookImageFactory> */
+    use HasFactory;
 
     protected $attributes = [
         'sort_order' => 0,

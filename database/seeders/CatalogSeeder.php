@@ -45,7 +45,7 @@ class CatalogSeeder extends Seeder
     }
 
     /**
-     * @param  array{title: string, slug: string, isbn: null, author: string, description: string, price: int, stock: int, is_active: bool, genres: list<string>, image_file: string}  $data
+     * @param  array{title: string, slug: string, isbn: null, author: string, description: string, price: int, shipping_category: string, weight: int, stock: int, sale_type: string, is_active: bool, genres: list<string>, image_file: string}  $data
      * @param  array<string, Category>  $categories
      */
     private function book(array $data, array $categories): void
@@ -107,7 +107,7 @@ class CatalogSeeder extends Seeder
     }
 
     /**
-     * @return list<array{title: string, slug: string, isbn: null, author: string, description: string, price: int, stock: int, is_active: bool, genres: list<string>, image_file: string}>
+     * @return list<array{title: string, slug: string, isbn: null, author: string, description: string, price: int, shipping_category: string, weight: int, stock: int, sale_type: string, is_active: bool, genres: list<string>, image_file: string}>
      */
     private function books(): array
     {
@@ -149,7 +149,10 @@ class CatalogSeeder extends Seeder
                 'author' => $author,
                 'description' => "Koleksi {$title} karya {$author}.",
                 'price' => 79000 + ($index * 3000),
+                'shipping_category' => 'others',
+                'weight' => 500,
                 'stock' => 10 + ($index % 11),
+                'sale_type' => 'ready_stock',
                 'is_active' => true,
                 'genres' => $genres,
                 'image_file' => "boks/{$imageFile}",

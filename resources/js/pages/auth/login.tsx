@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import PasskeyVerify from '@/components/passkey-verify';
+import { register } from '@/routes';
 
 type Props = {
     status?: string;
@@ -19,9 +19,7 @@ type Props = {
 export default function Login({ status, canResetPassword }: Props) {
     return (
         <>
-            <Head title="Masuk Admin" />
-
-            {/* <PasskeyVerify /> */}
+            <Head title="Masuk" />
 
             <Form
                 {...store.form()}
@@ -41,7 +39,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="admin@bukuorder.id"
+                                    placeholder="nama@email.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -94,6 +92,11 @@ export default function Login({ status, canResetPassword }: Props) {
                 )}
             </Form>
 
+            <p className="text-muted-foreground text-center text-sm">
+                Belum punya akun?{' '}
+                <TextLink href={register()}>Daftar sekarang</TextLink>
+            </p>
+
             {status && (
                 <div className="text-success mb-4 text-center text-sm font-medium">
                     {status}
@@ -105,5 +108,5 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Selamat datang kembali',
-    description: 'Masuk untuk mengelola katalog dan pesanan Wonder Book.',
+    description: 'Masuk untuk melanjutkan cerita bersama Wonder Book.',
 };

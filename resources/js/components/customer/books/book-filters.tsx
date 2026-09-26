@@ -48,10 +48,10 @@ export function BookFilters({
     };
 
     return (
-        <aside className="border-border bg-card flex flex-col gap-5 border p-5">
+        <aside className="border-border/80 bg-card flex flex-col gap-5 rounded-xl border p-5 shadow-sm">
             <div>
-                <div className="flex items-center justify-between border-b pb-3">
-                    <h2 className="font-heading text-lg font-semibold tracking-tight">
+                <div className="border-primary/15 flex items-center justify-between border-b pb-3">
+                    <h2 className="font-heading text-lg font-bold tracking-tight">
                         Filter & Cari
                     </h2>
                     {active && (
@@ -59,7 +59,7 @@ export function BookFilters({
                             variant="ghost"
                             size="sm"
                             onClick={onReset}
-                            className="text-muted-foreground hover:text-foreground h-7 rounded-none px-2 text-xs"
+                            className="text-muted-foreground hover:text-foreground h-8 rounded-md px-2 text-xs"
                         >
                             <X className="size-3.5" /> Reset
                         </Button>
@@ -69,42 +69,51 @@ export function BookFilters({
 
             {/* Search */}
             <div className="space-y-2">
-                <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                <Label
+                    htmlFor="catalog-search"
+                    className="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
+                >
                     Cari Buku
                 </Label>
                 <div className="relative">
                     <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                     <Input
+                        id="catalog-search"
                         value={search}
                         onChange={(event) => onSearchChange(event.target.value)}
                         placeholder="Judul, penulis, ISBN..."
-                        className="border-border h-10 rounded-none pl-9 text-xs"
+                        className="border-border bg-background h-10 rounded-lg pl-9 text-sm"
                     />
                 </div>
             </div>
 
             {/* Sorting */}
             <div className="space-y-2">
-                <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                <Label
+                    htmlFor="catalog-sort"
+                    className="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
+                >
                     Urutkan
                 </Label>
                 <Select
                     value={filters.sort}
                     onValueChange={(value) =>
-                        onChange(
-                            'sort',
-                            value as CatalogFilters['sort'],
-                        )
+                        onChange('sort', value as CatalogFilters['sort'])
                     }
                 >
-                    <SelectTrigger className="w-full rounded-none text-xs">
+                    <SelectTrigger
+                        id="catalog-sort"
+                        className="bg-background w-full rounded-lg text-sm"
+                    >
                         <SelectValue placeholder="Urutkan" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-none">
+                    <SelectContent className="rounded-lg">
                         <SelectItem value="latest">Terbaru</SelectItem>
                         <SelectItem value="title_asc">Judul A-Z</SelectItem>
                         <SelectItem value="title_desc">Judul Z-A</SelectItem>
-                        <SelectItem value="price_asc">Harga Terendah</SelectItem>
+                        <SelectItem value="price_asc">
+                            Harga Terendah
+                        </SelectItem>
                         <SelectItem value="price_desc">
                             Harga Tertinggi
                         </SelectItem>
@@ -114,7 +123,10 @@ export function BookFilters({
 
             {/* Availability */}
             <div className="space-y-2">
-                <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                <Label
+                    htmlFor="catalog-availability"
+                    className="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
+                >
                     Ketersediaan
                 </Label>
                 <Select
@@ -128,10 +140,13 @@ export function BookFilters({
                         )
                     }
                 >
-                    <SelectTrigger className="w-full rounded-none text-xs">
+                    <SelectTrigger
+                        id="catalog-availability"
+                        className="bg-background w-full rounded-lg text-sm"
+                    >
                         <SelectValue placeholder="Ketersediaan" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-none">
+                    <SelectContent className="rounded-lg">
                         <SelectItem value="all">Semua Stok</SelectItem>
                         <SelectItem value="available">Tersedia</SelectItem>
                         <SelectItem value="out_of_stock">Stok Habis</SelectItem>
@@ -140,7 +155,7 @@ export function BookFilters({
             </div>
 
             {/* Categories Multi-Select Checkboxes */}
-            <div className="space-y-3 border-t pt-4">
+            <div className="border-primary/15 space-y-3 border-t pt-4">
                 <div className="flex items-center justify-between">
                     <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                         Kategori
@@ -159,14 +174,14 @@ export function BookFilters({
                         return (
                             <label
                                 key={category.id}
-                                className="hover:text-primary flex cursor-pointer items-center gap-2.5 text-xs select-none"
+                                className="hover:bg-secondary/50 flex min-h-9 cursor-pointer items-center gap-2.5 rounded-md px-2 text-xs select-none"
                             >
                                 <Checkbox
                                     checked={isChecked}
                                     onCheckedChange={() =>
                                         toggleCategory(category.slug)
                                     }
-                                    className="rounded-none"
+                                    className="rounded-sm"
                                 />
                                 <span
                                     className={

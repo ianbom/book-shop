@@ -38,10 +38,19 @@ export type Book = {
     title: string;
     slug: string;
     isbn: string | null;
+    sku: string | null;
     author: string;
     description: string | null;
     price: string;
+    shipping_category: string;
+    weight: number;
+    height: string | null;
+    length: string | null;
+    width: string | null;
     stock: number;
+    sale_type: 'ready_stock' | 'preorder';
+    preorder_estimated_date: string | null;
+    preorder_note: string | null;
     is_active: boolean;
     primary_image_url?: string | null;
     images?: BookImage[];
@@ -118,7 +127,102 @@ export type Order = {
 };
 export type StoreSetting = {
     id: number;
-    whatsapp_number: string;
+    store_name: string;
+    whatsapp_number: string | null;
     email: string | null;
+    phone: string | null;
     address: string | null;
+    couriers: string;
+    shipper_contact_name: string | null;
+    shipper_contact_phone: string | null;
+    shipper_contact_email: string | null;
+    shipper_organization: string | null;
+    origin_contact_name: string;
+    origin_contact_phone: string;
+    origin_contact_email: string | null;
+    origin_address: string;
+    origin_note: string | null;
+    origin_postal_code: string | null;
+    origin_area_id: string | null;
+    origin_location_id: string | null;
+    origin_latitude: string | null;
+    origin_longitude: string | null;
+};
+
+export type ShipmentStatus =
+    | 'pending'
+    | 'booked'
+    | 'pickup'
+    | 'in_transit'
+    | 'delivered'
+    | 'cancelled'
+    | 'failed';
+export type Shipment = {
+    id: number;
+    shipment_code: string;
+    order: { order_code: string | null; customer_name: string | null };
+    courier_company: string;
+    courier_type: string;
+    courier_service_name: string | null;
+    delivery_type: 'now' | 'scheduled';
+    price: string;
+    tracking_id: string | null;
+    waybill_id: string | null;
+    status: ShipmentStatus;
+    created_at: string | null;
+};
+export type TopupStatus = 'pending' | 'approved' | 'rejected';
+export type WalletTopup = {
+    id: number;
+    topup_code: string;
+    user: { name: string | null; email: string | null };
+    requested_amount: string;
+    credited_amount: string | null;
+    status: TopupStatus;
+    reviewer: string | null;
+    reviewed_at: string | null;
+    created_at: string | null;
+};
+export type WalletTransactionType =
+    | 'topup_credit'
+    | 'order_payment'
+    | 'order_refund'
+    | 'admin_adjustment_credit'
+    | 'admin_adjustment_debit';
+export type WalletTransaction = {
+    id: number;
+    user: { name: string | null; email: string | null };
+    order_code: string | null;
+    topup_code: string | null;
+    type: WalletTransactionType;
+    direction: 'credit' | 'debit';
+    amount: string;
+    balance_before: string;
+    balance_after: string;
+    note: string | null;
+    created_at: string | null;
+};
+export type VoucherStatus = 'active' | 'inactive' | 'scheduled' | 'expired';
+export type Voucher = {
+    id: number;
+    code: string;
+    name: string;
+    type: 'fixed' | 'percentage';
+    value: string;
+    usage_limit: number | null;
+    usages_count: number;
+    starts_at: string | null;
+    ends_at: string | null;
+    status: VoucherStatus;
+    created_at: string | null;
+};
+export type Customer = {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    orders_count: number;
+    wallet_balance: string;
+    email_verified_at: string | null;
+    created_at: string | null;
 };

@@ -3,10 +3,8 @@ import { Head, Link, router } from '@inertiajs/react';
 import {
     BookOpen,
     CalendarDays,
-    ChevronRight,
     CircleDollarSign,
     Eye,
-    House,
     Package,
     RotateCcw,
     Search,
@@ -14,6 +12,7 @@ import {
     Tag,
 } from 'lucide-react';
 import { Pagination } from '@/components/admin/shared/pagination';
+import { AdminListLayout } from '@/components/admin/shared/admin-list-layout';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -73,37 +72,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
     return (
         <>
             <Head title="Pesanan" />
-            <main className="mx-auto flex w-full max-w-[1560px] flex-1 flex-col gap-5 px-4 py-5 md:px-7 md:py-7">
-                <nav className="text-muted-foreground flex items-center gap-2 text-xs" aria-label="Breadcrumb">
-                    <Link href={admin.dashboard()} className="hover:text-primary inline-flex items-center gap-1.5">
-                        <House className="size-3.5" />
-                        Dashboard
-                    </Link>
-                    <ChevronRight className="size-3.5" />
-                    <span className="text-foreground font-semibold">Pesanan</span>
-                </nav>
-
-                <section className="bg-muted/60 relative overflow-hidden rounded-2xl border border-white/80 px-5 py-6 sm:px-7 sm:py-7">
-                    <div className="relative z-10 max-w-2xl">
-                        <div className="flex items-center gap-3">
-                            <span className="bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl shadow-sm">
-                                <BookOpen className="size-6" />
-                            </span>
-                            <div>
-                                <p className="text-primary text-xs font-bold tracking-[0.16em] uppercase">Manajemen Toko</p>
-                                <h1 className="font-heading text-4xl leading-none font-bold text-foreground sm:text-5xl">Pesanan</h1>
-                            </div>
-                        </div>
-                        <p className="text-muted-foreground mt-4 max-w-xl text-sm leading-6">
-                            Pantau pembayaran dan proses setiap pesanan pelanggan dengan cepat.
-                        </p>
-                    </div>
-                    <img
-                        src="/dashboard/pesanan.png"
-                        alt="Ilustrasi membaca buku"
-                        className="pointer-events-none absolute right-0 bottom-0 hidden h-full max-w-[56%] object-contain object-right lg:block"
-                    />
-                </section>
+            <AdminListLayout title="Pesanan" description="Pantau pembayaran dan proses setiap pesanan pelanggan dengan cepat." icon={BookOpen}>
 
                 <Card className="border-border/90 shadow-sm">
                     <CardContent className="py-3 sm:py-1">
@@ -231,7 +200,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                         </div>
                     </CardContent>
                 </Card>
-            </main>
+            </AdminListLayout>
         </>
     );
 }

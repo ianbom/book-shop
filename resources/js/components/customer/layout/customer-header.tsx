@@ -1,13 +1,11 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
 import {
-    BookOpen,
-    ChevronDown,
-    Heart,
     Menu,
     Search,
     ShoppingCart,
     Sparkles,
+    UserRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,12 +16,12 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { SectionContainer } from '@/components/customer/shared/section-container';
+import admin from '@/routes/admin';
+import { login } from '@/routes';
 
 const navigation = [
     { label: 'Beranda', href: '/' },
     { label: 'Katalog Buku', href: '/books' },
-    { label: 'Koleksi', href: '/#koleksi', hasMenu: true },
-    { label: 'Tentang Kami', href: '/#tentang-kami' },
     { label: 'Lacak Pesanan', href: '/track-order' },
 ];
 
@@ -47,6 +45,8 @@ function Brand({ logoSrc }: { logoSrc: string }) {
 export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
     const page = usePage();
     const currentPath = page.url.split('?')[0];
+    const user = page.props.auth.user;
+    const accountHref = user?.role === 'admin' ? admin.dashboard() : user ? '/' : login();
     const [search, setSearch] = useState('');
     const [open, setOpen] = useState(false);
 
@@ -77,7 +77,6 @@ export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
                         return (
                             <Link key={item.label} href={item.href} className={`relative inline-flex h-[66px] items-center gap-1 whitespace-nowrap transition-colors ${isActive ? 'text-primary after:absolute after:right-0 after:bottom-0 after:left-0 after:h-0.5 after:bg-primary' : 'hover:text-primary'}`}>
                                 {item.label}
-                                {item.hasMenu && <ChevronDown className="size-3" />}
                             </Link>
                         );
                     })}
@@ -87,10 +86,13 @@ export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
                     <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari judul buku, penulis, atau kategori..." aria-label="Cari buku" className="border-border bg-muted/60 focus:border-primary h-9 w-full rounded-full border pr-3 pl-9 text-[10px] outline-none transition focus:ring-2 focus:ring-primary/15" />
                 </form>
                 <div className="hidden items-center gap-1 sm:flex">
-                    <span aria-hidden="true" className="text-primary grid size-9 place-items-center"><Heart className="size-[18px]" /></span>
                     <span aria-hidden="true" className="text-primary relative grid size-9 place-items-center"><ShoppingCart className="size-[18px]" /><span className="bg-destructive absolute top-1 right-0 grid size-3 place-items-center rounded-full text-[8px] text-white">0</span></span>
                 </div>
-                <Link href="/books" className="bg-primary text-primary-foreground hover:bg-primary/90 hidden h-9 items-center justify-center rounded-full px-5 text-[11px] font-bold shadow-sm transition sm:inline-flex">Lihat Buku</Link>
+                {user ? (
+                    <Link href={accountHref} aria-label={user.role === 'admin' ? 'Dashboard admin' : 'Akun saya'} className="text-primary hover:bg-secondary focus-visible:ring-ring hidden size-9 items-center justify-center rounded-full transition focus-visible:ring-2 focus-visible:ring-offset-2 sm:inline-flex"><UserRound className="size-[18px]" /></Link>
+                ) : (
+                    <Link href={accountHref} className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring hidden h-9 items-center justify-center rounded-full px-5 text-[11px] font-bold shadow-sm transition focus-visible:ring-2 focus-visible:ring-offset-2 sm:inline-flex">Login</Link>
+                )}
                 <Sheet open={open} onOpenChange={setOpen}>
                     <SheetTrigger asChild>
                         <Button variant="outline" size="icon" className="ml-auto size-9 lg:hidden" aria-label="Buka navigasi"><Menu className="size-4" /></Button>
@@ -107,7 +109,7 @@ export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
                                 return <Link key={item.label} href={item.href} onClick={() => setOpen(false)} className={`rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${isActive ? 'bg-secondary text-primary' : 'text-foreground hover:bg-secondary'}`}>{item.label}</Link>;
                             })}
                         </nav>
-                        <Link href="/books" onClick={() => setOpen(false)} className="bg-primary text-primary-foreground flex h-10 items-center justify-center rounded-full text-sm font-semibold">Lihat Buku</Link>
+                        <Link href={accountHref} onClick={() => setOpen(false)} className="bg-primary text-primary-foreground flex h-10 items-center justify-center rounded-full text-sm font-semibold">{user ? user.role === 'admin' ? 'Dashboard admin' : 'Akun saya' : 'Login'}</Link>
                     </SheetContent>
                 </Sheet>
             </SectionContainer>
