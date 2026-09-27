@@ -1,4 +1,6 @@
-import { ShoppingBag } from 'lucide-react';
+import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { BookImageGallery } from '@/components/customer/books/book-image-gallery';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,18 +16,23 @@ import type { CustomerBook } from '@/types';
 interface BookDetailDialogProps {
     book: CustomerBook | null;
     onClose: () => void;
-    onBuy: (book: CustomerBook) => void;
 }
 
 export function BookDetailDialog({
     book,
     onClose,
-    onBuy,
 }: BookDetailDialogProps) {
+    const form = useForm({ book_id: book?.id ?? 0 });
+
+    useEffect(() => {
+        form.setData('book_id', book?.id ?? 0);
+        form.clearErrors();
+    }, [book?.id]);
+
     return (
         <Dialog
             open={Boolean(book)}
-            onOpenChange={(open) => !open && onClose()}
+            onOpenChange={(open) => !open && !form.processing && onClose()}
         >
             {book && (
                 <DialogContent className="w-[94vw] max-w-[94vw] sm:max-w-4xl md:max-w-5xl lg:max-w-6xl max-h-[90vh] overflow-hidden rounded-none border border-border p-0 shadow-2xl">
@@ -125,15 +132,13 @@ export function BookDetailDialog({
                             <div className="sticky bottom-0 -mx-4 mt-4 border-t border-border bg-background/95 px-4 pt-3 pb-1 backdrop-blur-xs sm:-mx-6 sm:px-6 md:static md:mx-0 md:border-t md:bg-transparent md:px-0 md:pt-4 md:pb-0 md:backdrop-blur-none">
                                 <Button
                                     size="lg"
-                                    disabled={book.stock <= 0}
-                                    onClick={() => {
-                                        onClose();
-                                        onBuy(book);
-                                    }}
+                                    disabled={book.stock <= 0 || form.processing}
+                                    onClick={() => form.post('/cart/items', { preserveScroll: true })}
                                     className="w-full rounded-none h-10 sm:h-11 text-xs font-bold uppercase tracking-wider"
                                 >
-                                    <ShoppingBag className="size-4" /> Beli Buku
+                                    <ShoppingCart className="size-4" /> {form.processing ? 'Menambahkan...' : 'Masukkan ke Keranjang'}
                                 </Button>
+                                {form.errors.book_id && <p role="alert" className="text-destructive mt-2 text-xs">{form.errors.book_id}</p>}
                             </div>
                         </div>
                     </div>

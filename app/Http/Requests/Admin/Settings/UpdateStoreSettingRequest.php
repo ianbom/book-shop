@@ -44,6 +44,11 @@ class UpdateStoreSettingRequest extends FormRequest
             'origin_location_id' => ['nullable', 'string', 'max:150'],
             'origin_latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'origin_longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'bank_accounts' => ['sometimes', 'array', 'max:10'],
+            'bank_accounts.*' => ['array:bank_name,account_holder,account_number'],
+            'bank_accounts.*.bank_name' => ['required', 'string', 'max:100'],
+            'bank_accounts.*.account_holder' => ['required', 'string', 'max:150'],
+            'bank_accounts.*.account_number' => ['required', 'string', 'regex:/^[0-9]{6,34}$/'],
         ];
     }
 

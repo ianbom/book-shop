@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\UpdateOrderShippingCostRequest;
 use App\Http\Requests\Admin\Orders\UpdateOrderStatusRequest;
 use App\Http\Requests\Admin\Orders\UpdatePaymentStatusRequest;
+use App\Http\Resources\Admin\OrderDetailResource;
 use App\Http\Resources\Admin\OrderResource;
 use App\Models\Order;
 use App\Services\Admin\OrderStatusService;
@@ -43,13 +44,17 @@ class OrderController extends Controller
     public function show(Request $request, Order $order): Response
     {
         $order->load([
-            'book',
-            'paymentProofs.uploadedBy',
-            'statusHistories' => fn ($query) => $query->with('changedBy')->oldest(),
-            'stockMovements' => fn ($query) => $query->with(['book', 'order', 'changedBy'])->latest(),
+            'user', 'items', 'shippingAddress', 'voucher', 'voucherUsage',
+            'walletTransactions' => fn ($query) => $query->oldest(),
+            'statusHistories.changedBy',
+            'stockMovements.book', 'stockMovements.changedBy',
+            'shipments.items.orderItem',
+            'shipments.statusHistories' => fn ($query) => $query->orderBy('occurred_at')->orderBy('created_at'),
         ]);
 
-        return Inertia::render('admin/orders/show', ['order' => (new OrderResource($order))->resolve($request)]);
+        return Inertia::render('admin/orders/show', [
+            'order' => (new OrderDetailResource($order))->resolve($request),
+        ]);
     }
 
     public function updateStatus(UpdateOrderStatusRequest $request, Order $order): RedirectResponse

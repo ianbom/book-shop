@@ -22,6 +22,8 @@ class WalletTopupResource extends JsonResource
             ]),
             'requested_amount' => $this->requested_amount,
             'credited_amount' => $this->credited_amount,
+            'admin_note' => $this->admin_note,
+            'proof_url' => route('admin.top-ups.proof', $this->id),
             'status' => (string) $this->getRawOriginal('status'),
             'reviewer' => $this->whenLoaded('reviewer', fn () => $this->reviewer?->name),
             'reviewed_at' => $this->getRawOriginal('reviewed_at') === null

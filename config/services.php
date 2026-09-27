@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'biteship' => [
+        'key' => env('BITESHIP_API_KEY'),
+        'webhook_secret' => env('BITESHIP_WEBHOOK_SECRET'),
+    ],
+
+    'nominatim' => [
+        'user_agent' => env('NOMINATIM_USER_AGENT'),
+    ],
+
 ];

@@ -21,4 +21,5 @@ return [
     'origin_location_id' => env('STORE_ORIGIN_LOCATION_ID'),
     'origin_latitude' => env('STORE_ORIGIN_LATITUDE'),
     'origin_longitude' => env('STORE_ORIGIN_LONGITUDE'),
+    'bank_accounts' => json_decode(env('STORE_BANK_ACCOUNTS', '[]'), true),
 ];

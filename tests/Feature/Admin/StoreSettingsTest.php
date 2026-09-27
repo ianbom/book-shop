@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\StoreSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -36,6 +37,35 @@ class StoreSettingsTest extends TestCase
 
         $this->assertDatabaseCount('store_settings', 1);
         $this->assertDatabaseHas('store_settings', $this->settings());
+    }
+
+    public function test_admin_can_create_and_edit_bank_accounts(): void
+    {
+        $this->actingAs($this->admin());
+        $account = ['bank_name' => 'BCA', 'account_holder' => 'Toko Buku', 'account_number' => '0012345678'];
+
+        $this->patch(route('admin.settings.update'), [...$this->settings(), 'bank_accounts' => [$account]])
+            ->assertSessionHasNoErrors();
+
+        $setting = StoreSetting::query()->findOrFail(1);
+        $this->assertSame([$account], $setting->bank_accounts);
+        $this->get(route('admin.settings.edit'))
+            ->assertInertia(fn (Assert $page) => $page->where('setting.bank_accounts.0.account_number', '0012345678'));
+
+        $account['account_number'] = '0098765432';
+        $this->patch(route('admin.settings.update'), [...$this->settings(), 'bank_accounts' => [$account]])
+            ->assertSessionHasNoErrors();
+        $this->assertSame([$account], $setting->fresh()->bank_accounts);
+    }
+
+    public function test_bank_account_fields_are_required_and_account_number_stays_numeric_text(): void
+    {
+        $this->actingAs($this->admin())
+            ->patch(route('admin.settings.update'), [...$this->settings(), 'bank_accounts' => [[
+                'bank_name' => '', 'account_holder' => 'Toko Buku', 'account_number' => '12a',
+            ]]])
+            ->assertSessionHasErrors(['bank_accounts.0.bank_name', 'bank_accounts.0.account_number']);
+        $this->assertDatabaseCount('store_settings', 0);
     }
 
     public function test_admin_can_create_settings_and_clear_optional_fields(): void
@@ -92,6 +122,80 @@ class StoreSettingsTest extends TestCase
         $this->get(route('admin.settings.edit'))->assertForbidden();
         $this->patch(route('admin.settings.update'), $this->settings())->assertForbidden();
         $this->assertDatabaseCount('store_settings', 0);
+    }
+
+    public function test_admin_can_lookup_origin_areas_by_postal_code(): void
+    {
+        config(['services.biteship.key' => 'test-key']);
+        Http::fake([
+            'api.biteship.com/v1/maps/areas*' => Http::response([
+                'success' => true,
+                'areas' => [[
+                    'id' => 'area-123',
+                    'postal_code' => '61257',
+                    'administrative_division_level_1_name' => 'Jawa Timur',
+                    'administrative_division_level_2_name' => 'Sidoarjo',
+                    'administrative_division_level_3_name' => 'Waru',
+                ]],
+            ]),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->getJson(route('admin.settings.address.areas', ['postal_code' => '61257']))
+            ->assertOk()
+            ->assertExactJson(['areas' => [[
+                'id' => 'area-123',
+                'postal_code' => '61257',
+                'province' => 'Jawa Timur',
+                'city' => 'Sidoarjo',
+                'district' => 'Waru',
+            ]]]);
+    }
+
+    public function test_customer_cannot_lookup_admin_origin_areas(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->getJson(route('admin.settings.address.areas', ['postal_code' => '61257']))
+            ->assertForbidden();
+    }
+
+    public function test_admin_origin_area_lookup_requires_a_five_digit_postal_code(): void
+    {
+        $this->actingAs($this->admin())
+            ->getJson(route('admin.settings.address.areas', ['postal_code' => '6125']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('postal_code');
+    }
+
+    public function test_admin_can_lookup_origin_map_center_for_a_matching_area(): void
+    {
+        config([
+            'services.biteship.key' => 'test-key',
+            'services.nominatim.user_agent' => 'book-shop-tests',
+        ]);
+        Http::fake([
+            'api.biteship.com/v1/maps/areas*' => Http::response([
+                'success' => true,
+                'areas' => [[
+                    'id' => 'area-123',
+                    'postal_code' => '61257',
+                    'administrative_division_level_1_name' => 'Jawa Timur',
+                    'administrative_division_level_2_name' => 'Sidoarjo',
+                    'administrative_division_level_3_name' => 'Waru',
+                ]],
+            ]),
+            'nominatim.openstreetmap.org/search*' => Http::response([
+                ['lat' => '-7.35', 'lon' => '112.72'],
+            ]),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->getJson(route('admin.settings.address.map-center', [
+                'postal_code' => '61257',
+                'area_id' => 'area-123',
+            ]))
+            ->assertOk()
+            ->assertExactJson(['center' => ['latitude' => -7.35, 'longitude' => 112.72]]);
     }
 
     private function admin(): User

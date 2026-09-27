@@ -3,14 +3,16 @@ import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import type { AppLayoutProps } from '@/types';
+import type { User } from '@/types/auth';
 
 export default function AppSidebarLayout({
     children,
     breadcrumbs = [],
-}: AppLayoutProps) {
+    role,
+}: AppLayoutProps & { role?: User['role'] }) {
     return (
         <AppShell variant="sidebar">
-            <AppSidebar />
+            <AppSidebar role={role} />
             <AppContent variant="sidebar" className="admin-dashboard-shell min-w-0 overflow-x-clip">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 <div className="flex min-h-0 flex-1 flex-col">

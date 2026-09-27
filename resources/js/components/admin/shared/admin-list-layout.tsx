@@ -8,6 +8,8 @@ type Props = {
     description: string;
     icon: LucideIcon;
     children: ReactNode;
+    dashboardHref?: string;
+    eyebrow?: string;
 };
 
 export function AdminListLayout({
@@ -15,6 +17,8 @@ export function AdminListLayout({
     description,
     icon: Icon,
     children,
+    dashboardHref = admin.dashboard().url,
+    eyebrow = 'Manajemen Toko',
 }: Props) {
     return (
         <main className="mx-auto flex w-full max-w-[1560px] flex-1 flex-col gap-5 px-4 py-5 md:px-7 md:py-7">
@@ -23,7 +27,7 @@ export function AdminListLayout({
                 aria-label="Breadcrumb"
             >
                 <Link
-                    href={admin.dashboard()}
+                    href={dashboardHref}
                     className="hover:text-primary inline-flex items-center gap-1.5"
                 >
                     <House className="size-3.5" />
@@ -41,7 +45,7 @@ export function AdminListLayout({
                         </span>
                         <div>
                             <p className="text-primary text-xs font-bold tracking-[0.16em] uppercase">
-                                Manajemen Toko
+                                {eyebrow}
                             </p>
                             <h1 className="font-heading text-foreground text-4xl leading-none font-bold sm:text-5xl">
                                 {title}

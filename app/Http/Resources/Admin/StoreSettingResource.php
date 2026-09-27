@@ -36,6 +36,7 @@ class StoreSettingResource extends JsonResource
             'origin_location_id' => $this->origin_location_id,
             'origin_latitude' => $this->origin_latitude,
             'origin_longitude' => $this->origin_longitude,
+            'bank_accounts' => $this->bank_accounts ?? [],
         ];
     }
 }

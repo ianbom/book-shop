@@ -2,7 +2,6 @@ import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { ArrowRight, BookOpen, GraduationCap, Heart, Lightbulb, Palette, Sparkles, WandSparkles } from 'lucide-react';
 import { BookDetailDialog } from '@/components/customer/books/book-detail-dialog';
-import { BookOrderDialog } from '@/components/customer/books/book-order-dialog';
 import { HeroSection } from '@/components/customer/home/hero-section';
 import { StoreBenefits } from '@/components/customer/home/store-benefits';
 import { SectionContainer } from '@/components/customer/shared/section-container';
@@ -51,7 +50,6 @@ function Heading({ title, subtitle }: { title: string; subtitle?: string }) {
 
 export default function Home({ categories, featuredBooks, latestBooks, storeSettings }: HomeProps) {
     const [detailBook, setDetailBook] = useState<CustomerBook | null>(null);
-    const [orderBook, setOrderBook] = useState<CustomerBook | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const visibleLatest = activeCategory ? latestBooks.filter((book) => book.categories.some((category) => category.slug === activeCategory)) : latestBooks;
     const latestFilters = [{ name: 'Semua', slug: null }, ...categories.slice(0, 3)];
@@ -74,8 +72,7 @@ export default function Home({ categories, featuredBooks, latestBooks, storeSett
             <section className="pb-7"><SectionContainer><div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><h2 className="font-heading text-foreground flex items-center gap-2 text-xl font-bold sm:text-2xl"><Sparkles className="text-warning size-5" aria-hidden="true" />Buku Terbaru</h2><p className="text-muted-foreground mt-1 pl-7 text-xs">Temukan buku terbaru untuk menemani petualanganmu.</p></div><div className="bg-secondary/50 flex flex-wrap gap-1 rounded-lg p-1" role="group" aria-label="Filter buku terbaru">{latestFilters.map((filter) => <button type="button" key={filter.slug ?? 'semua'} onClick={() => setActiveCategory(filter.slug)} className={'rounded-md px-3 py-1.5 text-[11px] font-semibold transition ' + (activeCategory === filter.slug ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-background')}>{filter.name}</button>)}</div></div><div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 lg:gap-3">{visibleLatest.slice(0, 5).map((book) => <BookTile key={book.id} book={book} onView={setDetailBook} />)}</div>{visibleLatest.length === 0 && <p className="text-muted-foreground py-8 text-center">Belum ada buku terbaru di kategori ini.</p>}</SectionContainer></section>
             <StoreBenefits />
             <SectionContainer className="pb-9"><div className="bg-secondary/55 relative flex min-h-40 items-center overflow-hidden rounded-xl px-6 py-8 sm:px-12"><div className="relative z-10 max-w-md"><h2 className="font-heading text-foreground text-2xl font-bold leading-tight sm:text-3xl">Temukan Buku untuk Petualangan Berikutnya</h2><p className="text-muted-foreground mt-2 text-xs">Karena setiap halaman membawa kemungkinan baru.</p><Link href="/books" className="bg-primary text-primary-foreground mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2 text-xs font-bold">Jelajahi Semua Buku <ArrowRight className="size-4" /></Link></div><img src="/dashboard-image/pesanan.png" alt="" className="absolute right-[-12%] bottom-0 hidden h-44 w-1/2 object-contain sm:block" loading="lazy" /></div></SectionContainer>
-            <BookDetailDialog book={detailBook} onClose={() => setDetailBook(null)} onBuy={(book) => { setDetailBook(null); setOrderBook(book); }} />
-            <BookOrderDialog book={orderBook} onClose={() => setOrderBook(null)} />
+            <BookDetailDialog book={detailBook} onClose={() => setDetailBook(null)} />
         </>
     );
 }

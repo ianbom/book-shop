@@ -18,6 +18,7 @@ import {
 import { SectionContainer } from '@/components/customer/shared/section-container';
 import admin from '@/routes/admin';
 import { login } from '@/routes';
+import { edit as profileEdit } from '@/routes/profile';
 
 const navigation = [
     { label: 'Beranda', href: '/' },
@@ -43,10 +44,10 @@ function Brand({ logoSrc }: { logoSrc: string }) {
 }
 
 export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
-    const page = usePage();
+    const page = usePage<{ cartCount: number }>();
     const currentPath = page.url.split('?')[0];
     const user = page.props.auth.user;
-    const accountHref = user?.role === 'admin' ? admin.dashboard() : user ? '/' : login();
+    const accountHref = user?.role === 'admin' ? admin.dashboard() : user?.role === 'customer' ? profileEdit() : login();
     const [search, setSearch] = useState('');
     const [open, setOpen] = useState(false);
 
@@ -86,7 +87,10 @@ export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
                     <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari judul buku, penulis, atau kategori..." aria-label="Cari buku" className="border-border bg-muted/60 focus:border-primary h-9 w-full rounded-full border pr-3 pl-9 text-[10px] outline-none transition focus:ring-2 focus:ring-primary/15" />
                 </form>
                 <div className="hidden items-center gap-1 sm:flex">
-                    <span aria-hidden="true" className="text-primary relative grid size-9 place-items-center"><ShoppingCart className="size-[18px]" /><span className="bg-destructive absolute top-1 right-0 grid size-3 place-items-center rounded-full text-[8px] text-white">0</span></span>
+                    {user?.role !== 'admin' && <Link href={user ? '/customer/dashboard/carts' : login()} aria-label={'Keranjang: ' + page.props.cartCount + ' buku'} className="text-primary hover:bg-secondary relative grid size-9 place-items-center rounded-full">
+                        <ShoppingCart className="size-[18px]" />
+                        {page.props.cartCount > 0 && <span className="bg-destructive absolute top-0 right-0 grid h-4 min-w-4 place-items-center rounded-full px-0.5 text-[9px] text-white">{page.props.cartCount}</span>}
+                    </Link>}
                 </div>
                 {user ? (
                     <Link href={accountHref} aria-label={user.role === 'admin' ? 'Dashboard admin' : 'Akun saya'} className="text-primary hover:bg-secondary focus-visible:ring-ring hidden size-9 items-center justify-center rounded-full transition focus-visible:ring-2 focus-visible:ring-offset-2 sm:inline-flex"><UserRound className="size-[18px]" /></Link>
@@ -99,6 +103,7 @@ export function CustomerHeader({ logoSrc }: { logoSrc: string }) {
                     </SheetTrigger>
                     <SheetContent side="right" className="w-[320px] px-6">
                         <SheetHeader className="border-b px-0 py-5 text-left"><SheetTitle><Brand logoSrc={logoSrc} /></SheetTitle></SheetHeader>
+                        {user?.role !== 'admin' && <Link href={user ? '/customer/dashboard/carts' : login()} onClick={() => setOpen(false)} className="text-primary mt-4 flex items-center gap-2 text-sm font-medium"><ShoppingCart className="size-4" /> Keranjang: {page.props.cartCount} buku</Link>}
                         <form onSubmit={submitSearch} className="border-input mt-6 flex h-10 rounded-full border">
                             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari buku..." aria-label="Cari buku" className="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none" />
                             <button type="submit" className="text-primary px-3" aria-label="Cari buku"><Search className="size-4" /></button>

@@ -4,13 +4,14 @@ namespace Database\Seeders;
 
 use App\Models\StoreSetting;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use RuntimeException;
 
 class StoreSettingSeeder extends Seeder
 {
     public function run(): void
     {
-        $settings = config('store');
+        $settings = Arr::except(config('store'), ['bank_accounts']);
         $required = [
             'store_name' => 'STORE_NAME',
             'couriers' => 'STORE_COURIERS',

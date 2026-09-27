@@ -61,11 +61,14 @@ export type Book = {
 };
 export type OrderStatus =
     | 'pending'
+    | 'waiting_preorder'
+    | 'processing'
     | 'packing'
     | 'shipping'
     | 'completed'
     | 'cancelled';
-export type PaymentStatus = 'unpaid' | 'paid' | 'rejected';
+export type PaymentStatus =
+    'unpaid' | 'paid' | 'partially_refunded' | 'refunded';
 export type StockMovementType =
     | 'initial'
     | 'adjustment_in'
@@ -125,6 +128,11 @@ export type Order = {
     status_histories?: OrderStatusHistory[];
     stock_movements?: StockMovement[];
 };
+export type BankAccount = {
+    bank_name: string;
+    account_holder: string;
+    account_number: string;
+};
 export type StoreSetting = {
     id: number;
     store_name: string;
@@ -147,6 +155,7 @@ export type StoreSetting = {
     origin_location_id: string | null;
     origin_latitude: string | null;
     origin_longitude: string | null;
+    bank_accounts: BankAccount[];
 };
 
 export type ShipmentStatus =
@@ -178,6 +187,8 @@ export type WalletTopup = {
     user: { name: string | null; email: string | null };
     requested_amount: string;
     credited_amount: string | null;
+    admin_note: string | null;
+    proof_url: string;
     status: TopupStatus;
     reviewer: string | null;
     reviewed_at: string | null;
@@ -207,9 +218,14 @@ export type Voucher = {
     id: number;
     code: string;
     name: string;
+    description: string | null;
     type: 'fixed' | 'percentage';
     value: string;
+    max_discount: string | null;
+    min_order_amount: string;
     usage_limit: number | null;
+    per_user_limit: number;
+    is_active: boolean;
     usages_count: number;
     starts_at: string | null;
     ends_at: string | null;

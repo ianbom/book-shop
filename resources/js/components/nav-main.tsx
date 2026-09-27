@@ -7,27 +7,78 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
-export function NavMain({ items }: { items: NavItem[] }) {
-    const { isCurrentUrl } = useCurrentUrl();
+export type NavMainItem =
+    | NavItem
+    | {
+          title: string;
+          icon?: NavItem['icon'];
+          disabled: true;
+      };
+
+export function NavMain({ items }: { items: NavMainItem[] }) {
+    const { currentUrl } = useCurrentUrl();
+    const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
+    const pathFor = (href: NavItem['href']) =>
+        normalizePath(
+            new URL(
+                toUrl(href),
+                typeof window !== 'undefined'
+                    ? window.location.origin
+                    : 'http://localhost',
+            ).pathname,
+        );
+    const currentPath = normalizePath(currentUrl);
+    const activePath = items
+        .flatMap((item) =>
+            'disabled' in item
+                ? []
+                : item.children
+                  ? item.children.map((child) => pathFor(child.href))
+                  : [pathFor(item.href)],
+        )
+        .filter(
+            (path) =>
+                currentPath === path || currentPath.startsWith(`${path}/`),
+        )
+        .sort((first, second) => second.length - first.length)[0];
+    const isActive = (href: NavItem['href']) => pathFor(href) === activePath;
 
     return (
-            <SidebarGroup className="px-0 py-0">
-                <SidebarGroupLabel className="text-sidebar-foreground/55 px-3 font-semibold tracking-[0.14em] uppercase text-[10px]">Menu Utama</SidebarGroupLabel>
-                <SidebarMenu className="gap-1">
+        <SidebarGroup className="px-0 py-0">
+            <SidebarGroupLabel className="text-sidebar-foreground/55 px-3 text-[10px] font-semibold tracking-[0.14em] uppercase">
+                Menu Utama
+            </SidebarGroupLabel>
+            <SidebarMenu className="gap-1">
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                        {item.children ? (
+                        {'disabled' in item ? (
+                            <SidebarMenuButton
+                                disabled
+                                title={`${item.title}: segera hadir`}
+                                aria-label={`${item.title}, segera hadir`}
+                                className="h-11 rounded-xl px-3 text-[13px] font-semibold disabled:opacity-100"
+                            >
+                                {item.icon && <item.icon />}
+                                <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                                    <span>{item.title}</span>
+                                    <span className="text-sidebar-foreground text-[10px] font-normal">
+                                        Segera hadir
+                                    </span>
+                                </span>
+                            </SidebarMenuButton>
+                        ) : item.children ? (
                             <div className="space-y-1 py-1">
-                                <SidebarGroupLabel className="text-sidebar-foreground/55 px-3 font-semibold tracking-[0.14em] uppercase text-[10px]">
+                                <SidebarGroupLabel className="text-sidebar-foreground/55 px-3 text-[10px] font-semibold tracking-[0.14em] uppercase">
                                     {item.title}
                                 </SidebarGroupLabel>
                                 {item.children.map((child) => (
                                     <SidebarMenuButton
                                         key={child.title}
                                         asChild
-                                        isActive={isCurrentUrl(child.href)}
+                                        isActive={isActive(child.href)}
                                         tooltip={{ children: child.title }}
                                         className="h-10 rounded-xl px-3 text-[13px]"
                                     >
@@ -41,7 +92,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                         ) : (
                             <SidebarMenuButton
                                 asChild
-                                isActive={isCurrentUrl(item.href)}
+                                isActive={isActive(item.href)}
                                 tooltip={{ children: item.title }}
                                 className="h-11 rounded-xl px-3 text-[13px] font-semibold group-data-[collapsible=icon]:justify-center"
                             >

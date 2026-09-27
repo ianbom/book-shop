@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['store_name', 'whatsapp_number', 'email', 'phone', 'address', 'couriers', 'shipper_contact_name', 'shipper_contact_phone', 'shipper_contact_email', 'shipper_organization', 'origin_contact_name', 'origin_contact_phone', 'origin_contact_email', 'origin_address', 'origin_note', 'origin_postal_code', 'origin_area_id', 'origin_location_id', 'origin_latitude', 'origin_longitude'])]
+#[Fillable(['store_name', 'whatsapp_number', 'email', 'phone', 'address', 'couriers', 'shipper_contact_name', 'shipper_contact_phone', 'shipper_contact_email', 'shipper_organization', 'origin_contact_name', 'origin_contact_phone', 'origin_contact_email', 'origin_address', 'origin_note', 'origin_postal_code', 'origin_area_id', 'origin_location_id', 'origin_latitude', 'origin_longitude', 'bank_accounts'])]
 class StoreSetting extends Model
 {
     /** @use HasFactory<StoreSettingFactory> */
@@ -16,6 +16,7 @@ class StoreSetting extends Model
     protected function casts(): array
     {
         return [
+            'bank_accounts' => 'array',
             'origin_latitude' => 'decimal:7',
             'origin_longitude' => 'decimal:7',
         ];

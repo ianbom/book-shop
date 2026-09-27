@@ -4,7 +4,6 @@ import { Sparkles } from 'lucide-react';
 import { BookCard } from '@/components/customer/books/book-card';
 import { BookDetailDialog } from '@/components/customer/books/book-detail-dialog';
 import { BookFilters } from '@/components/customer/books/book-filters';
-import { BookOrderDialog } from '@/components/customer/books/book-order-dialog';
 import { CatalogPagination } from '@/components/customer/books/catalog-pagination';
 import { EmptyState } from '@/components/customer/shared/empty-state';
 import { SectionContainer } from '@/components/customer/shared/section-container';
@@ -29,15 +28,10 @@ export default function BooksIndex({
 }: CatalogPageProps) {
     const [search, setSearch] = useState(filters.search);
     const [detailBookId, setDetailBookId] = useState<number | null>(null);
-    const [orderBookId, setOrderBookId] = useState<number | null>(null);
     const debouncedSearch = useDebounce(search);
     const selectedDetailBook = useMemo(
         () => books.data.find((book) => book.id === detailBookId) ?? null,
         [books.data, detailBookId],
-    );
-    const selectedOrderBook = useMemo(
-        () => books.data.find((book) => book.id === orderBookId) ?? null,
-        [books.data, orderBookId],
     );
 
     const navigate = (next: CatalogFilters) => {
@@ -159,11 +153,6 @@ export default function BooksIndex({
             <BookDetailDialog
                 book={selectedDetailBook}
                 onClose={() => setDetailBookId(null)}
-                onBuy={(book) => setOrderBookId(book.id)}
-            />
-            <BookOrderDialog
-                book={selectedOrderBook}
-                onClose={() => setOrderBookId(null)}
             />
         </>
     );

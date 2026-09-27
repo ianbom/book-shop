@@ -5,8 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ShipmentDeliveryType;
 use App\Enums\ShipmentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Orders\UpdateShipmentStatusRequest;
 use App\Http\Resources\Admin\ShipmentResource;
+use App\Models\Order;
+use App\Models\Shipment;
 use App\Services\Admin\ShipmentListService;
+use App\Services\Admin\ShipmentStatusService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -14,7 +19,7 @@ use Inertia\Response;
 
 class ShipmentController extends Controller
 {
-    public function __construct(private readonly ShipmentListService $service) {}
+    public function __construct(private readonly ShipmentListService $service, private readonly ShipmentStatusService $statusService) {}
 
     public function index(Request $request): Response
     {
@@ -32,5 +37,14 @@ class ShipmentController extends Controller
             'shipments' => ShipmentResource::collection($this->service->paginate($filters)),
             'filters' => $filters,
         ]);
+    }
+
+    public function updateStatus(UpdateShipmentStatusRequest $request, Order $order, Shipment $shipment): RedirectResponse
+    {
+        abort_unless($shipment->order_id === $order->id, 404);
+        $this->statusService->update($shipment, ShipmentStatus::from($request->validated('status')), $request->validated('description'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Status pengiriman berhasil diperbarui.']);
+
+        return back();
     }
 }

@@ -18,12 +18,16 @@ type Status =
 
 const labels: Record<Status, string> = {
     pending: 'Pending',
+    waiting_preorder: 'Menunggu Preorder',
+    processing: 'Diproses',
     packing: 'Proses Packing',
     shipping: 'Proses Pengiriman',
     completed: 'Selesai',
     cancelled: 'Dibatalkan',
     unpaid: 'Belum Dibayar',
     paid: 'Dibayar',
+    partially_refunded: 'Refund sebagian',
+    refunded: 'Dikembalikan',
     rejected: 'Ditolak',
     initial: 'Stok Awal',
     adjustment_in: 'Stok Masuk',
@@ -43,12 +47,16 @@ const labels: Record<Status, string> = {
 };
 const colors: Record<string, string> = {
     pending: 'bg-warning/10 text-warning',
+    waiting_preorder: 'bg-warning/10 text-warning',
+    processing: 'bg-secondary text-secondary-foreground',
     packing: 'bg-secondary text-secondary-foreground',
     shipping: 'bg-accent text-accent-foreground',
     completed: 'bg-success/10 text-success',
     cancelled: 'bg-destructive/10 text-destructive',
     unpaid: 'bg-secondary text-foreground',
     paid: 'bg-success/10 text-success',
+    partially_refunded: 'bg-warning/10 text-warning',
+    refunded: 'bg-secondary text-secondary-foreground',
     rejected: 'bg-destructive/10 text-destructive',
     initial: 'bg-secondary text-secondary-foreground',
     adjustment_in: 'bg-success/10 text-success',

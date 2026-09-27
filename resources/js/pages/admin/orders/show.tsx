@@ -1,6 +1,16 @@
-import { FormEvent } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
-import { ExternalLink, Trash2, Upload } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import type { FormEvent, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import {
+    ArrowLeft,
+    BookOpen,
+    Boxes,
+    CreditCard,
+    Package,
+    PackageCheck,
+    ReceiptText,
+    Truck,
+} from 'lucide-react';
 import { PageHeader } from '@/components/admin/shared/page-header';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { Button } from '@/components/ui/button';
@@ -10,587 +20,999 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate, rupiah } from '@/lib/format';
 import admin from '@/routes/admin';
-import type { Order, OrderStatus, PaymentStatus } from '@/types/admin';
+import type { OrderStatus, ShipmentStatus } from '@/types/admin';
 
-const transitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
-    pending: ['packing', 'cancelled'],
-    packing: ['shipping', 'cancelled'],
+type History = {
+    id: number;
+    status: string;
+    note?: string | null;
+    changed_by?: string | null;
+    provider_status?: string | null;
+    description?: string | null;
+    occurred_at?: string | null;
+    created_at: string | null;
+};
+type Item = {
+    id: number;
+    name: string;
+    sku: string | null;
+    isbn: string | null;
+    author: string | null;
+    description: string | null;
+    category: string;
+    sale_type: 'ready_stock' | 'preorder';
+    preorder_estimated_date: string | null;
+    preorder_ready_at: string | null;
+    quantity: number;
+    value: string;
+    subtotal: string;
+    weight: number;
+};
+type Shipment = {
+    id: number;
+    shipment_code: string;
+    status: ShipmentStatus;
+    courier_company: string;
+    courier_type: string;
+    courier_service_name: string | null;
+    delivery_type: string;
+    price: string;
+    duration: string | null;
+    biteship_order_id: string | null;
+    tracking_id: string | null;
+    waybill_id: string | null;
+    courier_link: string | null;
+    biteship_status: string | null;
+    created_at: string | null;
+    items: { name: string | null; quantity: number }[];
+    status_histories: History[];
+};
+type OrderDetail = {
+    id: number;
+    order_code: string;
+    status: OrderStatus;
+    payment_status: 'unpaid' | 'paid' | 'partially_refunded' | 'refunded';
+    customer_note: string | null;
+    subtotal: string;
+    voucher_discount: string;
+    shipping_cost: string;
+    total: string;
+    wallet_amount: string;
+    created_at: string | null;
+    updated_at: string | null;
+    customer: {
+        name: string | null;
+        email: string | null;
+        phone: string | null;
+    };
+    shipping_address: null | {
+        recipient_name: string;
+        phone: string;
+        email: string | null;
+        address: string;
+        note: string | null;
+        postal_code: string | null;
+        province: string | null;
+        city: string | null;
+        district: string | null;
+        subdistrict: string | null;
+        latitude: string | null;
+        longitude: string | null;
+    };
+    items: Item[];
+    voucher: null | { code: string; name: string; discount: string | null };
+    wallet_transactions: {
+        id: number;
+        type: string;
+        direction: string;
+        amount: string;
+        balance_before: string;
+        balance_after: string;
+        note: string | null;
+        created_at: string | null;
+    }[];
+    status_histories: History[];
+    stock_movements: {
+        id: number;
+        book_title: string | null;
+        type: string;
+        quantity: number;
+        stock_before: number;
+        stock_after: number;
+        note: string | null;
+        changed_by: string | null;
+        created_at: string | null;
+    }[];
+    shipments: Shipment[];
+};
+const orderTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
+    pending: ['processing', 'cancelled'],
+    waiting_preorder: ['processing', 'cancelled'],
+    processing: ['packing'],
+    packing: ['shipping'],
     shipping: ['completed'],
 };
-
-function currentDateTimeLocal() {
-    const date = new Date();
-    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-
-    return date.toISOString().slice(0, 16);
+const shipmentTransitions: Partial<Record<ShipmentStatus, ShipmentStatus[]>> = {
+    pending: ['booked', 'cancelled', 'failed'],
+    booked: ['pickup', 'cancelled', 'failed'],
+    pickup: ['in_transit', 'failed'],
+    in_transit: ['delivered', 'failed'],
+};
+const statusLabel: Record<OrderStatus, string> = {
+    pending: 'Menunggu diproses',
+    waiting_preorder: 'Menunggu preorder',
+    processing: 'Diproses',
+    packing: 'Packing',
+    shipping: 'Dikirim',
+    completed: 'Selesai',
+    cancelled: 'Dibatalkan',
+};
+const shipmentLabel: Record<ShipmentStatus, string> = {
+    pending: 'Menunggu',
+    booked: 'Dipesan',
+    pickup: 'Dijemput',
+    in_transit: 'Dalam perjalanan',
+    delivered: 'Terkirim',
+    cancelled: 'Dibatalkan',
+    failed: 'Gagal',
+};
+const tabs = [
+    { id: 'summary', label: 'Ringkasan', icon: ReceiptText },
+    { id: 'status', label: 'Status', icon: PackageCheck },
+    { id: 'items', label: 'Produk', icon: BookOpen },
+    { id: 'payment', label: 'Pembayaran', icon: CreditCard },
+    { id: 'shipping', label: 'Pengiriman', icon: Truck },
+    { id: 'history', label: 'Riwayat', icon: Package },
+    { id: 'stock', label: 'Stok', icon: Boxes },
+] as const;
+type Tab = (typeof tabs)[number]['id'];
+function Info({ label, value }: { label: string; value: ReactNode }) {
+    return (
+        <div className="min-w-0">
+            <p className="text-muted-foreground text-xs">{label}</p>
+            <div className="mt-1 text-sm font-medium break-words">{value}</div>
+        </div>
+    );
+}
+function Line({
+    label,
+    value,
+    strong = false,
+}: {
+    label: string;
+    value: ReactNode;
+    strong?: boolean;
+}) {
+    return (
+        <div className="flex justify-between gap-4 border-b pb-2 text-sm">
+            <span className="text-muted-foreground">{label}</span>
+            <span
+                className={
+                    strong ? 'text-right font-bold' : 'text-right font-medium'
+                }
+            >
+                {value}
+            </span>
+        </div>
+    );
+}
+function Panel({ title, children }: { title: string; children: ReactNode }) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">{children}</CardContent>
+        </Card>
+    );
 }
 
-export default function OrderShow({ order }: { order: Order }) {
-    const statusForm = useForm<{ status: OrderStatus; note: string }>({
-        status: transitions[order.status]?.[0] ?? order.status,
+export default function OrderShow({ order }: { order: OrderDetail }) {
+    const [active, setActive] = useState<Tab>('summary');
+    const nextStatuses = orderTransitions[order.status] ?? [];
+    const form = useForm<{ status: OrderStatus; note: string }>({
+        status: nextStatuses[0] ?? order.status,
         note: '',
     });
-    const paymentForm = useForm<{ payment_status: PaymentStatus }>({
-        payment_status: order.payment_status,
-    });
-    const shippingForm = useForm<{ shipping_cost: string }>({
-        shipping_cost: String(order.shipping_cost),
-    });
-    const proofForm = useForm<{
-        image: File | null;
-        payment_amount: string;
-        paid_at: string;
-        note: string;
-    }>({
-        image: null,
-        payment_amount: String(order.total),
-        paid_at: currentDateTimeLocal(),
-        note: '',
-    });
-    const whatsapp = `https://wa.me/${order.customer_phone.replace(/\D/g, '').replace(/^0/, '62')}`;
-
-    const updateStatus = (event: FormEvent) => {
+    useEffect(() => {
+        form.setData(
+            'status',
+            (orderTransitions[order.status] ?? [])[0] ?? order.status,
+        );
+    }, [order.status]);
+    const saveStatus = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        statusForm.patch(admin.orders.status.url(order.id), {
-            preserveScroll: true,
-        });
+        if (
+            form.data.status === 'cancelled' &&
+            !window.confirm(
+                'Batalkan pesanan ini? Stok yang terpotong dan pembayaran saldo akan dikembalikan.',
+            )
+        )
+            return;
+        form.patch(admin.orders.status.url(order.id), { preserveScroll: true });
     };
-    const uploadProof = (event: FormEvent) => {
-        event.preventDefault();
-        proofForm.post(admin.orders.paymentProofs.store.url(order.id), {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () =>
-                proofForm.setData({
-                    image: null,
-                    payment_amount: String(order.total),
-                    paid_at: currentDateTimeLocal(),
-                    note: '',
-                }),
-        });
-    };
-    const updateShippingCost = (event: FormEvent) => {
-        event.preventDefault();
-        shippingForm.patch(admin.orders.shippingCost.url(order.id), {
-            preserveScroll: true,
-        });
-    };
-
     return (
         <>
-            <Head title={order.order_code} />
-            <main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+            <Head title={'Order ' + order.order_code} />
+            <main className="flex flex-1 flex-col gap-5 p-4 md:p-6">
+                <div className="flex items-center justify-between gap-3">
+                    <Link
+                        href={admin.orders.index()}
+                        className="text-primary inline-flex items-center gap-2 text-sm"
+                    >
+                        <ArrowLeft className="size-4" />
+                        Kembali ke pesanan
+                    </Link>
+                    <span className="text-muted-foreground text-xs">
+                        Diperbarui {formatDate(order.updated_at)}
+                    </span>
+                </div>
                 <PageHeader
                     title={order.order_code}
-                    description={`Dibuat ${formatDate(order.created_at)}`}
-                    actions={
-                        <Button asChild>
-                            <a href={whatsapp} target="_blank" rel="noreferrer">
-                                Hubungi via WhatsApp
-                                <ExternalLink className="ml-2 size-4" />
-                            </a>
-                        </Button>
+                    description={
+                        'Pesanan dibuat ' + formatDate(order.created_at)
                     }
+                    actions={<StatusBadge value={order.status} />}
                 />
-                <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-                    <div className="space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Informasi Pesanan</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
-                                <Info label="Status Pesanan">
-                                    <StatusBadge value={order.status} />
-                                </Info>
-                                <Info label="Status Pembayaran">
-                                    <StatusBadge value={order.payment_status} />
-                                </Info>
-                                <Info
-                                    label="Kode Order"
-                                    value={order.order_code}
-                                />
-                                <Info
-                                    label="Dibuat"
-                                    value={formatDate(order.created_at)}
-                                />
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Informasi Pelanggan</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
-                                <Info
-                                    label="Nama"
-                                    value={order.customer_name}
-                                />
-                                <Info
-                                    label="WhatsApp"
-                                    value={order.customer_phone}
-                                />
-                                <Info
-                                    label="Email"
-                                    value={order.customer_email ?? '-'}
-                                />
-                                <div className="sm:col-span-2">
-                                    <Info
-                                        label="Alamat"
-                                        value={order.customer_address}
-                                    />
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <Info
-                                        label="Catatan"
-                                        value={order.customer_note ?? '-'}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Snapshot Buku</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 text-sm">
-                                <Info label="Judul" value={order.book_title} />
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <Info
-                                        label="Penulis"
-                                        value={order.book_author ?? '-'}
-                                    />
-                                    <Info
-                                        label="ISBN"
-                                        value={order.book_isbn ?? '-'}
-                                    />
-                                    <Info
-                                        label="Harga Satuan"
-                                        value={rupiah(order.unit_price)}
-                                    />
-                                    <Info
-                                        label="Jumlah"
-                                        value={String(order.quantity)}
-                                    />
-                                    <Info
+                <div
+                    role="tablist"
+                    aria-label="Data order"
+                    className="flex gap-2 overflow-x-auto border-b pb-2"
+                >
+                    {tabs.map(({ id, label, icon: Icon }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            role="tab"
+                            aria-selected={active === id}
+                            onClick={() => setActive(id)}
+                            className={
+                                'inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ' +
+                                (active === id
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'hover:bg-muted')
+                            }
+                        >
+                            <Icon className="size-4" />
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                <div
+                    role="tabpanel"
+                    className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]"
+                >
+                    {active === 'summary' && (
+                        <>
+                            <div className="space-y-5">
+                                <Panel title="Data pelanggan">
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <Info
+                                            label="Nama"
+                                            value={order.customer.name || '—'}
+                                        />
+                                        <Info
+                                            label="Telepon"
+                                            value={order.customer.phone || '—'}
+                                        />
+                                        <Info
+                                            label="Email"
+                                            value={order.customer.email || '—'}
+                                        />
+                                        <Info
+                                            label="Kode order"
+                                            value={order.order_code}
+                                        />
+                                        <Info
+                                            label="Catatan pelanggan"
+                                            value={order.customer_note || '—'}
+                                        />
+                                    </div>
+                                </Panel>
+                                <Panel title="Alamat pengiriman">
+                                    {order.shipping_address ? (
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <Info
+                                                label="Penerima"
+                                                value={
+                                                    order.shipping_address
+                                                        .recipient_name
+                                                }
+                                            />
+                                            <Info
+                                                label="Telepon"
+                                                value={
+                                                    order.shipping_address.phone
+                                                }
+                                            />
+                                            <Info
+                                                label="Email"
+                                                value={
+                                                    order.shipping_address
+                                                        .email || '—'
+                                                }
+                                            />
+                                            <Info
+                                                label="Alamat"
+                                                value={[
+                                                    order.shipping_address
+                                                        .address,
+                                                    order.shipping_address
+                                                        .subdistrict,
+                                                    order.shipping_address
+                                                        .district,
+                                                    order.shipping_address.city,
+                                                    order.shipping_address
+                                                        .province,
+                                                    order.shipping_address
+                                                        .postal_code,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(', ')}
+                                            />
+                                            <Info
+                                                label="Catatan alamat"
+                                                value={
+                                                    order.shipping_address
+                                                        .note || '—'
+                                                }
+                                            />
+                                            <Info
+                                                label="Koordinat"
+                                                value={
+                                                    order.shipping_address
+                                                        .latitude &&
+                                                    order.shipping_address
+                                                        .longitude
+                                                        ? order.shipping_address
+                                                              .latitude +
+                                                          ', ' +
+                                                          order.shipping_address
+                                                              .longitude
+                                                        : '—'
+                                                }
+                                            />
+                                        </div>
+                                    ) : (
+                                        <p className="text-muted-foreground text-sm">
+                                            Alamat snapshot tidak tersedia.
+                                        </p>
+                                    )}
+                                </Panel>
+                                <Panel title="Rincian biaya">
+                                    <Line
                                         label="Subtotal"
                                         value={rupiah(order.subtotal)}
                                     />
-                                    <Info
-                                        label="Ongkir"
+                                    {order.voucher && (
+                                        <Line
+                                            label={
+                                                'Voucher ' + order.voucher.code
+                                            }
+                                            value={
+                                                '−' +
+                                                rupiah(
+                                                    order.voucher.discount ||
+                                                        order.voucher_discount,
+                                                )
+                                            }
+                                        />
+                                    )}
+                                    <Line
+                                        label="Ongkos kirim"
                                         value={rupiah(order.shipping_cost)}
                                     />
-                                </div>
-                                <div className="flex justify-between border-t pt-4 text-base">
-                                    <span>Total</span>
-                                    <strong>{rupiah(order.total)}</strong>
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Bukti Pembayaran</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-5">
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    {order.payment_proofs?.map((proof) => (
-                                        <div
-                                            key={proof.id}
-                                            className="overflow-hidden rounded-lg border"
-                                        >
-                                            <a
-                                                href={proof.image_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                <img
-                                                    src={proof.image_url}
-                                                    alt={`Bukti pembayaran ${order.order_code}`}
-                                                    className="aspect-video w-full object-cover"
-                                                />
-                                            </a>
-                                            <div className="space-y-1 p-3 text-sm">
-                                                <div className="flex items-start justify-between">
-                                                    <strong>
-                                                        {proof.payment_amount
-                                                            ? rupiah(
-                                                                  proof.payment_amount,
-                                                              )
-                                                            : 'Nominal tidak dicatat'}
-                                                    </strong>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        onClick={() => {
-                                                            if (
-                                                                confirm(
-                                                                    'Hapus bukti pembayaran ini?',
-                                                                )
-                                                            )
-                                                                router.delete(
-                                                                    admin.orders.paymentProofs.destroy(
-                                                                        {
-                                                                            order: order.id,
-                                                                            paymentProof:
-                                                                                proof.id,
-                                                                        },
-                                                                    ),
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                );
-                                                        }}
-                                                    >
-                                                        <Trash2 className="text-destructive size-4" />
-                                                    </Button>
-                                                </div>
-                                                <p className="text-muted-foreground">
-                                                    Dibayar:{' '}
-                                                    {formatDate(proof.paid_at)}
-                                                </p>
-                                                <p className="text-muted-foreground">
-                                                    Diunggah:{' '}
-                                                    {proof.uploaded_by?.name ??
-                                                        '-'}
-                                                </p>
-                                                {proof.note && (
-                                                    <p>{proof.note}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {!order.payment_proofs?.length && (
-                                        <p className="text-muted-foreground text-sm">
-                                            Belum ada bukti pembayaran.
-                                        </p>
-                                    )}
-                                </div>
-                                <form
-                                    onSubmit={uploadProof}
-                                    className="grid gap-4 border-t pt-5 md:grid-cols-2"
-                                >
-                                    <div className="grid gap-2 md:col-span-2">
-                                        <Label htmlFor="proof">
-                                            Gambar Bukti
-                                        </Label>
-                                        <Input
-                                            id="proof"
-                                            type="file"
-                                            accept="image/jpeg,image/png,image/webp"
-                                            onChange={(event) =>
-                                                proofForm.setData(
-                                                    'image',
-                                                    event.target.files?.[0] ??
-                                                        null,
-                                                )
-                                            }
-                                            required
-                                        />
-                                        <p className="text-destructive text-sm">
-                                            {proofForm.errors.image}
-                                        </p>
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="payment_amount">
-                                            Nominal
-                                        </Label>
-                                        <Input
-                                            id="payment_amount"
-                                            type="number"
-                                            min="0"
-                                            value={
-                                                proofForm.data.payment_amount
-                                            }
-                                            onChange={(event) =>
-                                                proofForm.setData(
-                                                    'payment_amount',
-                                                    event.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="paid_at">
-                                            Waktu Bayar
-                                        </Label>
-                                        <Input
-                                            id="paid_at"
-                                            type="datetime-local"
-                                            value={proofForm.data.paid_at}
-                                            onChange={(event) =>
-                                                proofForm.setData(
-                                                    'paid_at',
-                                                    event.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    <div className="grid gap-2 md:col-span-2">
-                                        <Label htmlFor="proof_note">
-                                            Catatan
-                                        </Label>
-                                        <Textarea
-                                            id="proof_note"
-                                            value={proofForm.data.note}
-                                            onChange={(event) =>
-                                                proofForm.setData(
-                                                    'note',
-                                                    event.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    <Button
-                                        className="md:col-span-2"
-                                        disabled={
-                                            proofForm.processing ||
-                                            !proofForm.data.image
+                                    <Line
+                                        label="Total order"
+                                        value={rupiah(order.total)}
+                                        strong
+                                    />
+                                    <Line
+                                        label="Dibayar dari saldo"
+                                        value={rupiah(order.wallet_amount)}
+                                    />
+                                    <Info
+                                        label="Status pembayaran"
+                                        value={
+                                            <StatusBadge
+                                                value={order.payment_status}
+                                            />
                                         }
-                                    >
-                                        <Upload className="mr-2 size-4" />
-                                        Unggah Bukti
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <div className="space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Ubah Status</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {transitions[order.status]?.length ? (
+                                    />
+                                </Panel>
+                            </div>
+                        </>
+                    )}
+                    {active === 'status' && (
+                        <>
+                            <Panel title="Ubah status order">
+                                {nextStatuses.length ? (
                                     <form
-                                        onSubmit={updateStatus}
+                                        onSubmit={saveStatus}
                                         className="space-y-4"
                                     >
                                         <div className="grid gap-2">
-                                            <Label htmlFor="status">
-                                                Status Berikutnya
+                                            <Label htmlFor="next-order-status">
+                                                Status berikutnya
                                             </Label>
                                             <select
-                                                id="status"
+                                                id="next-order-status"
                                                 className="bg-background h-10 rounded-md border px-3 text-sm"
-                                                value={statusForm.data.status}
-                                                onChange={(event) =>
-                                                    statusForm.setData(
+                                                value={form.data.status}
+                                                onChange={(e) =>
+                                                    form.setData(
                                                         'status',
-                                                        event.target
+                                                        e.target
                                                             .value as OrderStatus,
                                                     )
                                                 }
                                             >
-                                                {transitions[order.status]?.map(
-                                                    (status) => (
-                                                        <option
-                                                            key={status}
-                                                            value={status}
-                                                        >
-                                                            {status ===
-                                                            'packing'
-                                                                ? 'Proses Packing'
-                                                                : status ===
-                                                                    'shipping'
-                                                                  ? 'Proses Pengiriman'
-                                                                  : status ===
-                                                                      'completed'
-                                                                    ? 'Selesai'
-                                                                    : 'Dibatalkan'}
-                                                        </option>
-                                                    ),
-                                                )}
+                                                {nextStatuses.map((status) => (
+                                                    <option
+                                                        key={status}
+                                                        value={status}
+                                                    >
+                                                        {statusLabel[status]}
+                                                    </option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="grid gap-2">
-                                            <Label htmlFor="status_note">
-                                                Catatan
+                                            <Label htmlFor="order-status-note">
+                                                Catatan perubahan
                                             </Label>
                                             <Textarea
-                                                id="status_note"
-                                                value={statusForm.data.note}
-                                                onChange={(event) =>
-                                                    statusForm.setData(
+                                                id="order-status-note"
+                                                maxLength={2000}
+                                                value={form.data.note}
+                                                onChange={(e) =>
+                                                    form.setData(
                                                         'note',
-                                                        event.target.value,
+                                                        e.target.value,
                                                     )
                                                 }
                                             />
                                         </div>
-                                        <p className="text-destructive text-sm">
-                                            {statusForm.errors.status}
-                                        </p>
+                                        {form.errors.status && (
+                                            <p className="text-destructive text-sm">
+                                                {form.errors.status}
+                                            </p>
+                                        )}
+                                        {form.data.status === 'shipping' && (
+                                            <p className="text-muted-foreground text-sm">
+                                                Biteship akan membuat order
+                                                pengiriman. Jika gagal, status
+                                                tetap packing.
+                                            </p>
+                                        )}
                                         <Button
+                                            disabled={form.processing}
                                             className="w-full"
-                                            disabled={statusForm.processing}
                                         >
-                                            Perbarui Status
+                                            Simpan status
                                         </Button>
                                     </form>
                                 ) : (
                                     <p className="text-muted-foreground text-sm">
-                                        Status final. Tidak ada transisi
+                                        Status akhir; tidak ada transisi
                                         lanjutan.
                                     </p>
                                 )}
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Status Pembayaran</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <select
-                                    className="bg-background h-10 w-full rounded-md border px-3 text-sm"
-                                    value={paymentForm.data.payment_status}
-                                    onChange={(event) =>
-                                        paymentForm.setData(
-                                            'payment_status',
-                                            event.target.value as PaymentStatus,
-                                        )
-                                    }
-                                >
-                                    <option value="unpaid">
-                                        Belum Dibayar
-                                    </option>
-                                    <option value="paid">Dibayar</option>
-                                    <option value="rejected">Ditolak</option>
-                                </select>
-                                <Button
-                                    className="w-full"
-                                    variant="outline"
-                                    disabled={
-                                        paymentForm.processing ||
-                                        paymentForm.data.payment_status ===
-                                            order.payment_status
-                                    }
-                                    onClick={() =>
-                                        paymentForm.patch(
-                                            admin.orders.paymentStatus.url(
-                                                order.id,
-                                            ),
-                                            { preserveScroll: true },
-                                        )
-                                    }
-                                >
-                                    Simpan Pembayaran
-                                </Button>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Biaya Pengiriman</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <form
-                                    onSubmit={updateShippingCost}
-                                    className="space-y-3"
-                                >
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="shipping_cost">
-                                            Harga Ongkir
-                                        </Label>
-                                        <Input
-                                            id="shipping_cost"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={
-                                                shippingForm.data.shipping_cost
-                                            }
-                                            onChange={(event) =>
-                                                shippingForm.setData(
-                                                    'shipping_cost',
-                                                    event.target.value,
-                                                )
-                                            }
+                            </Panel>
+                            <div className="space-y-5">
+                                {order.shipments.length ? (
+                                    order.shipments.map((shipment) => (
+                                        <ShipmentPanel
+                                            key={shipment.id}
+                                            orderId={order.id}
+                                            shipment={shipment}
+                                            statusOnly
                                         />
-                                        <p className="text-destructive text-sm">
-                                            {shippingForm.errors.shipping_cost}
+                                    ))
+                                ) : (
+                                    <Panel title="Status pengiriman">
+                                        <p className="text-muted-foreground text-sm">
+                                            Belum ada data shipment.
                                         </p>
-                                    </div>
-                                    <Button
-                                        className="w-full"
-                                        variant="outline"
-                                        disabled={
-                                            shippingForm.processing ||
-                                            shippingForm.data.shipping_cost ===
-                                                String(order.shipping_cost)
-                                        }
-                                    >
-                                        Simpan Ongkir
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Timeline Status</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-0">
-                                {order.status_histories?.map(
-                                    (history, index) => (
-                                        <div
-                                            key={history.id}
-                                            className="relative border-l pb-6 pl-5 last:pb-0"
-                                        >
-                                            <span className="ring-background bg-primary absolute top-1 -left-1.5 size-3 rounded-full ring-4" />
-                                            <StatusBadge
-                                                value={history.status}
-                                            />
-                                            <p className="text-muted-foreground mt-2 text-xs">
-                                                {formatDate(history.created_at)}{' '}
-                                                ·{' '}
-                                                {history.changed_by?.name ??
-                                                    'Sistem'}
-                                            </p>
-                                            {history.note && (
-                                                <p className="mt-1 text-sm">
-                                                    {history.note}
-                                                </p>
-                                            )}
-                                            {index ===
-                                                (order.status_histories
-                                                    ?.length ?? 0) -
-                                                    1 && <span />}
-                                        </div>
-                                    ),
+                                    </Panel>
                                 )}
-                                {!order.status_histories?.length && (
+                            </div>
+                        </>
+                    )}
+                    {active === 'items' && (
+                        <div className="xl:col-span-2">
+                            <Panel
+                                title={
+                                    'Item pesanan (' + order.items.length + ')'
+                                }
+                            >
+                                {order.items.length ? (
+                                    order.items.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="grid gap-3 border-b pb-4 sm:grid-cols-[1fr_auto]"
+                                        >
+                                            <div>
+                                                <h3 className="font-semibold">
+                                                    {item.name}
+                                                </h3>
+                                                <p className="text-muted-foreground text-sm">
+                                                    {item.author || '—'} · SKU{' '}
+                                                    {item.sku || '—'} · ISBN{' '}
+                                                    {item.isbn || '—'}
+                                                </p>
+                                                <p className="text-muted-foreground text-sm">
+                                                    {item.category} ·{' '}
+                                                    {item.sale_type ===
+                                                    'preorder'
+                                                        ? 'Preorder'
+                                                        : 'Ready stock'}{' '}
+                                                    · {item.weight} g
+                                                </p>
+                                                {item.description && (
+                                                    <p className="mt-2 text-sm">
+                                                        {item.description}
+                                                    </p>
+                                                )}
+                                                {item.preorder_estimated_date && (
+                                                    <p className="text-sm">
+                                                        Estimasi preorder:{' '}
+                                                        {formatDate(
+                                                            item.preorder_estimated_date,
+                                                        )}
+                                                    </p>
+                                                )}
+                                                {item.preorder_ready_at && (
+                                                    <p className="text-sm">
+                                                        Siap preorder:{' '}
+                                                        {formatDate(
+                                                            item.preorder_ready_at,
+                                                        )}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                <p>
+                                                    {item.quantity} ×{' '}
+                                                    {rupiah(item.value)}
+                                                </p>
+                                                <b>{rupiah(item.subtotal)}</b>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
                                     <p className="text-muted-foreground text-sm">
-                                        Belum ada histori status.
+                                        Item tidak tersedia.
                                     </p>
                                 )}
-                            </CardContent>
-                        </Card>
-                    </div>
+                            </Panel>
+                        </div>
+                    )}
+                    {active === 'payment' && (
+                        <div className="grid gap-5 lg:grid-cols-2 xl:col-span-2">
+                            <Panel title="Pembayaran">
+                                <Info
+                                    label="Status"
+                                    value={
+                                        <StatusBadge
+                                            value={order.payment_status}
+                                        />
+                                    }
+                                />
+                                <Line
+                                    label="Jumlah dibayar dari saldo"
+                                    value={rupiah(order.wallet_amount)}
+                                />
+                                <Line
+                                    label="Total pesanan"
+                                    value={rupiah(order.total)}
+                                    strong
+                                />
+                            </Panel>
+                            <Panel
+                                title={
+                                    'Transaksi wallet (' +
+                                    order.wallet_transactions.length +
+                                    ')'
+                                }
+                            >
+                                {order.wallet_transactions.length ? (
+                                    order.wallet_transactions.map((tx) => (
+                                        <div
+                                            key={tx.id}
+                                            className="space-y-2 border-b pb-3"
+                                        >
+                                            <Line
+                                                label={
+                                                    tx.type +
+                                                    ' · ' +
+                                                    formatDate(tx.created_at)
+                                                }
+                                                value={
+                                                    (tx.direction === 'debit'
+                                                        ? '−'
+                                                        : '+') +
+                                                    rupiah(tx.amount)
+                                                }
+                                            />
+                                            <Line
+                                                label="Saldo sebelum"
+                                                value={rupiah(
+                                                    tx.balance_before,
+                                                )}
+                                            />
+                                            <Line
+                                                label="Saldo sesudah"
+                                                value={rupiah(tx.balance_after)}
+                                            />
+                                            {tx.note && (
+                                                <p className="text-muted-foreground text-xs">
+                                                    {tx.note}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        Tidak ada transaksi saldo.
+                                    </p>
+                                )}
+                            </Panel>
+                        </div>
+                    )}
+                    {active === 'shipping' && (
+                        <div className="space-y-5 xl:col-span-2">
+                            {order.shipments.length ? (
+                                order.shipments.map((shipment) => (
+                                    <ShipmentPanel
+                                        key={shipment.id}
+                                        orderId={order.id}
+                                        shipment={shipment}
+                                    />
+                                ))
+                            ) : (
+                                <Panel title="Pengiriman">
+                                    <p className="text-muted-foreground text-sm">
+                                        Belum ada data shipment.
+                                    </p>
+                                </Panel>
+                            )}
+                        </div>
+                    )}
+                    {active === 'history' && (
+                        <div className="xl:col-span-2">
+                            <Panel title="Riwayat status order">
+                                {order.status_histories.length ? (
+                                    order.status_histories.map((event) => (
+                                        <div
+                                            key={event.id}
+                                            className="flex flex-wrap items-start justify-between gap-3 border-b pb-3"
+                                        >
+                                            <div>
+                                                <StatusBadge
+                                                    value={
+                                                        event.status as OrderStatus
+                                                    }
+                                                />
+                                                {event.note && (
+                                                    <p className="mt-2 text-sm">
+                                                        {event.note}
+                                                    </p>
+                                                )}
+                                                <p className="text-muted-foreground text-xs">
+                                                    {event.changed_by ||
+                                                        'Sistem'}
+                                                </p>
+                                            </div>
+                                            <time className="text-muted-foreground text-xs">
+                                                {formatDate(event.created_at)}
+                                            </time>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        Belum ada riwayat status.
+                                    </p>
+                                )}
+                            </Panel>
+                        </div>
+                    )}
+                    {active === 'stock' && (
+                        <div className="xl:col-span-2">
+                            <Panel
+                                title={
+                                    'Mutasi stok (' +
+                                    order.stock_movements.length +
+                                    ')'
+                                }
+                            >
+                                {order.stock_movements.length ? (
+                                    order.stock_movements.map((move) => (
+                                        <div
+                                            key={move.id}
+                                            className="grid gap-2 border-b pb-3 sm:grid-cols-5"
+                                        >
+                                            <Info
+                                                label="Buku"
+                                                value={move.book_title || '—'}
+                                            />
+                                            <Info
+                                                label="Jenis"
+                                                value={move.type}
+                                            />
+                                            <Info
+                                                label="Perubahan"
+                                                value={move.quantity}
+                                            />
+                                            <Info
+                                                label="Stok sebelum → sesudah"
+                                                value={
+                                                    move.stock_before +
+                                                    ' → ' +
+                                                    move.stock_after
+                                                }
+                                            />
+                                            <Info
+                                                label="Waktu / Admin"
+                                                value={
+                                                    formatDate(
+                                                        move.created_at,
+                                                    ) +
+                                                    ' · ' +
+                                                    (move.changed_by || '—')
+                                                }
+                                            />
+                                            {move.note && (
+                                                <p className="text-muted-foreground text-xs sm:col-span-5">
+                                                    {move.note}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        Tidak ada mutasi stok.
+                                    </p>
+                                )}
+                            </Panel>
+                        </div>
+                    )}
                 </div>
             </main>
         </>
     );
 }
 
-function Info({
-    label,
-    value,
-    children,
+function ShipmentPanel({
+    orderId,
+    shipment,
+    statusOnly = false,
 }: {
-    label: string;
-    value?: string;
-    children?: React.ReactNode;
+    orderId: number;
+    shipment: Shipment;
+    statusOnly?: boolean;
 }) {
+    const choices = shipmentTransitions[shipment.status] ?? [];
+    const form = useForm<{ status: ShipmentStatus; description: string }>({
+        status: choices[0] ?? shipment.status,
+        description: '',
+    });
+    useEffect(() => {
+        form.setData(
+            'status',
+            (shipmentTransitions[shipment.status] ?? [])[0] ?? shipment.status,
+        );
+    }, [shipment.status]);
+    const submit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (
+            !window.confirm(
+                'Perubahan manual status pengiriman tidak disarankan karena dapat berbeda dari status Biteship. Lanjutkan?',
+            )
+        )
+            return;
+        form.patch(
+            '/admin/orders/' +
+                orderId +
+                '/shipments/' +
+                shipment.id +
+                '/status',
+            { preserveScroll: true },
+        );
+    };
     return (
-        <div>
-            <p className="text-muted-foreground text-xs tracking-wide uppercase">
-                {label}
-            </p>
-            <div className="mt-1 font-medium whitespace-pre-wrap">
-                {children ?? value}
-            </div>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+                    {shipment.shipment_code}
+                    <StatusBadge value={shipment.status} />
+                </CardTitle>
+            </CardHeader>
+            <CardContent
+                className={
+                    statusOnly ? 'space-y-4' : 'grid gap-6 lg:grid-cols-2'
+                }
+            >
+                {statusOnly ? (
+                    <>
+                        <p className="text-muted-foreground text-sm">
+                            Status pengiriman diperbarui otomatis oleh webhook
+                            Biteship. Perubahan manual tidak disarankan.
+                        </p>
+                        {choices.length ? (
+                            <form
+                                onSubmit={submit}
+                                className="space-y-3 border-t pt-4"
+                            >
+                                <div className="grid gap-2">
+                                    <Label
+                                        htmlFor={
+                                            'shipment-status-' + shipment.id
+                                        }
+                                    >
+                                        Status berikutnya
+                                    </Label>
+                                    <select
+                                        id={'shipment-status-' + shipment.id}
+                                        value={form.data.status}
+                                        onChange={(event) =>
+                                            form.setData(
+                                                'status',
+                                                event.target
+                                                    .value as ShipmentStatus,
+                                            )
+                                        }
+                                        className="bg-background h-10 rounded-md border px-3 text-sm"
+                                    >
+                                        {choices.map((status) => (
+                                            <option key={status} value={status}>
+                                                {shipmentLabel[status]}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label
+                                        htmlFor={'shipment-note-' + shipment.id}
+                                    >
+                                        Catatan
+                                    </Label>
+                                    <Input
+                                        id={'shipment-note-' + shipment.id}
+                                        maxLength={1000}
+                                        value={form.data.description}
+                                        onChange={(event) =>
+                                            form.setData(
+                                                'description',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                {form.errors.status && (
+                                    <p className="text-destructive text-sm">
+                                        {form.errors.status}
+                                    </p>
+                                )}
+                                <Button disabled={form.processing}>
+                                    Perbarui status pengiriman manual
+                                </Button>
+                            </form>
+                        ) : (
+                            <p className="text-muted-foreground text-sm">
+                                Status akhir.
+                            </p>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <div className="space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <Info
+                                    label="Kurir"
+                                    value={shipment.courier_company}
+                                />
+                                <Info
+                                    label="Dibuat"
+                                    value={formatDate(shipment.created_at)}
+                                />
+                                <Info
+                                    label="Layanan"
+                                    value={
+                                        shipment.courier_service_name ||
+                                        shipment.courier_type
+                                    }
+                                />
+                                <Info
+                                    label="Tipe"
+                                    value={shipment.delivery_type}
+                                />
+                                <Info
+                                    label="Biaya"
+                                    value={rupiah(shipment.price)}
+                                />
+                                <Info
+                                    label="Estimasi"
+                                    value={shipment.duration || '—'}
+                                />
+                                <Info
+                                    label="ID Biteship"
+                                    value={shipment.biteship_order_id || '—'}
+                                />
+                                <Info
+                                    label="Status provider"
+                                    value={shipment.biteship_status || '—'}
+                                />
+                                <Info
+                                    label="Nomor tracking"
+                                    value={shipment.tracking_id || '—'}
+                                />
+                                <Info
+                                    label="Resi"
+                                    value={shipment.waybill_id || '—'}
+                                />
+                            </div>
+                            {shipment.courier_link && (
+                                <a
+                                    href={shipment.courier_link}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-primary text-sm underline"
+                                >
+                                    Buka pelacakan kurir
+                                </a>
+                            )}
+                            <p className="text-sm">
+                                Isi paket:{' '}
+                                {shipment.items
+                                    .map(
+                                        (item) =>
+                                            (item.name || 'Item') +
+                                            ' × ' +
+                                            item.quantity,
+                                    )
+                                    .join(', ') || '—'}
+                            </p>
+                        </div>
+                        <div className="space-y-4">
+                            <h3 className="font-semibold">
+                                Riwayat pengiriman
+                            </h3>
+                            {shipment.status_histories.map((event) => (
+                                <div
+                                    key={event.id}
+                                    className="border-l-2 pl-3 text-sm"
+                                >
+                                    <StatusBadge
+                                        value={event.status as ShipmentStatus}
+                                    />
+                                    <time className="text-muted-foreground ml-2 text-xs">
+                                        {formatDate(
+                                            event.occurred_at ||
+                                                event.created_at,
+                                        )}
+                                    </time>
+                                    {event.description && (
+                                        <p className="mt-1">
+                                            {event.description}
+                                        </p>
+                                    )}
+                                    {event.provider_status && (
+                                        <p className="text-muted-foreground text-xs">
+                                            Provider: {event.provider_status}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                            {!shipment.status_histories.length && (
+                                <p className="text-muted-foreground text-sm">
+                                    Belum ada riwayat.
+                                </p>
+                            )}
+                        </div>
+                    </>
+                )}
+            </CardContent>
+        </Card>
     );
 }
-
-OrderShow.layout = {
-    breadcrumbs: [
-        { title: 'Pesanan', href: admin.orders.index() },
-        { title: 'Detail Pesanan', href: admin.orders.index() },
-    ],
-};

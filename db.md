@@ -168,6 +168,8 @@ Table users {
 Table store_settings {
   id bigint [pk, increment]
 
+  bank_accounts json // [{bank_name, account_holder, account_number}]
+
   store_name varchar(150) [not null]
 
   whatsapp_number varchar(30)

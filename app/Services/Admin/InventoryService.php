@@ -21,9 +21,25 @@ class InventoryService
         return $this->apply($book->id, $type, $type === StockMovementType::AdjustmentOut ? -$quantity : $quantity, $note, $admin);
     }
 
-    public function restoreForCancellation(Order $order, User $admin): BookStockMovement
+    public function restoreForCancellation(Order $order, User $admin): void
     {
-        return $this->apply($order->book_id, StockMovementType::Cancellation, $order->quantity, 'Pengembalian stok karena order dibatalkan.', $admin, $order);
+        $movements = BookStockMovement::query()
+            ->where('order_id', $order->id)
+            ->where('type', StockMovementType::Order)
+            ->get();
+
+        foreach ($movements as $movement) {
+            $alreadyRestored = BookStockMovement::query()
+                ->where('order_id', $order->id)
+                ->where('order_item_id', $movement->order_item_id)
+                ->where('type', StockMovementType::Cancellation)
+                ->exists();
+
+            if (! $alreadyRestored) {
+                $this->apply($movement->book_id, StockMovementType::Cancellation, abs($movement->quantity),
+                    'Pengembalian stok karena order dibatalkan.', $admin, $order, $movement->order_item_id);
+            }
+        }
     }
 
     public function recordInitial(Book $book, int $quantity, User $admin): ?BookStockMovement
@@ -42,9 +58,9 @@ class InventoryService
         ]);
     }
 
-    private function apply(int $bookId, StockMovementType $type, int $delta, ?string $note, User $admin, ?Order $order = null): BookStockMovement
+    private function apply(int $bookId, StockMovementType $type, int $delta, ?string $note, User $admin, ?Order $order = null, ?int $orderItemId = null): BookStockMovement
     {
-        return DB::transaction(function () use ($bookId, $type, $delta, $note, $admin, $order): BookStockMovement {
+        return DB::transaction(function () use ($bookId, $type, $delta, $note, $admin, $order, $orderItemId): BookStockMovement {
             $book = Book::withTrashed()->lockForUpdate()->findOrFail($bookId);
             $before = $book->stock;
             $after = $before + $delta;
@@ -58,6 +74,7 @@ class InventoryService
             return BookStockMovement::create([
                 'book_id' => $book->id,
                 'order_id' => $order?->id,
+                'order_item_id' => $orderItemId,
                 'changed_by' => $admin->id,
                 'type' => $type,
                 'quantity' => $delta,

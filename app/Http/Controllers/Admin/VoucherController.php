@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\VoucherType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Vouchers\SaveVoucherRequest;
 use App\Http\Resources\Admin\VoucherResource;
+use App\Models\Voucher;
 use App\Services\Admin\VoucherListService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -29,5 +32,21 @@ class VoucherController extends Controller
             'vouchers' => VoucherResource::collection($this->service->paginate($filters)),
             'filters' => $filters,
         ]);
+    }
+
+    public function store(SaveVoucherRequest $request): RedirectResponse
+    {
+        Voucher::create([...$request->validated(), 'created_by' => $request->user()->id]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Voucher berhasil ditambahkan.']);
+
+        return back();
+    }
+
+    public function update(SaveVoucherRequest $request, Voucher $voucher): RedirectResponse
+    {
+        $voucher->update($request->validated());
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Voucher berhasil diperbarui.']);
+
+        return back();
     }
 }

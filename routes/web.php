@@ -13,12 +13,25 @@ use App\Http\Controllers\Admin\StoreSettingController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\WalletTopupController;
 use App\Http\Controllers\Admin\WalletTransactionController;
+use App\Http\Controllers\BiteshipWebhookController;
 use App\Http\Controllers\Customer\BookController as CustomerBookController;
+use App\Http\Controllers\Customer\CartItemController;
+use App\Http\Controllers\Customer\Dashboard\AddressController as CustomerDashboardAddressController;
+use App\Http\Controllers\Customer\Dashboard\CartController as CustomerDashboardCartController;
+use App\Http\Controllers\Customer\Dashboard\CheckoutController;
+use App\Http\Controllers\Customer\Dashboard\OrderController as CustomerDashboardOrderController;
+use App\Http\Controllers\Customer\Dashboard\ProfileController as CustomerDashboardProfileController;
+use App\Http\Controllers\Customer\Dashboard\VoucherController as CustomerDashboardVoucherController;
+use App\Http\Controllers\Customer\Dashboard\WalletController as CustomerDashboardWalletController;
+use App\Http\Controllers\Customer\Dashboard\WalletTopupController as CustomerDashboardWalletTopupController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\OrderTrackingController;
 use App\Http\Middleware\EnsureAdminRole;
+use App\Http\Middleware\EnsureCustomerRole;
 use Illuminate\Support\Facades\Route;
+
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('books', [CustomerBookController::class, 'index'])->name('books.index');
@@ -27,7 +40,27 @@ Route::get('track-order', [OrderTrackingController::class, 'index'])->name('trac
 Route::get('track-order/{orderCode}', [OrderTrackingController::class, 'show'])->name('track-order.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('cart/items', [CartItemController::class, 'store'])->name('cart.items.store');
+    Route::patch('cart/items/{cartItem}', [CartItemController::class, 'update'])->middleware(EnsureCustomerRole::class)->name('cart.items.update');
+    Route::delete('cart/items/{cartItem}', [CartItemController::class, 'destroy'])->middleware(EnsureCustomerRole::class)->name('cart.items.destroy');
     Route::redirect('dashboard', '/admin')->name('dashboard');
+
+    Route::prefix('customer/dashboard')->as('customer.dashboard.')->middleware(EnsureCustomerRole::class)->group(function () {
+        Route::get('profile', CustomerDashboardProfileController::class)->name('profile');
+        Route::get('address/areas', [CustomerDashboardAddressController::class, 'areas'])->middleware('throttle:30,1')->name('address.areas');
+        Route::get('address/map-center', [CustomerDashboardAddressController::class, 'mapCenter'])->middleware('throttle:30,1')->name('address.map-center');
+        Route::put('address', [CustomerDashboardAddressController::class, 'save'])->name('address.save');
+        Route::get('carts', CustomerDashboardCartController::class)->name('carts.index');
+        Route::get('carts/checkout', [CheckoutController::class, 'index'])->name('checkout');
+        Route::get('carts/checkout/rates', [CheckoutController::class, 'rates'])->middleware('throttle:20,1')->name('checkout.rates');
+        Route::post('carts/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+        Route::get('orders', CustomerDashboardOrderController::class)->name('orders.index');
+        Route::patch('orders/{order}/cancel', [CustomerDashboardOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::get('orders/{order}', [CustomerDashboardOrderController::class, 'show'])->name('orders.show');
+        Route::get('wallets', CustomerDashboardWalletController::class)->name('wallets.index');
+        Route::post('wallets/top-ups', CustomerDashboardWalletTopupController::class)->name('wallets.topups.store');
+        Route::get('vouchers', CustomerDashboardVoucherController::class)->name('vouchers.index');
+    });
 
     Route::prefix('admin')->as('admin.')->middleware(EnsureAdminRole::class)->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
@@ -47,10 +80,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('shipments', [ShipmentController::class, 'index'])->name('shipments.index');
         Route::get('top-ups', [WalletTopupController::class, 'index'])->name('top-ups.index');
+        Route::get('top-ups/{walletTopup}/proof', [WalletTopupController::class, 'proof'])->name('top-ups.proof');
+        Route::patch('top-ups/{walletTopup}', [WalletTopupController::class, 'review'])->name('top-ups.review');
         Route::get('wallet-transactions', [WalletTransactionController::class, 'index'])->name('wallet-transactions.index');
         Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+        Route::post('vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
+        Route::patch('vouchers/{voucher}', [VoucherController::class, 'update'])->name('vouchers.update');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+        Route::patch('orders/{order}/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus'])->name('orders.shipments.status');
         Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
         Route::patch('orders/{order}/shipping-cost', [OrderController::class, 'updateShippingCost'])->name('orders.shipping-cost');
         Route::post('orders/{order}/payment-proofs', [PaymentProofController::class, 'store'])->name('orders.payment-proofs.store');
@@ -62,6 +100,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('settings', [StoreSettingController::class, 'edit'])->name('settings.edit');
         Route::patch('settings', [StoreSettingController::class, 'update'])->name('settings.update');
+        Route::get('settings/address/areas', [CustomerDashboardAddressController::class, 'areas'])->middleware('throttle:30,1')->name('settings.address.areas');
+        Route::get('settings/address/map-center', [CustomerDashboardAddressController::class, 'mapCenter'])->middleware('throttle:30,1')->name('settings.address.map-center');
     });
 });
 

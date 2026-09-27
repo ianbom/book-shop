@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,6 +42,12 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'cartCount' => fn () => $request->user()?->role === UserRole::Customer
+                ? (int) ($request->user()->cart()->withSum('items', 'quantity')->first()?->items_sum_quantity ?? 0)
+                : 0,
+            'walletBalance' => fn () => $request->user()?->role === UserRole::Customer
+                ? (string) ($request->user()->wallet()->value('balance') ?? '0.00')
+                : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

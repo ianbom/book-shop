@@ -14,9 +14,9 @@ export default function AuthSplitLayout({
                 <img
                     src="/images/customer/home/hero.jpg"
                     alt=""
-                    className="absolute inset-0 size-full object-cover opacity-70"
+                    className="absolute inset-0 size-full object-cover opacity-80"
                 />
-                <div className="from-foreground via-foreground/65 absolute inset-0 bg-gradient-to-t to-transparent" />
+                <div className="from-foreground via-foreground/5 absolute inset-0 bg-gradient-to-t to-transparent" />
                 <Link
                     href={home()}
                     className="text-primary-foreground relative z-10 flex items-center gap-3 p-10 text-lg font-medium"
