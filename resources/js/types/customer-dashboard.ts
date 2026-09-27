@@ -17,6 +17,7 @@ export type CustomerOrder = {
     id: number;
     order_code: string;
     item_summary: string;
+    primary_image: { url: string; alt_text: string | null } | null;
     quantity: number;
     total: string;
     status: OrderStatus;

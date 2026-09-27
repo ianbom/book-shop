@@ -10,7 +10,7 @@ class ProfileUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed()
+    public function test_profile_page_redirects_to_customer_dashboard()
     {
         $user = User::factory()->create();
 
@@ -18,7 +18,7 @@ class ProfileUpdateTest extends TestCase
             ->actingAs($user)
             ->get(route('profile.edit'));
 
-        $response->assertOk();
+        $response->assertRedirect(route('customer.dashboard.profile'));
     }
 
     public function test_profile_information_can_be_updated()

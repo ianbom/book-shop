@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer\Dashboard;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\SaveAddressRequest;
 use App\Models\User;
@@ -78,6 +79,8 @@ class AddressController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Alamat berhasil disimpan.']);
 
-        return to_route('customer.dashboard.profile');
+        return $request->user()->role === UserRole::Admin
+            ? to_route('admin.profile')
+            : to_route('customer.dashboard.profile');
     }
 }

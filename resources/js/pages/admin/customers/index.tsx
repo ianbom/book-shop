@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     CalendarDays,
     RotateCcw,
@@ -198,6 +198,12 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                             direction={filters.sort_direction}
                                             onSort={sortBy}
                                         />
+                                        <th
+                                            scope="col"
+                                            className="px-4 py-4 text-right"
+                                        >
+                                            Aksi
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-border/80 divide-y bg-white">
@@ -207,7 +213,12 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                             className="hover:bg-muted/45 transition-colors"
                                         >
                                             <td className="text-foreground px-4 py-3.5 font-semibold">
-                                                {customer.name}
+                                                <Link
+                                                    href={`/admin/customers/${customer.id}`}
+                                                    className="hover:text-primary hover:underline"
+                                                >
+                                                    {customer.name}
+                                                </Link>
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 {customer.email}
@@ -244,12 +255,25 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                                     customer.created_at,
                                                 )}
                                             </td>
+                                            <td className="px-4 py-3.5 text-right">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/customers/${customer.id}`}
+                                                    >
+                                                        Detail
+                                                    </Link>
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))}
                                     {customers.data.length === 0 && (
                                         <tr>
                                             <td
-                                                colSpan={7}
+                                                colSpan={8}
                                                 className="text-muted-foreground px-4 py-12 text-center"
                                             >
                                                 Customer tidak ditemukan.

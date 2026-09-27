@@ -23,21 +23,30 @@ class OrderController extends Controller
 
     public function index(Request $request): Response
     {
+        $request->validate([
+            'date_from' => ['nullable', 'date_format:Y-m-d'],
+            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from'],
+        ]);
+
+        $filters = $request->only(['search', 'status', 'date_from', 'date_to']);
         $status = OrderStatus::tryFrom($request->string('status')->toString());
-        $paymentStatus = PaymentStatus::tryFrom($request->string('payment')->toString());
         $orders = Order::query()
+            ->with([
+                'items' => fn ($query) => $query->orderBy('id'),
+                'items.book' => fn ($query) => $query->withTrashed(),
+                'items.book.images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
+            ])
             ->search($request->string('search')->toString())
             ->status($status)
-            ->paymentStatus($paymentStatus)
             ->when($request->date('date_from'), fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
             ->when($request->date('date_to'), fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
             ->latest()
             ->paginate(15)
-            ->withQueryString();
+            ->appends($filters);
 
         return Inertia::render('admin/orders/index', [
             'orders' => OrderResource::collection($orders),
-            'filters' => $request->only(['search', 'status', 'payment', 'date_from', 'date_to']),
+            'filters' => $filters,
         ]);
     }
 

@@ -3,7 +3,10 @@
 namespace Tests\Feature\Customer;
 
 use App\Enums\UserRole;
+use App\Models\Book;
+use App\Models\BookImage;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Voucher;
@@ -12,6 +15,7 @@ use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -189,7 +193,24 @@ class CustomerDashboardPagesTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->has('orders.data', 1)
                 ->where('orders.data.0.order_code', 'ORD-MY-BOOK')
+                ->where('orders.data.0.primary_image', null)
                 ->where('filters.search', 'MY-BOOK'));
+    }
+
+    public function test_order_list_shows_first_books_primary_cover(): void
+    {
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $order = $this->order($customer, 'ORD-WITH-COVER');
+        $book = Book::factory()->create();
+        BookImage::factory()->create(['book_id' => $book->id, 'image_path' => 'books/other.webp', 'is_primary' => false]);
+        BookImage::factory()->create(['book_id' => $book->id, 'image_path' => 'books/cover.webp', 'alt_text' => 'Sampul pesanan', 'is_primary' => true]);
+        OrderItem::create(['order_id' => $order->id, 'book_id' => $book->id, 'name' => 'Buku Contoh', 'sku' => 'BUKU-1', 'weight' => 500, 'sale_type' => 'ready_stock', 'value' => 100000, 'quantity' => 1, 'subtotal' => 100000]);
+        $book->delete();
+
+        $this->actingAs($customer)->get(route('customer.dashboard.orders.index', ['search' => 'WITH-COVER']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('orders.data.0.primary_image.url', Storage::disk('public')->url('books/cover.webp'))
+                ->where('orders.data.0.primary_image.alt_text', 'Sampul pesanan'));
     }
 
     public function test_order_pagination_preserves_the_search_filter(): void

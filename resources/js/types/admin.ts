@@ -68,7 +68,10 @@ export type OrderStatus =
     | 'completed'
     | 'cancelled';
 export type PaymentStatus =
-    'unpaid' | 'paid' | 'partially_refunded' | 'refunded';
+    | 'unpaid'
+    | 'paid'
+    | 'partially_refunded'
+    | 'refunded';
 export type StockMovementType =
     | 'initial'
     | 'adjustment_in'
@@ -106,27 +109,13 @@ export type StockMovement = {
 export type Order = {
     id: number;
     order_code: string;
-    customer_name: string;
-    customer_phone: string;
-    customer_email: string | null;
-    customer_address: string;
-    customer_note: string | null;
-    book_id: number;
     book_title: string;
-    book_isbn: string | null;
-    book_author: string | null;
-    unit_price: string;
+    primary_image_url: string | null;
     quantity: number;
-    subtotal: string;
-    shipping_cost: string;
     total: string;
     status: OrderStatus;
     payment_status: PaymentStatus;
-    created_at: string;
-    book?: { id: number | null; slug: string | null };
-    payment_proofs?: PaymentProof[];
-    status_histories?: OrderStatusHistory[];
-    stock_movements?: StockMovement[];
+    created_at: string | null;
 };
 export type BankAccount = {
     bank_name: string;

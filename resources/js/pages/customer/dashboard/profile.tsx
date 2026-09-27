@@ -1,23 +1,31 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { CheckCircle2 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import { AddressDialog } from '@/components/customer/profile/address-dialog';
 import type { CustomerAddress } from '@/components/customer/profile/address-dialog';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Auth } from '@/types';
 
 export default function Profile({
     address,
+    profilePhotoUrl,
+    profileEndpoint = '/customer/dashboard/profile',
+    addressEndpoint = '/customer/dashboard/address',
 }: {
     address: CustomerAddress | null;
+    profilePhotoUrl: string | null;
+    profileEndpoint?: string;
+    addressEndpoint?: string;
 }) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const [addressOpen, setAddressOpen] = useState(false);
+    const photoInput = useRef<HTMLInputElement>(null);
     const user = auth.user;
     const addressSummary = address
         ? [
@@ -34,7 +42,7 @@ export default function Profile({
         : '—';
     const details = [
         ['Nama Lengkap', user.name],
-        ['Member ID', '—'],
+        ['Member ID', String(user.id)],
         ['No. WhatsApp', (user.phone as string | null) || '—'],
         ['Email', user.email],
         ['Alamat', addressSummary],
@@ -56,15 +64,18 @@ export default function Profile({
             >
                 <div className="flex flex-col items-center gap-3 self-start">
                     <Avatar className="size-28 border-4 border-white bg-sky-100 shadow-sm">
+                        <AvatarImage
+                            src={profilePhotoUrl ?? undefined}
+                            alt={`Foto profil ${user.name}`}
+                        />
                         <AvatarFallback className="bg-sky-100 text-4xl font-bold text-sky-700">
                             {user.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
                     <Button
                         type="button"
-                        disabled
-                        title="Unggah foto belum tersedia"
                         className="w-28 bg-[#124979] text-white disabled:opacity-100"
+                        onClick={() => photoInput.current?.click()}
                     >
                         Ubah Foto
                     </Button>
@@ -104,10 +115,77 @@ export default function Profile({
                 </Button>
             </section>
 
+            <section
+                aria-labelledby="profile-update-heading"
+                className="mt-6 rounded-xl border border-slate-100 bg-white p-5 shadow-sm sm:p-7"
+            >
+                <h2
+                    id="profile-update-heading"
+                    className="font-heading text-xl font-bold text-slate-900"
+                >
+                    Informasi Akun
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                    Perbarui nomor WhatsApp dan foto profil.
+                </p>
+                <Form
+                    action={profileEndpoint}
+                    method="post"
+                    options={{ preserveScroll: true }}
+                    className="mt-5 max-w-lg space-y-4"
+                >
+                    {({ errors, processing }) => (
+                        <>
+                            <input type="hidden" name="_method" value="PATCH" />
+                            <div className="space-y-2">
+                                <Label htmlFor="profile_phone">
+                                    No. WhatsApp
+                                </Label>
+                                <Input
+                                    id="profile_phone"
+                                    name="phone"
+                                    type="tel"
+                                    autoComplete="tel"
+                                    maxLength={30}
+                                    defaultValue={user.phone ?? ''}
+                                    placeholder="08xxxxxxxxxx"
+                                />
+                                <InputError message={errors.phone} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="profile_photo">
+                                    Foto Profil
+                                </Label>
+                                <Input
+                                    id="profile_photo"
+                                    name="profile_photo"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    ref={photoInput}
+                                    className="file:mr-3 file:rounded file:border-0 file:bg-sky-50 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-sky-700"
+                                />
+                                <p className="text-xs text-slate-500">
+                                    JPG, PNG, atau WebP; maksimal 5 MB.
+                                </p>
+                                <InputError message={errors.profile_photo} />
+                            </div>
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                className="bg-[#124979] text-white"
+                            >
+                                Simpan Profil
+                            </Button>
+                        </>
+                    )}
+                </Form>
+            </section>
+
             <AddressDialog
                 address={address}
                 open={addressOpen}
                 onOpenChange={setAddressOpen}
+                endpoint={addressEndpoint}
             />
 
             <section

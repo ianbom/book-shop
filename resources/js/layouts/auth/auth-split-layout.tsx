@@ -17,15 +17,6 @@ export default function AuthSplitLayout({
                     className="absolute inset-0 size-full object-cover opacity-80"
                 />
                 <div className="from-foreground via-foreground/5 absolute inset-0 bg-gradient-to-t to-transparent" />
-                <Link
-                    href={home()}
-                    className="text-primary-foreground relative z-10 flex items-center gap-3 p-10 text-lg font-medium"
-                >
-                    <AppLogoIcon className="size-8 fill-current" />
-                    <span className="font-heading text-2xl tracking-tight">
-                        Wonder Book
-                    </span>
-                </Link>
                 <div className="text-primary-foreground absolute right-10 bottom-10 left-10 z-10 max-w-lg">
                     <p className="mb-4 text-xs font-semibold tracking-[0.24em] uppercase opacity-75">
                         Temukan cerita berikutnya
@@ -38,7 +29,7 @@ export default function AuthSplitLayout({
             <div className="flex min-h-svh flex-col p-6 md:p-10">
                 <Link
                     href={home()}
-                    className="text-foreground flex items-center gap-3 lg:hidden"
+                    className="text-foreground flex items-center justify-end gap-3"
                 >
                     <AppLogoIcon className="size-8 fill-current" />
                     <span className="font-heading text-xl font-semibold">

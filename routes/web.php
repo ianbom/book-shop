@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PaymentProofController;
 use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\StoreSettingController;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('customer/dashboard')->as('customer.dashboard.')->middleware(EnsureCustomerRole::class)->group(function () {
         Route::get('profile', CustomerDashboardProfileController::class)->name('profile');
+        Route::patch('profile', [CustomerDashboardProfileController::class, 'update'])->name('profile.update');
         Route::get('address/areas', [CustomerDashboardAddressController::class, 'areas'])->middleware('throttle:30,1')->name('address.areas');
         Route::get('address/map-center', [CustomerDashboardAddressController::class, 'mapCenter'])->middleware('throttle:30,1')->name('address.map-center');
         Route::put('address', [CustomerDashboardAddressController::class, 'save'])->name('address.save');
@@ -64,6 +66,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('admin')->as('admin.')->middleware(EnsureAdminRole::class)->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+        Route::get('profile', AdminProfileController::class)->name('profile');
+        Route::patch('profile', [CustomerDashboardProfileController::class, 'update'])->name('profile.update');
+        Route::get('profile/address/areas', [CustomerDashboardAddressController::class, 'areas'])->middleware('throttle:30,1')->name('profile.address.areas');
+        Route::get('profile/address/map-center', [CustomerDashboardAddressController::class, 'mapCenter'])->middleware('throttle:30,1')->name('profile.address.map-center');
+        Route::put('profile/address', [CustomerDashboardAddressController::class, 'save'])->name('profile.address.save');
         Route::resource('books', BookController::class);
         Route::patch('books/{book}/status', [BookController::class, 'updateStatus'])->name('books.status');
         Route::post('books/{book}/images', [BookImageController::class, 'store'])->name('books.images.store');
@@ -78,6 +85,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
         Route::get('shipments', [ShipmentController::class, 'index'])->name('shipments.index');
         Route::get('top-ups', [WalletTopupController::class, 'index'])->name('top-ups.index');
         Route::get('top-ups/{walletTopup}/proof', [WalletTopupController::class, 'proof'])->name('top-ups.proof');

@@ -50,7 +50,9 @@ export default function OrdersIndex({
     orders: CustomerDashboardPage<CustomerOrder>;
     filters: Filters;
 }) {
-    const [orderToCancel, setOrderToCancel] = useState<CustomerOrder | null>(null);
+    const [orderToCancel, setOrderToCancel] = useState<CustomerOrder | null>(
+        null,
+    );
     const cancelForm = useForm({});
     const cancellationError = String(Object.values(cancelForm.errors)[0] ?? '');
 
@@ -210,9 +212,7 @@ export default function OrdersIndex({
                                         </th>
                                         <th className="px-4 py-4">Tanggal</th>
                                         <th className="px-4 py-4">Status</th>
-                                        <th className="px-4 py-4">
-                                            Aksi
-                                        </th>
+                                        <th className="px-4 py-4">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-border/80 divide-y bg-white">
@@ -223,9 +223,29 @@ export default function OrdersIndex({
                                         >
                                             <td className="px-4 py-3.5">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="admin-orders-book-placeholder text-primary-foreground flex size-14 shrink-0 items-center justify-center rounded-lg border border-white/70 shadow-sm">
-                                                        <BookOpen className="size-6" />
-                                                    </div>
+                                                    {order.primary_image ? (
+                                                        <img
+                                                            src={
+                                                                order
+                                                                    .primary_image
+                                                                    .url
+                                                            }
+                                                            alt={
+                                                                order
+                                                                    .primary_image
+                                                                    .alt_text ||
+                                                                order.item_summary
+                                                            }
+                                                            className="size-14 shrink-0 rounded-lg border object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="admin-orders-book-placeholder text-primary-foreground flex size-14 shrink-0 items-center justify-center rounded-lg border border-white/70 shadow-sm">
+                                                            <BookOpen
+                                                                className="size-6"
+                                                                aria-hidden="true"
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <div className="min-w-0">
                                                         <p className="text-foreground truncate font-bold">
                                                             {order.item_summary}
@@ -260,8 +280,14 @@ export default function OrdersIndex({
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                    <Button asChild variant="outline" size="sm">
-                                                        <Link href={`${url}/${order.id}`}>
+                                                    <Button
+                                                        asChild
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        <Link
+                                                            href={`${url}/${order.id}`}
+                                                        >
                                                             Lihat Detail
                                                         </Link>
                                                     </Button>
@@ -272,7 +298,9 @@ export default function OrdersIndex({
                                                             size="sm"
                                                             onClick={() => {
                                                                 cancelForm.clearErrors();
-                                                                setOrderToCancel(order);
+                                                                setOrderToCancel(
+                                                                    order,
+                                                                );
                                                             }}
                                                         >
                                                             Batalkan
@@ -325,7 +353,10 @@ export default function OrdersIndex({
                             </DialogDescription>
                         </DialogHeader>
                         {cancellationError && (
-                            <p role="alert" className="text-destructive text-sm">
+                            <p
+                                role="alert"
+                                className="text-destructive text-sm"
+                            >
                                 {cancellationError}
                             </p>
                         )}
@@ -341,7 +372,9 @@ export default function OrdersIndex({
                             <Button
                                 type="button"
                                 variant="destructive"
-                                disabled={cancelForm.processing || !orderToCancel}
+                                disabled={
+                                    cancelForm.processing || !orderToCancel
+                                }
                                 onClick={() => {
                                     if (!orderToCancel) return;
                                     cancelForm.patch(
@@ -356,7 +389,9 @@ export default function OrdersIndex({
                                     );
                                 }}
                             >
-                                {cancelForm.processing ? 'Membatalkan…' : 'Ya, batalkan'}
+                                {cancelForm.processing
+                                    ? 'Membatalkan…'
+                                    : 'Ya, batalkan'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

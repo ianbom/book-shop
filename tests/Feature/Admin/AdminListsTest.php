@@ -3,7 +3,10 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\UserRole;
+use App\Models\Book;
+use App\Models\BookImage;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Shipment;
 use App\Models\User;
 use App\Models\Voucher;
@@ -11,6 +14,7 @@ use App\Models\Wallet;
 use App\Models\WalletTopup;
 use App\Models\WalletTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -189,6 +193,70 @@ class AdminListsTest extends TestCase
             ->where('vouchers.links.next', fn (string $url) => str_contains($url, 'search=Promo')
                 && str_contains($url, 'sort=value')
                 && str_contains($url, 'page=2')));
+    }
+
+    public function test_order_list_displays_primary_book_image_and_filters_date_range(): void
+    {
+        $admin = $this->admin();
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $inside = $this->order($customer, 'ORD-INSIDE');
+        $inside->forceFill(['created_at' => '2026-09-21 10:00:00'])->save();
+        $outside = $this->order($customer, 'ORD-OUTSIDE');
+        $outside->forceFill(['created_at' => '2026-09-20 10:00:00'])->save();
+        $book = Book::factory()->create(['title' => 'Buku Contoh', 'author' => 'Penulis Contoh']);
+        BookImage::factory()->create(['book_id' => $book->id, 'image_path' => 'books/other.webp', 'is_primary' => false]);
+        BookImage::factory()->create(['book_id' => $book->id, 'image_path' => 'books/cover.webp', 'alt_text' => 'Sampul contoh', 'is_primary' => true]);
+        OrderItem::create(['order_id' => $inside->id, 'book_id' => $book->id, 'name' => 'Buku Contoh', 'sku' => 'BOOK-1', 'weight' => 500, 'sale_type' => 'ready_stock', 'value' => 100000, 'quantity' => 2, 'subtotal' => 200000]);
+        OrderItem::create(['order_id' => $inside->id, 'name' => 'Buku Kedua', 'sku' => 'BOOK-2', 'weight' => 500, 'sale_type' => 'ready_stock', 'value' => 100000, 'quantity' => 1, 'subtotal' => 100000]);
+        $book->delete();
+
+        $this->actingAs($admin)->get(route('admin.orders.index', [
+            'date_from' => '2026-09-21', 'date_to' => '2026-09-21', 'payment' => 'paid',
+        ]))->assertInertia(fn (Assert $page) => $page
+            ->has('orders.data', 1)
+            ->where('orders.data.0.book_title', 'Buku Contoh')
+            ->where('orders.data.0.quantity', 3)
+            ->where('orders.data.0.primary_image_url', Storage::disk('public')->url('books/cover.webp'))
+            ->where('filters.date_from', '2026-09-21')
+            ->where('filters.date_to', '2026-09-21')
+            ->missing('filters.payment'));
+
+        $this->actingAs($admin)->get(route('admin.orders.index', ['search' => 'ORD-OUTSIDE']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('orders.data.0.book_title', 'Buku')
+                ->where('orders.data.0.quantity', 0)
+                ->where('orders.data.0.primary_image_url', null));
+    }
+
+    public function test_order_date_filter_rejects_invalid_or_reversed_ranges(): void
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get(route('admin.orders.index', [
+            'date_from' => '2026-09-22', 'date_to' => '2026-09-21',
+        ]))->assertSessionHasErrors('date_to');
+
+        $this->actingAs($admin)->get(route('admin.orders.index', ['date_from' => 'not-a-date']))
+            ->assertSessionHasErrors('date_from');
+    }
+
+    public function test_order_pagination_preserves_both_dates_without_payment_filter(): void
+    {
+        $admin = $this->admin();
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        foreach (range(1, 16) as $index) {
+            $this->order($customer, sprintf('ORD-DATE-%02d', $index))
+                ->forceFill(['created_at' => '2026-09-21 10:00:00'])->save();
+        }
+
+        $this->actingAs($admin)->get(route('admin.orders.index', [
+            'date_from' => '2026-09-21', 'date_to' => '2026-09-21', 'payment' => 'paid',
+        ]))->assertInertia(fn (Assert $page) => $page
+            ->has('orders.data', 15)
+            ->where('orders.meta.total', 16)
+            ->where('orders.links.next', fn (string $url) => str_contains($url, 'date_from=2026-09-21')
+                && str_contains($url, 'date_to=2026-09-21')
+                && ! str_contains($url, 'payment=')));
     }
 
     private function admin(): User

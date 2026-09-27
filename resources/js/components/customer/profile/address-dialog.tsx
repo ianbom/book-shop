@@ -88,10 +88,12 @@ export function AddressDialog({
     address,
     open,
     onOpenChange,
+    endpoint = '/customer/dashboard/address',
 }: {
     address: CustomerAddress | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    endpoint?: string;
 }) {
     const form = useForm<AddressData>(initialData(address));
     const [areas, setAreas] = useState<Area[]>([]);
@@ -155,7 +157,7 @@ export function AddressDialog({
             setAreaError('');
             try {
                 const response = await fetch(
-                    `/customer/dashboard/address/areas?postal_code=${postalCode}`,
+                    `${endpoint}/areas?postal_code=${postalCode}`,
                     {
                         signal: controller.signal,
                         headers: { Accept: 'application/json' },
@@ -187,7 +189,7 @@ export function AddressDialog({
             clearTimeout(timer);
             controller.abort();
         };
-    }, [open, form.data.destination_postal_code, address]);
+    }, [open, form.data.destination_postal_code, address, endpoint]);
 
     useEffect(() => {
         const postalCode = form.data.destination_postal_code;
@@ -210,7 +212,7 @@ export function AddressDialog({
                     area_id: areaId,
                 });
                 const response = await fetch(
-                    `/customer/dashboard/address/map-center?${query}`,
+                    `${endpoint}/map-center?${query}`,
                     {
                         signal: controller.signal,
                         headers: { Accept: 'application/json' },
@@ -282,7 +284,7 @@ export function AddressDialog({
                     className="space-y-5"
                     onSubmit={(event) => {
                         event.preventDefault();
-                        form.put('/customer/dashboard/address', {
+                        form.put(endpoint, {
                             preserveScroll: true,
                             onSuccess: () => onOpenChange(false),
                         });
