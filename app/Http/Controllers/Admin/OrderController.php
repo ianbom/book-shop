@@ -32,6 +32,7 @@ class OrderController extends Controller
         $status = OrderStatus::tryFrom($request->string('status')->toString());
         $orders = Order::query()
             ->with([
+                'user' => fn ($query) => $query->withTrashed()->select('id', 'name', 'email'),
                 'items' => fn ($query) => $query->orderBy('id'),
                 'items.book' => fn ($query) => $query->withTrashed(),
                 'items.book.images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),

@@ -47,6 +47,7 @@ class ProfileController extends Controller
             }
         }
 
+        $user->name = $validated['name'];
         $user->phone = $validated['phone'] ?? null;
         if ($newPhotoPath !== null) {
             $user->profile_photo_path = $newPhotoPath;

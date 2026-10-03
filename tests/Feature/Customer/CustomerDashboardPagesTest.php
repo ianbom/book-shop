@@ -116,6 +116,15 @@ class CustomerDashboardPagesTest extends TestCase
             'label' => 'Kantor',
             'destination_address' => 'Jl. Buku Baru No. 2',
         ]);
+
+        $this->put(route('customer.dashboard.address.save', ['return_to' => 'cart']), $payload)
+            ->assertRedirect(route('customer.dashboard.carts.index'));
+        $this->get(route('customer.dashboard.carts.index'))
+            ->assertInertia(fn (Assert $page) => $page->where('hasAddress', true));
+        $this->assertDatabaseCount('user_addresses', 1);
+
+        $this->put(route('customer.dashboard.address.save', ['return_to' => 'https://example.com']), $payload)
+            ->assertRedirect(route('customer.dashboard.profile'));
     }
 
     public function test_address_map_center_uses_postal_geocoding(): void

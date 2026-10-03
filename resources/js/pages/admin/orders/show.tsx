@@ -5,10 +5,13 @@ import {
     ArrowLeft,
     BookOpen,
     Boxes,
+    Check,
+    ClipboardList,
     CreditCard,
     Package,
     PackageCheck,
     ReceiptText,
+    ShieldCheck,
     Truck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/admin/shared/page-header';
@@ -19,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate, rupiah } from '@/lib/format';
+import { getOrderProgress } from '@/lib/order-progress';
 import admin from '@/routes/admin';
 import type { OrderStatus, ShipmentStatus } from '@/types/admin';
 
@@ -203,6 +207,90 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
                 <CardTitle>{title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">{children}</CardContent>
+        </Card>
+    );
+}
+
+function OrderProgress({ order }: { order: OrderDetail }) {
+    const steps = getOrderProgress(order);
+    const icons = [ClipboardList, Check, ShieldCheck, Package, Truck, Check];
+
+    return (
+        <Card className="bg-card border-primary/20 min-w-0 shadow-none xl:col-span-2">
+            <CardHeader>
+                <CardTitle className="text-primary">Progres Pesanan</CardTitle>
+                {order.status === 'cancelled' && (
+                    <p className="text-destructive text-sm">
+                        Pesanan dibatalkan. Progres berikutnya dihentikan.
+                    </p>
+                )}
+                {order.status === 'waiting_preorder' && (
+                    <p className="text-muted-foreground text-sm">
+                        Menunggu ketersediaan buku preorder sebelum diproses.
+                    </p>
+                )}
+            </CardHeader>
+            <CardContent>
+                <div
+                    role="region"
+                    aria-label="Tahapan progres pesanan; geser untuk melihat seluruh tahap"
+                    tabIndex={0}
+                    className="focus-visible:ring-ring overflow-x-auto rounded-lg pb-2 focus-visible:ring-2 focus-visible:outline-none"
+                >
+                    <ol className="grid min-w-[700px] grid-cols-6 py-2">
+                        {steps.map((step, index) => {
+                            const Icon = icons[index];
+
+                            return (
+                                <li
+                                    key={step.label}
+                                    aria-current={
+                                        step.state === 'current'
+                                            ? 'step'
+                                            : undefined
+                                    }
+                                    className="relative flex flex-col items-center px-2 text-center"
+                                >
+                                    {index < steps.length - 1 && (
+                                        <span
+                                            aria-hidden="true"
+                                            className={`absolute top-7 left-1/2 h-px w-full ${step.reached && steps[index + 1].reached ? 'bg-primary' : 'bg-border'}`}
+                                        />
+                                    )}
+                                    <span
+                                        aria-hidden="true"
+                                        className={`relative z-10 grid size-14 place-items-center rounded-full border-2 ${step.state === 'current' ? 'border-primary bg-primary text-primary-foreground shadow-md' : step.state === 'complete' ? 'border-primary bg-secondary text-primary' : 'border-border bg-card text-muted-foreground'}`}
+                                    >
+                                        <Icon
+                                            className="size-5"
+                                            strokeWidth={1.6}
+                                        />
+                                    </span>
+                                    <span className="text-foreground mt-3 text-sm font-medium">
+                                        {step.label}
+                                    </span>
+                                    <span className="sr-only">
+                                        {step.state === 'current'
+                                            ? 'Tahap saat ini'
+                                            : step.state === 'complete'
+                                              ? 'Tahap tercapai'
+                                              : 'Belum tercapai'}
+                                    </span>
+                                    <span className="text-muted-foreground mt-1 text-xs">
+                                        {step.date ? (
+                                            <time dateTime={step.date}>
+                                                {formatDate(step.date)}
+                                            </time>
+                                        ) : (
+                                            step.detail || '—'
+                                        )}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ol>
+                </div>
+            </CardContent>
         </Card>
     );
 }
@@ -425,6 +513,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                     )}
                     {active === 'status' && (
                         <>
+                            <OrderProgress order={order} />
                             <Panel title="Ubah status order">
                                 {nextStatuses.length ? (
                                     <form

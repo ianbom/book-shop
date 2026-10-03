@@ -37,7 +37,7 @@ class DatabaseSeederTest extends TestCase
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('store_settings', 1);
         $this->assertDatabaseCount('categories', 7);
-        $this->assertDatabaseCount('books', 23);
-        $this->assertDatabaseCount('book_stock_movements', 23);
+        $this->assertDatabaseCount('books', 10);
+        $this->assertDatabaseCount('book_stock_movements', 10);
     }
 }

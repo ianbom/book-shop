@@ -40,6 +40,8 @@ class CustomerIndexTest extends TestCase
             'password' => 'password',
         ])->assertRedirect(route('home'));
 
+        $this->get(route('login'))->assertRedirect(route('home'));
+
         auth()->logout();
         $admin = User::factory()->create(['email' => 'admin@example.com']);
         $admin->forceFill(['role' => UserRole::Admin])->save();
@@ -48,6 +50,8 @@ class CustomerIndexTest extends TestCase
             'email' => $admin->email,
             'password' => 'password',
         ])->assertRedirect(route('admin.dashboard', absolute: false));
+
+        $this->get(route('login'))->assertRedirect(route('admin.dashboard'));
     }
 
     public function test_customer_index_searches_filters_sorts_and_excludes_admins(): void

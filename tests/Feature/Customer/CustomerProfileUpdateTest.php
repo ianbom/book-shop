@@ -14,17 +14,19 @@ class CustomerProfileUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_customer_can_update_phone_and_profile_photo(): void
+    public function test_customer_can_update_name_phone_and_profile_photo(): void
     {
         Storage::fake('public');
         $customer = User::factory()->create(['role' => UserRole::Customer]);
 
         $this->actingAs($customer)->patch(route('customer.dashboard.profile.update'), [
+            'name' => 'Customer Updated',
             'phone' => '08123456789',
             'profile_photo' => UploadedFile::fake()->image('profile.jpg'),
         ])->assertRedirect(route('customer.dashboard.profile'));
 
         $customer->refresh();
+        $this->assertSame('Customer Updated', $customer->name);
         $this->assertSame('08123456789', $customer->phone);
         $this->assertNotNull($customer->profile_photo_path);
         Storage::disk('public')->assertExists($customer->profile_photo_path);
@@ -43,6 +45,7 @@ class CustomerProfileUpdateTest extends TestCase
         $customer->forceFill(['profile_photo_path' => $oldPath])->save();
 
         $this->actingAs($customer)->patch(route('customer.dashboard.profile.update'), [
+            'name' => $customer->name,
             'phone' => $customer->phone,
             'profile_photo' => UploadedFile::fake()->image('new.png'),
         ])->assertRedirect(route('customer.dashboard.profile'));
@@ -61,6 +64,7 @@ class CustomerProfileUpdateTest extends TestCase
 
         $this->actingAs($customer)->from(route('customer.dashboard.profile'))
             ->patch(route('customer.dashboard.profile.update'), [
+                'name' => $customer->name,
                 'phone' => '08222222222',
                 'profile_photo' => UploadedFile::fake()->create('invalid.svg', 4, 'image/svg+xml'),
             ])->assertSessionHasErrors('profile_photo');
@@ -71,11 +75,28 @@ class CustomerProfileUpdateTest extends TestCase
         Storage::disk('public')->assertExists($oldPath);
     }
 
+    public function test_name_is_required_and_limited_to_255_characters(): void
+    {
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+
+        $originalName = $customer->name;
+
+        foreach (['', str_repeat('a', 256)] as $name) {
+            $this->actingAs($customer)->from(route('customer.dashboard.profile'))
+                ->patch(route('customer.dashboard.profile.update'), [
+                    'name' => $name,
+                ])->assertSessionHasErrors('name');
+        }
+
+        $this->assertSame($originalName, $customer->refresh()->name);
+    }
+
     public function test_profile_update_is_limited_to_customers(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->actingAs($admin)->patch(route('customer.dashboard.profile.update'), [
+            'name' => $admin->name,
             'phone' => '08123456789',
         ])->assertForbidden();
     }

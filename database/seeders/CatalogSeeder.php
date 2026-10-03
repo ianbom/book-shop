@@ -112,34 +112,21 @@ class CatalogSeeder extends Seeder
     private function books(): array
     {
         $books = [
-            ['1.jpeg', 'Be Awesome, Be Cool', 'Warda Artist', ['pengembangan-diri']],
-            ['2.jpeg', 'The World Without You', 'Joshua Henkin', ['fiksi', 'romansa']],
-            ['3.jpeg', 'Serenity', 'Steven Knight', ['misteri', 'fiksi']],
-            ['4.jpeg', 'The Son', 'Florian Zeller', ['fiksi']],
-            ['5.jpeg', 'Esperanza', 'Department of Economics', ['bisnis']],
-            ['6.jpeg', 'In the Fire', 'Connor Allyn', ['misteri', 'fiksi']],
-            ['7.jpeg', 'Gernika', 'Koldo Serra', ['fiksi']],
-            ['8.jpeg', '7 Days', 'Tidak tercantum', ['romansa', 'fiksi']],
-            ['9.jpeg', 'Hidden Figures', 'Margot Lee Shetterly', ['teknologi', 'pengembangan-diri']],
-            ['10.jpeg', 'What If It Works: Just Do It', 'Tidak tercantum', ['pengembangan-diri']],
-            ['11.jpeg', 'Success: Elon Musk', 'Success Media', ['bisnis']],
-            ['12.jpeg', 'The Lost City of Z', 'David Grann', ['fiksi', 'misteri']],
-            ['13.jpeg', 'Business: Anas Azwar', 'Anas Azwar', ['bisnis']],
-            ['14.jpeg', 'The Youngest Billionaire', 'Forbes', ['bisnis']],
-            ['15.jpeg', 'Inspire: The Future of Leadership', 'Inspire Magazine', ['bisnis', 'pengembangan-diri']],
-            ['16.jpeg', 'Building Multi-Billionaire Start Up', 'Vick Stone', ['bisnis']],
-            ['17.jpeg', 'Innovisual: The Best Actor', 'Innovisual', ['teknologi']],
-            ['18.jpeg', 'I Was Born With the Devil in Me', 'H. H. Holmes', ['misteri']],
-            ['19.jpeg', 'CEO Times: Mauricio Fernandez Piqueras', 'CEO Times', ['bisnis']],
-            ['20.jpeg', 'The Moneychanger', 'Federico Veiroj', ['misteri', 'fiksi']],
-            ['21.jpeg', 'Stella: A Life', 'Tidak tercantum', ['fiksi']],
-            ['22.jpeg', 'Oppenheimer: The Destroyer of Worlds', 'Christopher Nolan', ['teknologi', 'fiksi']],
-            ['23.jpeg', 'Maria Stuart', 'Stefan Zweig', ['fiksi', 'romansa']],
+            ['Cover Buku Anak.jpg.jpeg', 'Hari Ceria di Peternakan', 'Mira Puspita', ['fiksi'], 'Kisah tentang seorang anak yang menghabiskan hari menyenangkan bersama hewan-hewan ternaknya.'],
+            ['Cover Buku Anak (1).jpg.jpeg', 'Petualangan di Hutan Pelangi', 'Raka Pratama', ['fantasi', 'fiksi'], 'Dua sahabat menjelajahi hutan penuh warna dan belajar saling membantu.'],
+            ['Cover Buku Anak (2).jpg.jpeg', 'Kelinci Kecil yang Pemberani', 'Nadia Larasati', ['fiksi'], 'Seekor kelinci kecil menemukan keberanian saat menolong teman-temannya.'],
+            ['Cover Buku Anak (3).jpg.jpeg', 'Rahasia Rumah Pohon', 'Dita Maharani', ['fiksi', 'misteri'], 'Sekelompok sahabat memecahkan teka-teki seru di rumah pohon mereka.'],
+            ['Cover Buku Anak (4).jpg.jpeg', 'Gerbang Ajaib Negeri Angka', 'Raka Pratama', ['fantasi', 'pengembangan-diri'], 'Petualangan ajaib mengenalkan angka dan mengajak anak mencintai belajar.'],
+            ['Cover Buku Anak (5).jpg.jpeg', 'Sahabat Kecil di Negeri Awan', 'Nadia Larasati', ['fantasi', 'fiksi'], 'Perjalanan ke negeri awan mengajarkan arti persahabatan dan menghargai perbedaan.'],
+            ['Cover Buku Anak (6).jpg.jpeg', 'Kucing Baik Hati dan Teman Baru', 'Mira Puspita', ['fiksi'], 'Seekor kucing ramah membantu tetangga kecilnya dan menemukan teman baru.'],
+            ['Cover Buku Anak (7).jpg.jpeg', 'Si Penjelajah Cilik dan Laut Biru', 'Dita Maharani', ['fiksi', 'pengembangan-diri'], 'Penjelajah cilik belajar menjaga laut dalam perjalanan penuh kejutan.'],
+            ['Cover Buku Anak (8).jpg.jpeg', 'Bintang Kecil dan Mimpi Besar', 'Raka Pratama', ['fantasi', 'pengembangan-diri'], 'Kisah tentang anak yang berani berusaha untuk meraih cita-citanya.'],
+            ['Cover Buku Anak (9).jpg.jpeg', 'Pesta Si Ayam Ceria', 'Dita Maharani', ['fiksi'], 'Pesta di halaman menjadi petualangan seru bagi ayam dan teman-temannya.'],
         ];
 
         $data = [];
         foreach ($books as $index => $book) {
-            [$imageFile, $title, $author, $genres] = $book;
+            [$imageFile, $title, $author, $genres, $description] = $book;
             $slug = Str::slug($title);
 
             $data[] = [
@@ -147,7 +134,7 @@ class CatalogSeeder extends Seeder
                 'slug' => $slug,
                 'isbn' => null,
                 'author' => $author,
-                'description' => "Koleksi {$title} karya {$author}.",
+                'description' => $description,
                 'price' => 79000 + ($index * 3000),
                 'shipping_category' => 'others',
                 'weight' => 500,
@@ -155,7 +142,7 @@ class CatalogSeeder extends Seeder
                 'sale_type' => 'ready_stock',
                 'is_active' => true,
                 'genres' => $genres,
-                'image_file' => "boks/{$imageFile}",
+                'image_file' => "kid_books/{$imageFile}",
             ];
         }
 

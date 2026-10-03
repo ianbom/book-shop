@@ -54,17 +54,19 @@ class AdminProfileTest extends TestCase
                 ->where('profilePhotoUrl', null));
     }
 
-    public function test_admin_can_update_profile_photo_and_phone(): void
+    public function test_admin_can_update_name_phone_and_profile_photo(): void
     {
         Storage::fake('public');
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->actingAs($admin)->patch(route('admin.profile.update'), [
+            'name' => 'Admin Updated',
             'phone' => '08123456789',
             'profile_photo' => UploadedFile::fake()->image('admin.jpg'),
         ])->assertRedirect(route('admin.profile'));
 
         $admin->refresh();
+        $this->assertSame('Admin Updated', $admin->name);
         $this->assertSame('08123456789', $admin->phone);
         Storage::disk('public')->assertExists($admin->profile_photo_path);
     }

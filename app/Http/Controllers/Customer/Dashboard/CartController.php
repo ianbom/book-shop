@@ -12,6 +12,9 @@ class CartController extends Controller
 {
     public function __invoke(Request $request, CartListService $cartListService): Response
     {
-        return Inertia::render('customer/dashboard/carts/index', $cartListService->get($request->user()));
+        return Inertia::render('customer/dashboard/carts/index', [
+            ...$cartListService->get($request->user()),
+            'hasAddress' => $request->user()->addresses()->exists(),
+        ]);
     }
 }

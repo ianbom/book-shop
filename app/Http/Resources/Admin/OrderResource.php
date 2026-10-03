@@ -21,9 +21,13 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'order_code' => $this->order_code,
+            'customer_name' => $this->user?->name,
+            'customer_email' => $this->user?->email,
             'book_title' => $item?->name ?? 'Buku',
             'quantity' => $this->items->sum('quantity'),
             'primary_image_url' => $image ? Storage::disk('public')->url($image->image_path) : null,
+            'subtotal' => $this->subtotal,
+            'shipping_cost' => $this->shipping_cost,
             'total' => $this->total,
             'status' => $this->status->value,
             'payment_status' => $this->payment_status->value,

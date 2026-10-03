@@ -208,13 +208,18 @@ export default function OrdersIndex({ orders, filters }: Props) {
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-[1060px] text-left text-sm">
+                            <table className="w-full min-w-[1440px] text-left text-sm">
                                 <thead className="bg-muted/85 text-muted-foreground border-b text-xs font-semibold">
                                     <tr>
                                         <th className="px-4 py-4">
                                             Order / Campaign
                                         </th>
+                                        <th className="px-4 py-4">Pelanggan</th>
                                         <th className="px-4 py-4">Buku</th>
+                                        <th className="px-4 py-4">
+                                            Harga Produk
+                                        </th>
+                                        <th className="px-4 py-4">Ongkir</th>
                                         <th className="px-4 py-4">Total</th>
                                         <th className="px-4 py-4">
                                             Pembayaran
@@ -272,8 +277,26 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                                         </div>
                                                     </div>
                                                 </td>
+                                                <td className="px-4 py-3.5">
+                                                    <p className="text-foreground font-semibold">
+                                                        {order.customer_name ??
+                                                            '—'}
+                                                    </p>
+                                                    <p className="text-muted-foreground mt-0.5 max-w-56 text-xs break-all">
+                                                        {order.customer_email ??
+                                                            '—'}
+                                                    </p>
+                                                </td>
                                                 <td className="text-foreground px-4 py-3.5 font-semibold">
                                                     {order.quantity} buku
+                                                </td>
+                                                <td className="text-foreground px-4 py-3.5 font-semibold">
+                                                    {rupiah(order.subtotal)}
+                                                </td>
+                                                <td className="text-foreground px-4 py-3.5 font-semibold">
+                                                    {rupiah(
+                                                        order.shipping_cost,
+                                                    )}
                                                 </td>
                                                 <td className="text-foreground px-4 py-3.5 font-bold">
                                                     {rupiah(order.total)}

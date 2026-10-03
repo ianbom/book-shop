@@ -34,6 +34,32 @@ class CartPageTest extends TestCase
         $this->assertDatabaseCount('carts', 0);
     }
 
+    public function test_cart_address_status_uses_only_the_customers_active_addresses(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $other = User::factory()->create(['role' => 'customer']);
+        $other->addresses()->create([
+            'destination_contact_name' => $other->name,
+            'destination_contact_phone' => '08123456789',
+            'destination_address' => 'Jalan Buku 1',
+        ]);
+
+        $this->actingAs($customer)->get('/customer/dashboard/carts')
+            ->assertInertia(fn (Assert $page) => $page->where('hasAddress', false));
+
+        $address = $customer->addresses()->create([
+            'destination_contact_name' => $customer->name,
+            'destination_contact_phone' => '08123456789',
+            'destination_address' => 'Jalan Buku 2',
+        ]);
+        $this->get('/customer/dashboard/carts')
+            ->assertInertia(fn (Assert $page) => $page->where('hasAddress', true));
+
+        $address->delete();
+        $this->get('/customer/dashboard/carts')
+            ->assertInertia(fn (Assert $page) => $page->where('hasAddress', false));
+    }
+
     public function test_cart_shows_only_own_items_and_calculates_current_prices(): void
     {
         $customer = User::factory()->create(['role' => 'customer']);

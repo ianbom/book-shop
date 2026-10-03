@@ -228,6 +228,29 @@ class AdminListsTest extends TestCase
                 ->where('orders.data.0.primary_image_url', null));
     }
 
+    public function test_order_list_displays_customer_and_price_breakdown_even_for_deleted_customers(): void
+    {
+        $admin = $this->admin();
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $order = $this->order($customer, 'ORD-PRICES');
+        $order->update(['subtotal' => 300000, 'shipping_cost' => 25000, 'voucher_discount' => 10000, 'total' => 315000]);
+
+        $this->actingAs($admin)->get(route('admin.orders.index'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('orders.data.0.customer_name', $customer->name)
+                ->where('orders.data.0.customer_email', $customer->email)
+                ->where('orders.data.0.subtotal', '300000.00')
+                ->where('orders.data.0.shipping_cost', '25000.00')
+                ->where('orders.data.0.total', '315000.00'));
+
+        $customer->delete();
+
+        $this->actingAs($admin)->get(route('admin.orders.index'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('orders.data.0.customer_name', $customer->name)
+                ->where('orders.data.0.customer_email', $customer->email));
+    }
+
     public function test_order_date_filter_rejects_invalid_or_reversed_ranges(): void
     {
         $admin = $this->admin();

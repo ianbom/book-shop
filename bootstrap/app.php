@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: ['webhooks/biteship']);
         $middleware->encryptCookies(except: ['sidebar_state']);
+        $middleware->redirectUsersTo(fn (Request $request): string => $request->user()?->getRawOriginal('role') === UserRole::Admin->value
+            ? route('admin.dashboard')
+            : route('home'),
+        );
 
         $middleware->web(append: [
             HandleInertiaRequests::class,

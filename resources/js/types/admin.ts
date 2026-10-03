@@ -109,9 +109,13 @@ export type StockMovement = {
 export type Order = {
     id: number;
     order_code: string;
+    customer_name: string | null;
+    customer_email: string | null;
     book_title: string;
     primary_image_url: string | null;
     quantity: number;
+    subtotal: string;
+    shipping_cost: string;
     total: string;
     status: OrderStatus;
     payment_status: PaymentStatus;

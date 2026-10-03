@@ -89,11 +89,13 @@ export function AddressDialog({
     open,
     onOpenChange,
     endpoint = '/customer/dashboard/address',
+    returnToCart = false,
 }: {
     address: CustomerAddress | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     endpoint?: string;
+    returnToCart?: boolean;
 }) {
     const form = useForm<AddressData>(initialData(address));
     const [areas, setAreas] = useState<Area[]>([]);
@@ -284,10 +286,15 @@ export function AddressDialog({
                     className="space-y-5"
                     onSubmit={(event) => {
                         event.preventDefault();
-                        form.put(endpoint, {
-                            preserveScroll: true,
-                            onSuccess: () => onOpenChange(false),
-                        });
+                        form.put(
+                            returnToCart
+                                ? `${endpoint}?return_to=cart`
+                                : endpoint,
+                            {
+                                preserveScroll: true,
+                                onSuccess: () => onOpenChange(false),
+                            },
+                        );
                     }}
                 >
                     <div className="grid gap-4 sm:grid-cols-2">

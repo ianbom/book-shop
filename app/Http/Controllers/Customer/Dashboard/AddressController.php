@@ -79,6 +79,10 @@ class AddressController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Alamat berhasil disimpan.']);
 
+        if ($request->user()->role === UserRole::Customer && $request->query('return_to') === 'cart') {
+            return to_route('customer.dashboard.carts.index');
+        }
+
         return $request->user()->role === UserRole::Admin
             ? to_route('admin.profile')
             : to_route('customer.dashboard.profile');

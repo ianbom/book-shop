@@ -23,38 +23,55 @@ class CatalogSeederTest extends TestCase
         $this->seed(CatalogSeeder::class);
 
         $this->assertDatabaseCount('categories', 7);
-        $this->assertDatabaseCount('books', 23);
-        $this->assertDatabaseCount('book_images', 23);
-        $this->assertDatabaseCount('book_stock_movements', 23);
-        $this->assertSame(23, Book::has('categories')->count());
-        $this->assertSame(23, BookStockMovement::where('type', StockMovementType::Initial)->count());
+        $this->assertDatabaseCount('books', 10);
+        $this->assertDatabaseCount('book_images', 10);
+        $this->assertDatabaseCount('book_stock_movements', 10);
+        $this->assertSame(10, Book::has('categories')->count());
+        $this->assertSame(10, BookStockMovement::where('type', StockMovementType::Initial)->count());
+        $this->assertSame([
+            'Bintang Kecil dan Mimpi Besar',
+            'Gerbang Ajaib Negeri Angka',
+            'Hari Ceria di Peternakan',
+            'Kelinci Kecil yang Pemberani',
+            'Kucing Baik Hati dan Teman Baru',
+            'Pesta Si Ayam Ceria',
+            'Petualangan di Hutan Pelangi',
+            'Rahasia Rumah Pohon',
+            'Sahabat Kecil di Negeri Awan',
+            'Si Penjelajah Cilik dan Laut Biru',
+        ], Book::orderBy('title')->pluck('title')->all());
 
         $covers = Book::with('images')->get()->pluck('images.0.image_path');
         $covers->each(fn (string $path) => Storage::disk('public')->assertExists($path));
-        $this->assertCount(23, $covers->unique());
+        $this->assertCount(10, $covers->unique());
+        $sourceHashes = array_map(fn (string $path) => hash_file('sha256', $path), glob(public_path('kid_books/*.jpeg')));
+        $coverHashes = $covers->map(fn (string $path) => hash('sha256', Storage::disk('public')->get($path)))->all();
+        sort($sourceHashes);
+        sort($coverHashes);
+        $this->assertSame($sourceHashes, $coverHashes);
         $this->assertDatabaseHas('books', [
-            'slug' => 'the-world-without-you',
-            'title' => 'The World Without You',
-            'author' => 'Joshua Henkin',
+            'slug' => 'hari-ceria-di-peternakan',
+            'title' => 'Hari Ceria di Peternakan',
+            'author' => 'Mira Puspita',
             'isbn' => null,
             'shipping_category' => 'others',
             'weight' => 500,
             'sale_type' => 'ready_stock',
         ]);
         $this->assertDatabaseHas('book_images', [
-            'image_path' => 'books/the-world-without-you/cover.jpeg',
+            'image_path' => 'books/hari-ceria-di-peternakan/cover.jpeg',
             'is_primary' => true,
         ]);
         $this->assertDatabaseHas('books', [
-            'slug' => 'hidden-figures',
-            'title' => 'Hidden Figures',
-            'author' => 'Margot Lee Shetterly',
+            'slug' => 'gerbang-ajaib-negeri-angka',
+            'title' => 'Gerbang Ajaib Negeri Angka',
+            'author' => 'Raka Pratama',
         ]);
         $this->assertSame('Fiksi', Category::where('slug', 'fiksi')->value('name'));
         $this->assertDatabaseHas('books', [
-            'slug' => 'maria-stuart',
-            'title' => 'Maria Stuart',
-            'author' => 'Stefan Zweig',
+            'slug' => 'pesta-si-ayam-ceria',
+            'title' => 'Pesta Si Ayam Ceria',
+            'author' => 'Dita Maharani',
         ]);
     }
 }

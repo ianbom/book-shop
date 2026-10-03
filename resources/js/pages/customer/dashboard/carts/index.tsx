@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { BookOpen, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AdminListLayout } from '@/components/admin/shared/admin-list-layout';
+import { AddressDialog } from '@/components/customer/profile/address-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { rupiah } from '@/lib/format';
@@ -29,11 +30,14 @@ export default function CartsIndex({
     items,
     subtotal,
     total,
+    hasAddress,
 }: {
     items: CartItem[];
     subtotal: string;
     total: string;
+    hasAddress: boolean;
 }) {
+    const [addressOpen, setAddressOpen] = useState(false);
     const [pendingId, setPendingId] = useState<number | null>(null);
     const [error, setError] = useState<{ id: number; message: string } | null>(
         null,
@@ -317,13 +321,31 @@ export default function CartsIndex({
                                 >
                                     <Link href="/books">Lanjut pilih buku</Link>
                                 </Button>
-                                <Button asChild className="w-full">
-                                    <Link href="/customer/dashboard/carts/checkout">Lanjut checkout</Link>
-                                </Button>
+                                {hasAddress ? (
+                                    <Button asChild className="w-full">
+                                        <Link href="/customer/dashboard/carts/checkout">
+                                            Lanjut checkout
+                                        </Link>
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="button"
+                                        className="w-full"
+                                        onClick={() => setAddressOpen(true)}
+                                    >
+                                        Tambah alamat
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
                 )}
+                <AddressDialog
+                    address={null}
+                    open={addressOpen}
+                    onOpenChange={setAddressOpen}
+                    returnToCart
+                />
             </AdminListLayout>
         </>
     );
