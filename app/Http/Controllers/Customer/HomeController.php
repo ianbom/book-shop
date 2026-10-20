@@ -19,6 +19,7 @@ class HomeController extends Controller
             ->active()
             ->with([
                 'categories:id,name,slug',
+                'preOrderCode:id,code',
                 'images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
             ]);
 

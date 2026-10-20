@@ -26,6 +26,11 @@ export type Category = {
     slug: string;
     books_count?: number;
 };
+export type PreOrderCode = {
+    id: number;
+    code: string;
+    books_count?: number;
+};
 export type BookImage = {
     id: number;
     url: string;
@@ -49,6 +54,8 @@ export type Book = {
     width: string | null;
     stock: number;
     sale_type: 'ready_stock' | 'preorder';
+    pre_order_code_id: number | null;
+    pre_order_code?: (PreOrderCode & { is_deleted: boolean }) | null;
     preorder_estimated_date: string | null;
     preorder_note: string | null;
     is_active: boolean;
@@ -119,6 +126,8 @@ export type Order = {
     total: string;
     status: OrderStatus;
     payment_status: PaymentStatus;
+    shipment_status: ShipmentStatus | null;
+    eta: string | null;
     created_at: string | null;
 };
 export type BankAccount = {
@@ -158,7 +167,19 @@ export type ShipmentStatus =
     | 'in_transit'
     | 'delivered'
     | 'cancelled'
-    | 'failed';
+    | 'failed'
+    | 'confirmed'
+    | 'scheduled'
+    | 'allocated'
+    | 'picking_up'
+    | 'picked'
+    | 'on_hold'
+    | 'dropping_off'
+    | 'return_in_transit'
+    | 'returned'
+    | 'rejected'
+    | 'disposed'
+    | 'courier_not_found';
 export type Shipment = {
     id: number;
     shipment_code: string;

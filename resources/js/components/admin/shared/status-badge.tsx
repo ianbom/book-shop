@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { shipmentStatusLabels } from '@/lib/shipment-status';
 import type {
     OrderStatus,
     PaymentStatus,
@@ -17,6 +18,7 @@ type Status =
     | VoucherStatus;
 
 const labels: Record<Status, string> = {
+    ...shipmentStatusLabels,
     pending: 'Pending',
     waiting_preorder: 'Menunggu Preorder',
     processing: 'Diproses',
@@ -34,15 +36,9 @@ const labels: Record<Status, string> = {
     adjustment_out: 'Stok Keluar',
     order: 'Order',
     cancellation: 'Pembatalan',
-    booked: 'Dipesan',
-    pickup: 'Penjemputan',
-    in_transit: 'Dalam Pengiriman',
-    delivered: 'Terkirim',
-    failed: 'Gagal',
     approved: 'Disetujui',
     active: 'Aktif',
     inactive: 'Nonaktif',
-    scheduled: 'Terjadwal',
     expired: 'Kedaluwarsa',
 };
 const colors: Record<string, string> = {
@@ -73,12 +69,31 @@ const colors: Record<string, string> = {
     inactive: 'bg-secondary text-secondary-foreground',
     scheduled: 'bg-warning/10 text-warning',
     expired: 'bg-destructive/10 text-destructive',
+    confirmed: 'bg-accent text-accent-foreground',
+    allocated: 'bg-accent text-accent-foreground',
+    picking_up: 'bg-accent text-accent-foreground',
+    picked: 'bg-accent text-accent-foreground',
+    dropping_off: 'bg-accent text-accent-foreground',
+    on_hold: 'bg-warning/10 text-warning',
+    return_in_transit: 'bg-warning/10 text-warning',
+    returned: 'bg-warning/10 text-warning',
+    disposed: 'bg-destructive/10 text-destructive',
+    courier_not_found: 'bg-destructive/10 text-destructive',
 };
 
-export function StatusBadge({ value }: { value: Status }) {
+export function StatusBadge({ value }: { value: string }) {
     return (
-        <Badge variant="secondary" className={colors[value]}>
-            {labels[value]}
+        <Badge
+            variant="secondary"
+            className={
+                Object.hasOwn(colors, value)
+                    ? colors[value]
+                    : 'bg-secondary text-secondary-foreground'
+            }
+        >
+            {Object.hasOwn(labels, value)
+                ? labels[value as Status]
+                : value || 'Tidak diketahui'}
         </Badge>
     );
 }

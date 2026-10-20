@@ -67,7 +67,37 @@ class WalletTopupTest extends TestCase
                 ->has('topups.data', 1)
                 ->where('topups.data.0.topup_code', $topup->topup_code)
                 ->where('topups.data.0.status', 'pending')
+                ->where('topups.data.0.proof_url', route('customer.dashboard.wallets.topups.proof', $topup))
                 ->where('balance', '15000.00'));
+    }
+
+    public function test_only_owner_can_view_private_topup_proof(): void
+    {
+        Storage::fake('local');
+        $customer = User::factory()->create(['role' => 'customer']);
+        $proof = UploadedFile::fake()->image('receipt.png');
+        $path = $proof->store('topups', 'local');
+        $topup = WalletTopup::query()->create([
+            'user_id' => $customer->id,
+            'topup_code' => 'TOP-PRIVATE',
+            'requested_amount' => 20000,
+            'proof_image_path' => $path,
+        ]);
+        $url = route('customer.dashboard.wallets.topups.proof', $topup);
+
+        $this->get($url)->assertRedirect(route('login'));
+        $response = $this->actingAs($customer)->get($url)
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/png')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertStringContainsString('private', $response->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+        $this->assertSame(Storage::disk('local')->get($path), $response->streamedContent());
+
+        $this->actingAs(User::factory()->create(['role' => 'customer']))->get($url)->assertNotFound();
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->get($url)->assertForbidden();
+        Storage::disk('local')->delete($path);
+        $this->actingAs($customer)->get($url)->assertNotFound();
     }
 
     public function test_only_owner_sees_topup_request(): void

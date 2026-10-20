@@ -10,6 +10,7 @@ use App\Enums\VoucherType;
 use App\Enums\WalletTransactionDirection;
 use App\Enums\WalletTransactionType;
 use App\Models\Book;
+use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\StoreSetting;
 use App\Models\User;
@@ -78,6 +79,8 @@ class CheckoutService
             $books = Book::query()->whereIn('id', $items->pluck('book_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $items->each(fn ($item) => $item->setRelation('book', $books->get($item->book_id)));
 
+            $this->validateCheckoutItems($items);
+
             if ($this->rates->payload($setting, $address, $items) !== $payload) {
                 throw ValidationException::withMessages(['shipping' => 'Keranjang atau alamat berubah. Perbarui tarif pengiriman.']);
             }
@@ -86,10 +89,6 @@ class CheckoutService
             $preorder = false;
             foreach ($items as $item) {
                 $book = $item->book;
-                if (! $book || ! $book->is_active || $item->quantity < 1 || $book->weight < 1
-                    || ($book->sale_type === BookSaleType::ReadyStock && $book->stock < $item->quantity)) {
-                    throw ValidationException::withMessages(['items' => 'Buku tidak tersedia atau stok tidak mencukupi. Periksa keranjang.']);
-                }
                 $preorder = $preorder || $book->sale_type === BookSaleType::Preorder;
                 $subtotal += (int) round((float) $book->price * 100) * $item->quantity;
             }
@@ -146,16 +145,14 @@ class CheckoutService
                     'sale_type' => $book->sale_type, 'preorder_estimated_date' => $book->preorder_estimated_date,
                 ]);
                 $shipment->items()->create(['order_item_id' => $orderItem->id, 'quantity' => $item->quantity]);
-                if ($book->sale_type === BookSaleType::ReadyStock) {
-                    $before = $book->stock;
-                    $book->update(['stock' => $before - $item->quantity]);
-                    $book->stockMovements()->create([
-                        'order_id' => $order->id, 'order_item_id' => $orderItem->id,
-                        'changed_by' => $user->id, 'type' => StockMovementType::Order,
-                        'quantity' => -$item->quantity, 'stock_before' => $before,
-                        'stock_after' => $book->stock,
-                    ]);
-                }
+                $before = $book->stock;
+                $book->update(['stock' => $before - $item->quantity]);
+                $book->stockMovements()->create([
+                    'order_id' => $order->id, 'order_item_id' => $orderItem->id,
+                    'changed_by' => $user->id, 'type' => StockMovementType::Order,
+                    'quantity' => -$item->quantity, 'stock_before' => $before,
+                    'stock_after' => $book->stock,
+                ]);
             }
 
             if ($voucher) {
@@ -183,11 +180,36 @@ class CheckoutService
     private function items(User $user): Collection
     {
         $items = $user->cart?->items()->with('book')->orderBy('book_id')->get() ?? collect();
+        $this->validateCheckoutItems($items);
+
+        return $items;
+    }
+
+    /** @param Collection<int, CartItem> $items */
+    private function validateCheckoutItems(Collection $items): void
+    {
         if ($items->isEmpty()) {
             throw ValidationException::withMessages(['items' => 'Keranjang kosong. Tambahkan buku sebelum checkout.']);
         }
 
-        return $items;
+        if ($items->contains(fn ($item) => ! $item->book)) {
+            throw ValidationException::withMessages(['items' => 'Buku tidak tersedia. Hapus item tersebut dari keranjang.']);
+        }
+
+        $preorders = $items->filter(fn ($item) => $item->book->sale_type === BookSaleType::Preorder);
+        if ($preorders->contains(fn ($item) => $item->book->pre_order_code_id === null)) {
+            throw ValidationException::withMessages(['items' => 'Buku preorder belum memiliki kode. Hapus buku tersebut dari keranjang sebelum checkout.']);
+        }
+
+        if ($preorders->isNotEmpty() && ($preorders->count() !== $items->count()
+            || $preorders->pluck('book.pre_order_code_id')->unique()->count() !== 1)) {
+            throw ValidationException::withMessages(['items' => 'Checkout hanya bisa untuk buku ready stock atau preorder dengan kode yang sama. Hapus item lain dari keranjang.']);
+        }
+
+        if ($items->contains(fn ($item) => ! $item->book->is_active || $item->quantity < 1
+            || $item->book->weight < 1 || $item->book->stock < $item->quantity)) {
+            throw ValidationException::withMessages(['items' => 'Buku tidak tersedia atau stok tidak mencukupi. Kurangi jumlah atau hapus buku dari keranjang.']);
+        }
     }
 
     private function discount(?Voucher $voucher, User $user, int $subtotal): int

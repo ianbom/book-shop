@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('width', 8, 2)->nullable();
             $table->integer('stock')->default(0);
             $table->enum('sale_type', ['ready_stock', 'preorder'])->default('ready_stock');
+            $table->foreignId('pre_order_code_id')->nullable()->index()->constrained('pre_order_codes')->restrictOnDelete();
             $table->date('preorder_estimated_date')->nullable();
             $table->text('preorder_note')->nullable();
             $table->boolean('is_active')->default(true);

@@ -97,6 +97,18 @@ const shipmentLabels: Record<ShipmentStatus, string> = {
     delivered: 'Paket diterima',
     cancelled: 'Pengiriman dibatalkan',
     failed: 'Pengiriman gagal',
+    confirmed: 'Dikonfirmasi',
+    scheduled: 'Terjadwal',
+    allocated: 'Kurir ditugaskan',
+    picking_up: 'Kurir menuju penjemputan',
+    picked: 'Paket telah dijemput',
+    on_hold: 'Pengiriman tertahan',
+    dropping_off: 'Kurir menuju penerima',
+    return_in_transit: 'Dalam perjalanan retur',
+    returned: 'Dikembalikan ke pengirim',
+    rejected: 'Pengiriman ditolak',
+    disposed: 'Paket dimusnahkan',
+    courier_not_found: 'Kurir tidak ditemukan',
 };
 
 function SectionHeading({

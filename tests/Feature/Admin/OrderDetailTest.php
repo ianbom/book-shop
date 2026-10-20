@@ -79,7 +79,7 @@ class OrderDetailTest extends TestCase
         $this->actingAs($customer)->patch(route('admin.orders.shipments.status', [$order, $shipment]), ['status' => 'booked'])->assertForbidden();
         $this->actingAs($admin)->patch(route('admin.orders.shipments.status', [$order, $otherShipment]), ['status' => 'booked'])->assertNotFound();
         $url = route('admin.orders.shipments.status', [$order, $shipment]);
-        $this->actingAs($admin)->patch($url, ['status' => 'delivered'])->assertSessionHasErrors('status');
+        $this->actingAs($admin)->patch($url, ['status' => 'delivered', 'description' => 'Belum ada booking'])->assertSessionHasErrors('status');
         $shipment->update(['biteship_order_id' => 'provider-detail']);
         $this->actingAs($admin)->patch($url, ['status' => 'booked', 'description' => 'Diserahkan ke kurir'])->assertRedirect();
         $this->assertDatabaseHas('shipment_status_histories', ['shipment_id' => $shipment->id, 'status' => 'booked', 'description' => 'Diserahkan ke kurir']);

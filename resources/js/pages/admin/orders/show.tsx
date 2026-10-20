@@ -23,6 +23,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate, rupiah } from '@/lib/format';
 import { getOrderProgress } from '@/lib/order-progress';
+import {
+    biteshipStatusLabels,
+    shipmentStatusLabel,
+    shipmentStatusNotice,
+} from '@/lib/shipment-status';
 import admin from '@/routes/admin';
 import type { OrderStatus, ShipmentStatus } from '@/types/admin';
 
@@ -32,6 +37,7 @@ type History = {
     note?: string | null;
     changed_by?: string | null;
     provider_status?: string | null;
+    source?: string;
     description?: string | null;
     occurred_at?: string | null;
     created_at: string | null;
@@ -67,6 +73,8 @@ type Shipment = {
     waybill_id: string | null;
     courier_link: string | null;
     biteship_status: string | null;
+    status_source: string;
+    updated_at: string | null;
     created_at: string | null;
     items: { name: string | null; quantity: number }[];
     status_histories: History[];
@@ -136,12 +144,6 @@ const orderTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
     packing: ['shipping'],
     shipping: ['completed'],
 };
-const shipmentTransitions: Partial<Record<ShipmentStatus, ShipmentStatus[]>> = {
-    pending: ['booked', 'cancelled', 'failed'],
-    booked: ['pickup', 'cancelled', 'failed'],
-    pickup: ['in_transit', 'failed'],
-    in_transit: ['delivered', 'failed'],
-};
 const statusLabel: Record<OrderStatus, string> = {
     pending: 'Menunggu diproses',
     waiting_preorder: 'Menunggu preorder',
@@ -150,15 +152,6 @@ const statusLabel: Record<OrderStatus, string> = {
     shipping: 'Dikirim',
     completed: 'Selesai',
     cancelled: 'Dibatalkan',
-};
-const shipmentLabel: Record<ShipmentStatus, string> = {
-    pending: 'Menunggu',
-    booked: 'Dipesan',
-    pickup: 'Dijemput',
-    in_transit: 'Dalam perjalanan',
-    delivered: 'Terkirim',
-    cancelled: 'Dibatalkan',
-    failed: 'Gagal',
 };
 const tabs = [
     { id: 'summary', label: 'Ringkasan', icon: ReceiptText },
@@ -594,6 +587,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                         <ShipmentPanel
                                             key={shipment.id}
                                             orderId={order.id}
+                                            orderStatus={order.status}
                                             shipment={shipment}
                                             statusOnly
                                         />
@@ -756,6 +750,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                     <ShipmentPanel
                                         key={shipment.id}
                                         orderId={order.id}
+                                        orderStatus={order.status}
                                         shipment={shipment}
                                     />
                                 ))
@@ -874,23 +869,34 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
 
 function ShipmentPanel({
     orderId,
+    orderStatus,
     shipment,
     statusOnly = false,
 }: {
     orderId: number;
+    orderStatus: OrderStatus;
     shipment: Shipment;
     statusOnly?: boolean;
 }) {
-    const choices = shipmentTransitions[shipment.status] ?? [];
+    const choices = shipment.biteship_order_id
+        ? (Object.keys(biteshipStatusLabels) as ShipmentStatus[]).filter(
+              (status) => status !== shipment.status,
+          )
+        : [];
+    const sync = useForm<{ shipping?: string }>({});
+    const effectiveStatus =
+        shipment.status_source === 'admin'
+            ? shipment.status
+            : (shipment.biteship_status ?? shipment.status);
+    const notice =
+        shipmentStatusNotice(shipment.biteship_status ?? effectiveStatus) ??
+        shipmentStatusNotice(effectiveStatus);
     const form = useForm<{ status: ShipmentStatus; description: string }>({
         status: choices[0] ?? shipment.status,
         description: '',
     });
     useEffect(() => {
-        form.setData(
-            'status',
-            (shipmentTransitions[shipment.status] ?? [])[0] ?? shipment.status,
-        );
+        form.setData('status', choices[0] ?? shipment.status);
     }, [shipment.status]);
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -916,6 +922,76 @@ function ShipmentPanel({
                     {shipment.shipment_code}
                     <StatusBadge value={shipment.status} />
                 </CardTitle>
+                <div className="text-muted-foreground space-y-2 text-sm">
+                    <p>
+                        Sumber status:{' '}
+                        {shipment.status_source === 'admin'
+                            ? 'Override admin sementara'
+                            : shipment.status_source === 'biteship'
+                              ? 'Biteship'
+                              : 'Sistem / data lama'}
+                    </p>
+                    <p>Diperbarui: {formatDate(shipment.updated_at)}</p>
+                    {shipment.biteship_status && (
+                        <p>
+                            Status resmi Biteship:{' '}
+                            <StatusBadge value={shipment.biteship_status} />{' '}
+                            <code className="text-xs break-all">
+                                {shipment.biteship_status}
+                            </code>
+                        </p>
+                    )}
+                    {shipment.status_source === 'admin' && (
+                        <p>
+                            Override hanya mengubah status lokal; sinkronisasi
+                            Biteship berikutnya dapat menimpanya.
+                        </p>
+                    )}
+                    {notice && (
+                        <p
+                            role="status"
+                            className="border-warning/40 bg-warning/10 text-foreground rounded-md border p-3"
+                        >
+                            {notice} Tidak ada refund atau restock otomatis.
+                        </p>
+                    )}
+                    {shipment.biteship_status &&
+                        ((orderStatus === 'completed' &&
+                            shipment.biteship_status !== 'delivered') ||
+                            (orderStatus === 'cancelled' &&
+                                shipment.biteship_status !== 'cancelled')) && (
+                            <p
+                                role="status"
+                                className="border-warning/40 rounded-md border p-3"
+                            >
+                                Status pengiriman berbeda dari order yang sudah
+                                ditutup. Tinjau secara manual; order tidak
+                                dibuka kembali otomatis.
+                            </p>
+                        )}
+                    {shipment.biteship_order_id && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={sync.processing}
+                            onClick={() =>
+                                sync.post(
+                                    `/admin/orders/${orderId}/shipments/${shipment.id}/sync`,
+                                    { preserveScroll: true },
+                                )
+                            }
+                        >
+                            {sync.processing
+                                ? 'Menyinkronkan...'
+                                : 'Sinkronkan Biteship'}
+                        </Button>
+                    )}
+                    {sync.errors.shipping && (
+                        <p role="alert" className="text-destructive">
+                            {sync.errors.shipping}
+                        </p>
+                    )}
+                </div>
             </CardHeader>
             <CardContent
                 className={
@@ -926,7 +1002,8 @@ function ShipmentPanel({
                     <>
                         <p className="text-muted-foreground text-sm">
                             Status pengiriman diperbarui otomatis oleh webhook
-                            Biteship. Perubahan manual tidak disarankan.
+                            Biteship. Override manual wajib disertai catatan dan
+                            tidak mengubah status di Biteship.
                         </p>
                         {choices.length ? (
                             <form
@@ -939,7 +1016,7 @@ function ShipmentPanel({
                                             'shipment-status-' + shipment.id
                                         }
                                     >
-                                        Status berikutnya
+                                        Override status lokal
                                     </Label>
                                     <select
                                         id={'shipment-status-' + shipment.id}
@@ -955,7 +1032,7 @@ function ShipmentPanel({
                                     >
                                         {choices.map((status) => (
                                             <option key={status} value={status}>
-                                                {shipmentLabel[status]}
+                                                {shipmentStatusLabel(status)}
                                             </option>
                                         ))}
                                     </select>
@@ -969,6 +1046,7 @@ function ShipmentPanel({
                                     <Input
                                         id={'shipment-note-' + shipment.id}
                                         maxLength={1000}
+                                        required
                                         value={form.data.description}
                                         onChange={(event) =>
                                             form.setData(
@@ -983,13 +1061,22 @@ function ShipmentPanel({
                                         {form.errors.status}
                                     </p>
                                 )}
+                                {form.errors.description && (
+                                    <p
+                                        role="alert"
+                                        className="text-destructive text-sm"
+                                    >
+                                        {form.errors.description}
+                                    </p>
+                                )}
                                 <Button disabled={form.processing}>
                                     Perbarui status pengiriman manual
                                 </Button>
                             </form>
                         ) : (
                             <p className="text-muted-foreground text-sm">
-                                Status akhir.
+                                Booking Biteship diperlukan sebelum override
+                                status.
                             </p>
                         )}
                     </>
@@ -1030,7 +1117,11 @@ function ShipmentPanel({
                                 />
                                 <Info
                                     label="Status provider"
-                                    value={shipment.biteship_status || '—'}
+                                    value={
+                                        shipment.biteship_status
+                                            ? `${shipmentStatusLabel(shipment.biteship_status)} (${shipment.biteship_status})`
+                                            : '—'
+                                    }
                                 />
                                 <Info
                                     label="Nomor tracking"
@@ -1073,7 +1164,10 @@ function ShipmentPanel({
                                     className="border-l-2 pl-3 text-sm"
                                 >
                                     <StatusBadge
-                                        value={event.status as ShipmentStatus}
+                                        value={
+                                            event.provider_status ??
+                                            event.status
+                                        }
                                     />
                                     <time className="text-muted-foreground ml-2 text-xs">
                                         {formatDate(
@@ -1084,6 +1178,12 @@ function ShipmentPanel({
                                     {event.description && (
                                         <p className="mt-1">
                                             {event.description}
+                                        </p>
+                                    )}
+                                    {event.source === 'admin' && (
+                                        <p className="text-muted-foreground text-xs">
+                                            Override admin:{' '}
+                                            {event.changed_by ?? 'Admin'}
                                         </p>
                                     )}
                                     {event.provider_status && (

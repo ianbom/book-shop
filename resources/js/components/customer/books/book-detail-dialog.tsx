@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { BookImageGallery } from '@/components/customer/books/book-image-gallery';
+import { BookPreOrderDetails } from '@/components/customer/books/book-preorder-details';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -80,6 +81,7 @@ export function BookDetailDialog({
                                     {book.author}
                                 </span>
                             </p>
+                            <BookPreOrderDetails book={book} />
 
                             {/* Price & Stock status */}
                             <div className="mt-3.5 sm:mt-4 flex flex-wrap items-baseline gap-3 sm:gap-4 border-y border-border py-3">

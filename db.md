@@ -97,6 +97,18 @@ Enum shipment_status {
   delivered
   cancelled
   failed
+  confirmed
+  scheduled
+  allocated
+  picking_up
+  picked
+  on_hold
+  dropping_off
+  return_in_transit
+  returned
+  rejected
+  disposed
+  courier_not_found
 }
 
 
@@ -354,6 +366,14 @@ Table categories {
 //
 // Shipping data is snapshotted into order_items at checkout.
 
+Table pre_order_codes {
+  id bigint [pk, increment]
+  code varchar(100) [not null, unique]
+  created_at timestamptz
+  updated_at timestamptz
+  deleted_at timestamptz
+}
+
 Table books {
   id bigint [pk, increment]
 
@@ -395,6 +415,8 @@ Table books {
 
   sale_type book_sale_type [not null, default: 'ready_stock']
 
+  pre_order_code_id bigint
+
   preorder_estimated_date date
 
   preorder_note text
@@ -415,6 +437,7 @@ Table books {
     title
     author
     sale_type
+    pre_order_code_id
     preorder_estimated_date
     is_active
   }
@@ -1121,7 +1144,7 @@ Table shipment_status_histories {
 // ======================================================
 // BOOK STOCK MOVEMENTS
 // ======================================================
-// books.stock = current physical ready stock.
+// books.stock = sellable physical stock for ready stock, remaining quota for preorder.
 //
 // This table is immutable inventory audit.
 //
@@ -1279,6 +1302,8 @@ Ref: shipment_status_histories.shipment_id > shipments.id
 // ------------------------------------------------------
 // STOCK
 // ------------------------------------------------------
+
+Ref: books.pre_order_code_id > pre_order_codes.id
 
 Ref: book_stock_movements.book_id > books.id
 

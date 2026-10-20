@@ -2,7 +2,13 @@ import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import type { PaginationLink } from '@/types/admin';
 
-export function Pagination({ links }: { links: PaginationLink[] }) {
+export function Pagination({
+    links,
+    preserveState = false,
+}: {
+    links: PaginationLink[];
+    preserveState?: boolean;
+}) {
     return (
         <nav
             className="flex flex-wrap justify-end gap-1"
@@ -19,6 +25,7 @@ export function Pagination({ links }: { links: PaginationLink[] }) {
                     <Link
                         href={link.url ?? '#'}
                         preserveScroll
+                        preserveState={preserveState}
                         dangerouslySetInnerHTML={{ __html: link.label }}
                     />
                 </Button>

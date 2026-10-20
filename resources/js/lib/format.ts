@@ -11,3 +11,11 @@ export const formatDate = (value: string | null | undefined): string =>
               timeStyle: 'short',
           }).format(new Date(value))
         : '-';
+export const formatMonthYear = (value: string | null): string =>
+    value
+        ? new Intl.DateTimeFormat('id-ID', {
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'UTC',
+          }).format(new Date(value))
+        : '-';

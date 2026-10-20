@@ -7,6 +7,8 @@ use App\Models\Book;
 use App\Models\BookImage;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PreOrderCode;
+use App\Models\Shipment;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Voucher;
@@ -203,7 +205,93 @@ class CustomerDashboardPagesTest extends TestCase
                 ->has('orders.data', 1)
                 ->where('orders.data.0.order_code', 'ORD-MY-BOOK')
                 ->where('orders.data.0.primary_image', null)
+                ->where('orders.data.0.shipment_status', null)
+                ->where('orders.data.0.preorder_estimated_date', null)
                 ->where('filters.search', 'MY-BOOK'));
+    }
+
+    public function test_preorder_code_filter_combines_with_book_search_and_ignores_removed_date_filters(): void
+    {
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $code = PreOrderCode::query()->create(['code' => 'BATCH-A']);
+        $wanted = $this->order($customer, 'ORD-ONE');
+        $readyStock = $this->order($customer, 'ORD-TWO');
+        $foreign = $this->order(User::factory()->create(), 'ORD-THREE');
+        $preorderBook = Book::factory()->create(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        $readyStockBook = Book::factory()->create(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        foreach ([[$wanted, $preorderBook, 'preorder'], [$readyStock, $readyStockBook, 'ready_stock'], [$foreign, $preorderBook, 'preorder']] as [$order, $book, $saleType]) {
+            OrderItem::create(['order_id' => $order->id, 'book_id' => $book->id, 'name' => 'Buku Pilihan', 'weight' => 500, 'sale_type' => $saleType, 'value' => 100000, 'quantity' => 1, 'subtotal' => 100000]);
+        }
+        $preorderBook->delete();
+        $code->delete();
+
+        $this->actingAs($customer)->get(route('customer.dashboard.orders.index', ['search' => 'Buku Pilihan']))
+            ->assertInertia(fn (Assert $page) => $page->has('orders.data', 2));
+
+        $this->get(route('customer.dashboard.orders.index', [
+            'pre_order_code' => 'BATCH-A', 'search' => 'Buku Pilihan', 'date_from' => '2099-01-01', 'date_to' => '2099-12-31',
+        ]))->assertInertia(fn (Assert $page) => $page
+            ->has('orders.data', 1)
+            ->where('orders.data.0.order_code', 'ORD-ONE')
+            ->where('filters.pre_order_code', 'BATCH-A')
+            ->where('filters.search', 'Buku Pilihan')
+            ->missing('filters.date_from')
+            ->missing('filters.date_to'));
+    }
+
+    public function test_preorder_code_filter_validates_the_input(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Customer]));
+        foreach ([str_repeat('X', 101), ['ORD-1']] as $code) {
+            $this->getJson(route('customer.dashboard.orders.index', ['pre_order_code' => $code]))
+                ->assertUnprocessable()->assertJsonValidationErrors('pre_order_code');
+        }
+    }
+
+    public function test_preorder_code_filter_accepts_zero_as_a_search_term(): void
+    {
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $code = PreOrderCode::query()->create(['code' => 'BATCH-0A']);
+        $book = Book::factory()->create(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        $order = $this->order($customer, 'ORD-ONE');
+        OrderItem::create(['order_id' => $order->id, 'book_id' => $book->id, 'name' => 'Preorder', 'weight' => 500, 'sale_type' => 'preorder', 'value' => 100000, 'quantity' => 1, 'subtotal' => 100000]);
+        $this->order($customer, 'ORD-ZERO-UNRELATED');
+
+        $this->actingAs($customer)->get(route('customer.dashboard.orders.index', ['pre_order_code' => '0']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('orders.data', 1)
+                ->where('orders.data.0.order_code', 'ORD-ONE'));
+    }
+
+    public function test_order_list_shows_latest_shipment_and_earliest_preorder_snapshot_date(): void
+    {
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $order = $this->order($customer, 'ORD-PREORDER');
+        $order->update(['payment_status' => 'paid']);
+        $book = Book::factory()->create(['sale_type' => 'preorder', 'preorder_estimated_date' => '2027-06-01']);
+        foreach ([['preorder', '2027-02-10'], ['preorder', '2027-01-20'], ['preorder', null], ['ready_stock', '2026-12-01']] as [$saleType, $date]) {
+            OrderItem::create([
+                'order_id' => $order->id, 'book_id' => $book->id, 'name' => 'Buku Snapshot',
+                'weight' => 500, 'sale_type' => $saleType, 'preorder_estimated_date' => $date,
+                'value' => 100000, 'quantity' => 1, 'subtotal' => 100000,
+            ]);
+        }
+        $olderShipment = Shipment::create([
+            'order_id' => $order->id, 'shipment_code' => 'SHP-OLDER', 'courier_company' => 'jne',
+            'courier_type' => 'REG', 'price' => 10000, 'status' => 'delivered',
+        ]);
+        $olderShipment->forceFill(['created_at' => now()->subDay()])->save();
+        Shipment::create([
+            'order_id' => $order->id, 'shipment_code' => 'SHP-LATEST', 'courier_company' => 'jne',
+            'courier_type' => 'REG', 'price' => 10000, 'status' => 'in_transit',
+        ]);
+        $book->delete();
+
+        $this->actingAs($customer)->get(route('customer.dashboard.orders.index'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('orders.data.0.payment_status', 'paid')
+                ->where('orders.data.0.shipment_status', 'in_transit')
+                ->where('orders.data.0.preorder_estimated_date', '2027-01-20'));
     }
 
     public function test_order_list_shows_first_books_primary_cover(): void
@@ -222,19 +310,24 @@ class CustomerDashboardPagesTest extends TestCase
                 ->where('orders.data.0.primary_image.alt_text', 'Sampul pesanan'));
     }
 
-    public function test_order_pagination_preserves_the_search_filter(): void
+    public function test_order_pagination_preserves_the_preorder_code_filter(): void
     {
         $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $code = PreOrderCode::query()->create(['code' => 'BATCH-PAGE']);
+        $book = Book::factory()->create(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
         foreach (range(1, 16) as $index) {
-            $this->order($customer, sprintf('ORD-PAGE-%02d', $index));
+            $order = $this->order($customer, sprintf('ORD-PAGE-%02d', $index));
+            OrderItem::create(['order_id' => $order->id, 'book_id' => $book->id, 'name' => 'Buku preorder', 'weight' => 500, 'sale_type' => 'preorder', 'value' => 100000, 'quantity' => 1, 'subtotal' => 100000]);
         }
 
-        $this->actingAs($customer)->get(route('customer.dashboard.orders.index', ['search' => 'ORD-PAGE', 'page' => 2]))
+        $this->actingAs($customer)->get(route('customer.dashboard.orders.index', ['search' => 'ORD-PAGE', 'pre_order_code' => 'BATCH-PAGE', 'page' => 2]))
             ->assertInertia(fn (Assert $page) => $page
                 ->has('orders.data', 1)
                 ->where('orders.total', 16)
                 ->where('orders.current_page', 2)
-                ->where('filters.search', 'ORD-PAGE'));
+                ->where('filters.search', 'ORD-PAGE')
+                ->where('filters.pre_order_code', 'BATCH-PAGE')
+                ->where('orders.links.1.url', fn (string $value) => str_contains($value, 'pre_order_code=BATCH-PAGE')));
     }
 
     public function test_wallet_shows_only_its_owners_balance_and_transactions(): void

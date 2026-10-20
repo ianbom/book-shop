@@ -1,6 +1,6 @@
 import { BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { rupiah } from '@/lib/format';
+import { formatMonthYear, rupiah } from '@/lib/format';
 import type { CustomerBook } from '@/types';
 
 export function BookCard({
@@ -35,11 +35,12 @@ export function BookCard({
                         aria-hidden="true"
                     />
                 )}
-
             </button>
             <div className="flex flex-1 flex-col pt-2">
                 <span className="bg-secondary text-primary w-fit max-w-full truncate rounded-full px-2 py-0.5 text-[10px] font-semibold">
-                    {book.categories[0]?.name ?? 'Buku'}
+                    {book.sale_type === 'preorder'
+                        ? 'Pre-order'
+                        : (book.categories[0]?.name ?? 'Buku')}
                 </span>
                 <button
                     type="button"
@@ -52,9 +53,22 @@ export function BookCard({
                     {book.author}
                 </p>
                 <span
-                    className={`mt-1 text-[10px] font-medium ${book.stock > 0 ? 'text-success' : 'text-destructive'}`}
+                    className={`mt-1 truncate text-[10px] font-medium ${book.stock > 0 ? 'text-success' : 'text-destructive'}`}
+                    title={
+                        book.sale_type === 'preorder'
+                            ? `Stok ${book.stock} · Estimasi ${formatMonthYear(book.preorder_estimated_date)} · Kode ${book.pre_order_code?.code ?? '-'}`
+                            : undefined
+                    }
                 >
                     {book.stock > 0 ? `Stok ${book.stock}` : 'Habis'}
+                    {book.sale_type === 'preorder' && (
+                        <>
+                            {' · '}
+                            {formatMonthYear(book.preorder_estimated_date)}
+                            {' · '}
+                            {book.pre_order_code?.code ?? '-'}
+                        </>
+                    )}
                 </span>
                 <div className="mt-auto flex flex-wrap items-end justify-between gap-2 pt-2">
                     <strong className="text-primary text-xs sm:text-sm">

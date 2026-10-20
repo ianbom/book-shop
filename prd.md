@@ -456,6 +456,10 @@ sale_type = preorder
 
 buku dapat tetap dibeli meskipun physical ready stock belum tersedia.
 
+Untuk preorder, `books.stock` adalah kuota preorder yang masih dapat dibeli, bukan jumlah stok fisik. Quantity pembelian tidak boleh melebihi kuota ini. Checkout yang berhasil mengurangi kuota sesuai quantity dan mencatat mutasi `order`, sama seperti ready stock. Kuota nol berarti preorder tidak dapat dibeli.
+
+Pembatalan mengembalikan stok berdasarkan mutasi `order` yang benar-benar tercatat, tepat sekali. Perubahan status pemenuhan preorder tidak mengurangi stok lagi.
+
 Informasi yang dapat ditampilkan:
 
 - label preorder
@@ -630,8 +634,7 @@ Backend harus memvalidasi:
 - book exists
 - book active
 - quantity >= 1
-- ready stock quantity tidak melebihi stock
-- preorder masih tersedia untuk dibeli sesuai policy aplikasi
+- quantity ready stock maupun preorder tidak melebihi `books.stock`
 - harga di frontend bukan source of truth
 
 Cart dapat menampilkan estimated subtotal, tetapi total final dihitung ulang ketika checkout.
@@ -1169,10 +1172,10 @@ START TRANSACTION
 1. Load authenticated customer
 2. Lock wallet
 3. Load cart and items
-4. Reload/lock relevant ready-stock books
+4. Reload/lock all selected books, including preorder
 5. Validate all books active
 6. Validate quantities
-7. Validate ready stock
+7. Validate stock for ready stock and preorder
 8. Recalculate current prices
 9. Validate voucher
 10. Validate selected shipping data
@@ -1186,7 +1189,7 @@ START TRANSACTION
 18. Create order item snapshots
 19. Create immutable shipping address snapshot
 20. Create voucher usage if applicable
-21. Reduce ready stock
+21. Reduce stock for all purchased books, including preorder
 22. Create stock movements
 23. Debit wallet
 24. Create wallet transaction (order_payment)
@@ -1504,17 +1507,11 @@ waiting_preorder
 
 ## 30.4 Preorder Stock Policy
 
-`books.stock` merepresentasikan physical ready stock.
+Untuk preorder, `books.stock` merepresentasikan sisa kuota preorder yang dapat dijual. Checkout mengurangi kuota ini dan mencatat mutasi `order` dalam transaksi yang sama dengan pembayaran.
 
-Membuat preorder tidak otomatis berarti physical stock dikurangi.
+Stok harus mencukupi sebelum checkout, lalu divalidasi ulang setelah row buku dikunci. Stok tidak boleh negatif.
 
-Ketika physical preorder stock datang atau dialokasikan, perubahan inventory dapat menggunakan:
-
-```text
-preorder_fulfillment
-```
-
-pada stock movement sesuai implementation policy.
+Perubahan dari `waiting_preorder` ke `processing`, maupun pemenuhan preorder, tidak mengurangi stok lagi. Tipe `preorder_fulfillment` tidak digunakan untuk pengurangan kedua.
 
 ---
 
@@ -1833,7 +1830,7 @@ Create wallet transaction:
   type = order_refund
   direction = credit
 ↓
-Restore eligible ready stock
+Restore previously deducted ready stock or preorder quota
 ↓
 Create stock movement cancellation
 ↓
@@ -1880,7 +1877,7 @@ if payment_status == refunded
 
 ## 42.1 Current Stock
 
-`books.stock` menyimpan current physical ready stock.
+`books.stock` menyimpan jumlah yang masih dapat dijual: stok fisik untuk ready stock dan kuota untuk preorder.
 
 ---
 
@@ -1940,7 +1937,7 @@ type = adjustment_out
 
 ---
 
-## 42.6 Ready Stock Order
+## 42.6 Ready Stock and Preorder Order
 
 ```text
 stock_before = 20
@@ -1962,13 +1959,13 @@ stock_after = 20
 type = cancellation
 ```
 
-System tidak boleh mengembalikan stok untuk preorder yang tidak pernah mengurangi physical stock.
+System hanya mengembalikan stok jika terdapat mutasi `order` untuk item tersebut. Pesanan lama tanpa pengurangan stok tidak boleh menambah stok ketika dibatalkan.
 
 ---
 
 # 43. Inventory Concurrency
 
-Checkout ready stock harus mencegah overselling.
+Checkout ready stock maupun preorder harus mencegah overselling.
 
 Backend harus:
 
@@ -1978,7 +1975,7 @@ Backend harus:
 - update stock dalam transaction
 - create movement dalam transaction
 
-Dua concurrent checkout tidak boleh dapat membeli unit fisik yang sama melebihi stock.
+Dua concurrent checkout tidak boleh membeli unit ready stock atau kuota preorder melebihi stock.
 
 ---
 
@@ -2794,7 +2791,7 @@ System harus menjamin:
 13. Wallet mutation selalu mempunyai ledger record.
 14. Top-up approved tidak dapat di-credit dua kali.
 15. Refund tidak dapat dilakukan dua kali.
-16. Ready stock tidak dapat oversell.
+16. Ready stock dan preorder tidak dapat oversell.
 17. Stock mutation mempunyai stock movement.
 18. Cancellation restore tidak dapat dilakukan dua kali.
 19. Status change mempunyai status history.
@@ -2854,7 +2851,7 @@ System harus menjamin:
 - book active
 - quantity integer
 - quantity >= 1
-- ready stock quantity <= available stock
+- ready stock and preorder quantity <= available stock
 
 ---
 
@@ -3524,7 +3521,7 @@ Automated tests minimal mencakup domain kritis.
 - duplicate add increases quantity
 - update quantity
 - remove item
-- ready stock quantity validation
+- ready stock and preorder quantity validation
 - inactive book cannot be purchased
 
 ---
@@ -3574,7 +3571,7 @@ Automated tests minimal mencakup domain kritis.
 - wallet debit created
 - order items snapshotted
 - address snapshotted
-- stock reduced for ready stock
+- stock reduced for ready stock and preorder
 - stock movements created
 - cart cleared
 - insufficient wallet fails without partial mutation
@@ -3600,7 +3597,7 @@ Automated tests minimal mencakup domain kritis.
 - order payment becomes refunded
 - order status becomes cancelled
 - wallet transaction order_refund created
-- ready stock restored only if previously deducted
+- ready stock and preorder stock restored only if previously deducted
 - stock movement cancellation created
 - double cancellation cannot double refund
 - double cancellation cannot restore stock twice
@@ -3625,7 +3622,7 @@ Automated tests minimal mencakup domain kritis.
 - adjustment out
 - order deduction
 - cancellation restoration
-- concurrent ready-stock checkout does not oversell
+- concurrent ready-stock and preorder checkout does not oversell
 
 ---
 
@@ -3790,7 +3787,7 @@ Produk dianggap memenuhi requirement ketika:
 39. Successful checkout membuat `order_payment` ledger.
 40. Successful checkout menyimpan item snapshot.
 41. Successful checkout menyimpan address snapshot.
-42. Successful ready-stock checkout mengurangi stock.
+42. Successful ready-stock maupun preorder checkout mengurangi stock.
 43. Perubahan stock menghasilkan stock movement.
 44. Cart dikosongkan setelah checkout sukses.
 45. Checkout gagal tidak boleh meninggalkan partial mutation.
@@ -3810,7 +3807,7 @@ Produk dianggap memenuhi requirement ketika:
 59. Cancelled paid order mengembalikan wallet amount.
 60. Refund membuat `order_refund` wallet transaction.
 61. Refund tidak dapat terjadi dua kali.
-62. Ready stock yang pernah dikurangi dikembalikan ketika cancellation.
+62. Ready stock atau kuota preorder yang pernah dikurangi dikembalikan ketika cancellation.
 63. Stock restore tidak dapat terjadi dua kali.
 64. Order berubah menjadi `cancelled`.
 65. Payment berubah menjadi `refunded` pada full refund.

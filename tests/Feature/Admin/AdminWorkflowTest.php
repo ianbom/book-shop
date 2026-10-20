@@ -9,6 +9,7 @@ use App\Models\Book;
 use App\Models\BookStockMovement;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\PreOrderCode;
 use App\Models\StoreSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -107,6 +108,7 @@ class AdminWorkflowTest extends TestCase
             'length' => '20.00',
             'width' => '13.00',
             'sale_type' => 'preorder',
+            'pre_order_code_id' => PreOrderCode::create(['code' => 'PO-CLEAN-CODE'])->id,
             'preorder_estimated_date' => '2026-10-15',
             'preorder_note' => 'Cetakan berikutnya.',
             'initial_stock' => 8,

@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Orders\UpdateShipmentStatusRequest;
 use App\Http\Resources\Admin\ShipmentResource;
 use App\Models\Order;
 use App\Models\Shipment;
+use App\Services\Admin\BiteshipShipmentService;
 use App\Services\Admin\ShipmentListService;
 use App\Services\Admin\ShipmentStatusService;
 use Illuminate\Http\RedirectResponse;
@@ -42,8 +43,17 @@ class ShipmentController extends Controller
     public function updateStatus(UpdateShipmentStatusRequest $request, Order $order, Shipment $shipment): RedirectResponse
     {
         abort_unless($shipment->order_id === $order->id, 404);
-        $this->statusService->update($shipment, ShipmentStatus::from($request->validated('status')), $request->validated('description'));
+        $this->statusService->update($shipment, ShipmentStatus::from($request->validated('status')), $request->validated('description'), $request->user());
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Status pengiriman berhasil diperbarui.']);
+
+        return back();
+    }
+
+    public function sync(Order $order, Shipment $shipment, BiteshipShipmentService $service): RedirectResponse
+    {
+        abort_unless($shipment->order_id === $order->id, 404);
+        $service->synchronize($shipment);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Status Biteship berhasil disinkronkan.']);
 
         return back();
     }

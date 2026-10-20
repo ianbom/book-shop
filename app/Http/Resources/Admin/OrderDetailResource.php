@@ -109,6 +109,8 @@ class OrderDetailResource extends JsonResource
                 'waybill_id' => $shipment->waybill_id,
                 'courier_link' => $shipment->courier_link,
                 'biteship_status' => $shipment->biteship_status,
+                'updated_at' => $shipment->updated_at?->toISOString(),
+                'status_source' => $shipment->statusHistories->sortByDesc('id')->first()?->raw_payload['source'] ?? 'system',
                 'created_at' => $shipment->created_at?->toISOString(),
                 'items' => $shipment->items->map(fn ($shipmentItem) => [
                     'name' => $shipmentItem->orderItem?->name,
@@ -118,6 +120,8 @@ class OrderDetailResource extends JsonResource
                     'id' => $history->id,
                     'status' => $history->status->value,
                     'provider_status' => $history->provider_status,
+                    'source' => $history->raw_payload['source'] ?? ($history->provider_status ? 'biteship' : 'system'),
+                    'changed_by' => $history->raw_payload['actor_name'] ?? null,
                     'description' => $history->description,
                     'occurred_at' => $history->occurred_at?->toISOString(),
                     'created_at' => $history->created_at?->toISOString(),

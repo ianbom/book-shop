@@ -5,7 +5,8 @@ import { AdminListLayout } from '@/components/admin/shared/admin-list-layout';
 import { AddressDialog } from '@/components/customer/profile/address-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { rupiah } from '@/lib/format';
+import { getCartCheckoutError } from '@/lib/cart-checkout';
+import { formatMonthYear, rupiah } from '@/lib/format';
 
 const url = '/customer/dashboard/carts';
 
@@ -16,6 +17,10 @@ type CartBook = {
     price: string;
     stock: number;
     is_active: boolean;
+    sale_type: 'ready_stock' | 'preorder';
+    pre_order_code_id: number | null;
+    preorder_estimated_date: string | null;
+    pre_order_code: { id: number; code: string } | null;
     primary_image: { url: string; alt_text: string | null } | null;
 };
 
@@ -42,6 +47,7 @@ export default function CartsIndex({
     const [error, setError] = useState<{ id: number; message: string } | null>(
         null,
     );
+    const checkoutError = getCartCheckoutError(items);
 
     const updateQuantity = (item: CartItem, quantity: number) => {
         setPendingId(item.id);
@@ -155,6 +161,31 @@ export default function CartsIndex({
                                                         <p className="text-muted-foreground mt-1 text-xs">
                                                             {book.author}
                                                         </p>
+                                                    )}
+                                                    {book?.sale_type ===
+                                                        'preorder' && (
+                                                        <div className="mt-2 space-y-1 text-xs">
+                                                            <span className="bg-primary/10 text-primary inline-block rounded px-1.5 py-0.5 font-semibold">
+                                                                Pre Order
+                                                            </span>
+                                                            <p className="text-muted-foreground break-all">
+                                                                Kode preorder:{' '}
+                                                                {book
+                                                                    .pre_order_code
+                                                                    ?.code ??
+                                                                    '-'}
+                                                            </p>
+                                                            <p className="text-muted-foreground">
+                                                                Estimasi:{' '}
+                                                                {formatMonthYear(
+                                                                    book.preorder_estimated_date,
+                                                                )}
+                                                            </p>
+                                                            <p className="text-muted-foreground">
+                                                                Stok tersedia:{' '}
+                                                                {book.stock}
+                                                            </p>
+                                                        </div>
                                                     )}
                                                     <p className="text-primary mt-2 text-sm font-semibold">
                                                         {book
@@ -321,7 +352,23 @@ export default function CartsIndex({
                                 >
                                     <Link href="/books">Lanjut pilih buku</Link>
                                 </Button>
-                                {hasAddress ? (
+                                {checkoutError && (
+                                    <div
+                                        role="alert"
+                                        className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4 text-sm"
+                                    >
+                                        {checkoutError}
+                                    </div>
+                                )}
+                                {hasAddress && checkoutError ? (
+                                    <Button
+                                        type="button"
+                                        className="w-full"
+                                        disabled
+                                    >
+                                        Lanjut checkout
+                                    </Button>
+                                ) : hasAddress ? (
                                     <Button asChild className="w-full">
                                         <Link href="/customer/dashboard/carts/checkout">
                                             Lanjut checkout

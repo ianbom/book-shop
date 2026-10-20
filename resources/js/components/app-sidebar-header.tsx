@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import { ChevronDown, Search, ShoppingCart } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -41,6 +42,32 @@ export function AppSidebarHeader({
                         </span>
                     )}
                 </Link>
+            )}
+            {role === 'customer' && (
+                <form
+                    action="/books"
+                    method="get"
+                    role="search"
+                    aria-label="Cari buku di katalog"
+                    className="hidden max-w-xl min-w-0 flex-1 items-center gap-2 md:flex"
+                >
+                    <div className="relative min-w-0 flex-1">
+                        <Search
+                            className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2"
+                            aria-hidden="true"
+                        />
+                        <input
+                            name="search"
+                            type="search"
+                            aria-label="Cari judul buku"
+                            placeholder="Cari judul buku..."
+                            className="border-input bg-muted/80 focus:border-ring focus:ring-ring/20 h-10 w-full rounded-lg border pr-4 pl-11 text-sm transition outline-none focus:ring-4"
+                        />
+                    </div>
+                    <Button type="submit" className="h-10 shrink-0">
+                        Cari
+                    </Button>
+                </form>
             )}
             {role !== 'customer' && (
                 <form

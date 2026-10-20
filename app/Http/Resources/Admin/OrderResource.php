@@ -31,6 +31,8 @@ class OrderResource extends JsonResource
             'total' => $this->total,
             'status' => $this->status->value,
             'payment_status' => $this->payment_status->value,
+            'shipment_status' => $this->shipments->first()?->getRawOriginal('status'),
+            'eta' => $this->getAttribute('preorder_estimated_date')?->toDateString(),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

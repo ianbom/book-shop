@@ -41,6 +41,11 @@ const mainNavItems: NavItem[] = [
         children: [
             { title: 'Buku', href: admin.books.index(), icon: BookOpen },
             { title: 'Kategori', href: admin.categories.index(), icon: Tags },
+            {
+                title: 'Kode Preorder',
+                href: admin.preOrderCodes.index(),
+                icon: TicketPercent,
+            },
         ],
     },
     {
@@ -54,7 +59,11 @@ const mainNavItems: NavItem[] = [
         title: 'Pengiriman',
         href: admin.shipments.index(),
         children: [
-            { title: 'Shipment', href: admin.shipments.index(), icon: PackageCheck },
+            {
+                title: 'Shipment',
+                href: admin.shipments.index(),
+                icon: PackageCheck,
+            },
         ],
     },
     {
@@ -69,15 +78,27 @@ const mainNavItems: NavItem[] = [
         title: 'Wallet',
         href: admin.topUps.index(),
         children: [
-            { title: 'Permintaan Top-up', href: admin.topUps.index(), icon: CreditCard },
-            { title: 'Transaksi Wallet', href: admin.walletTransactions.index(), icon: Wallet },
+            {
+                title: 'Permintaan Top-up',
+                href: admin.topUps.index(),
+                icon: CreditCard,
+            },
+            {
+                title: 'Transaksi Wallet',
+                href: admin.walletTransactions.index(),
+                icon: Wallet,
+            },
         ],
     },
     {
         title: 'Promosi',
         href: admin.vouchers.index(),
         children: [
-            { title: 'Voucher', href: admin.vouchers.index(), icon: TicketPercent },
+            {
+                title: 'Voucher',
+                href: admin.vouchers.index(),
+                icon: TicketPercent,
+            },
         ],
     },
     {
@@ -105,23 +126,46 @@ const mainNavItems: NavItem[] = [
 
 const customerNavItems: NavMainItem[] = [
     { title: 'Profil', href: '/customer/dashboard/profile', icon: UserRound },
-    { title: 'Keranjang', href: '/customer/dashboard/carts', icon: ShoppingCart },
+    {
+        title: 'Keranjang',
+        href: '/customer/dashboard/carts',
+        icon: ShoppingCart,
+    },
     { title: 'Pesanan', href: '/customer/dashboard/orders', icon: ShoppingBag },
     { title: 'Saldo', href: '/customer/dashboard/wallets', icon: Wallet },
-    { title: 'Voucher', href: '/customer/dashboard/vouchers', icon: TicketPercent },
+    {
+        title: 'Voucher',
+        href: '/customer/dashboard/vouchers',
+        icon: TicketPercent,
+    },
 ];
 
 export function AppSidebar({ role }: { role?: 'admin' | 'customer' }) {
     const isAdmin = role === 'admin';
-    const items = isAdmin ? mainNavItems : role === 'customer' ? customerNavItems : [];
+    const items = isAdmin
+        ? mainNavItems
+        : role === 'customer'
+          ? customerNavItems
+          : [];
 
     return (
-        <Sidebar collapsible="icon" variant="sidebar" className="border-sidebar-border">
+        <Sidebar
+            collapsible="icon"
+            variant="sidebar"
+            className="border-sidebar-border"
+        >
             <SidebarHeader className="px-4 pt-3 pb-2 group-data-[collapsible=icon]:px-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" className="h-auto rounded-xl p-0 hover:bg-transparent group-data-[collapsible=icon]:size-10!" asChild>
-                            <Link href={isAdmin ? admin.dashboard() : '/'} prefetch>
+                        <SidebarMenuButton
+                            size="lg"
+                            className="h-auto rounded-xl p-0 group-data-[collapsible=icon]:size-10! hover:bg-transparent"
+                            asChild
+                        >
+                            <Link
+                                href={isAdmin ? admin.dashboard() : '/'}
+                                prefetch
+                            >
                                 <img
                                     src="/dashboard-image/header-sidebar.png"
                                     alt="Wonder Prince Library"

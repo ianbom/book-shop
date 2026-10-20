@@ -28,7 +28,9 @@ class BookService
         $primaryImageIndex = Arr::pull($data, 'primary_image_index');
         $initialStock = (int) Arr::pull($data, 'initial_stock');
         $data['stock'] = $initialStock;
+        $data['shipping_category'] = 'others';
         if ($data['sale_type'] === BookSaleType::ReadyStock->value) {
+            $data['pre_order_code_id'] = null;
             $data['preorder_estimated_date'] = null;
             $data['preorder_note'] = null;
         }
@@ -46,9 +48,11 @@ class BookService
     /** @param array<string, mixed> $data */
     public function update(Book $book, array $data): Book
     {
+        $data['shipping_category'] = 'others';
         /** @var array<int, int> $categoryIds */
         $categoryIds = Arr::pull($data, 'category_ids', []);
         if ($data['sale_type'] === BookSaleType::ReadyStock->value) {
+            $data['pre_order_code_id'] = null;
             $data['preorder_estimated_date'] = null;
             $data['preorder_note'] = null;
         }

@@ -2,16 +2,20 @@
 
 namespace Tests\Feature\Customer;
 
+use App\Enums\StockMovementType;
 use App\Models\Book;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\PreOrderCode;
 use App\Models\StoreSetting;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Voucher;
 use App\Models\Wallet;
+use App\Services\Admin\InventoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class CheckoutTest extends TestCase
@@ -65,6 +69,136 @@ class CheckoutTest extends TestCase
         $this->assertSame('109999.00', $user->wallet->fresh()->balance);
     }
 
+    public function test_preorder_checkout_reduces_stock_and_cancellation_restores_it_once(): void
+    {
+        [$user, $book, $address] = $this->checkoutData(300000);
+        $code = PreOrderCode::create(['code' => 'PO-STOCK']);
+        $book->update(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        $user->cart->items()->update(['quantity' => 2]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertRedirect(route('customer.dashboard.orders.index'));
+
+        $order = $user->orders()->firstOrFail();
+        $this->assertSame('waiting_preorder', $order->status->value);
+        $this->assertSame(3, $book->fresh()->stock);
+        $this->assertSame('90000.00', $user->wallet->fresh()->balance);
+        $this->assertDatabaseHas('book_stock_movements', [
+            'book_id' => $book->id, 'order_id' => $order->id,
+            'order_item_id' => $order->items()->value('id'), 'type' => 'order',
+            'quantity' => -2, 'stock_before' => 5, 'stock_after' => 3,
+        ]);
+
+        $this->patch(route('customer.dashboard.orders.cancel', $order))->assertRedirect();
+        $this->assertSame(5, $book->fresh()->stock);
+        $this->assertSame('300000.00', $user->wallet->fresh()->balance);
+        $this->assertDatabaseHas('book_stock_movements', [
+            'book_id' => $book->id, 'order_id' => $order->id, 'type' => 'cancellation',
+            'quantity' => 2, 'stock_before' => 3, 'stock_after' => 5,
+        ]);
+
+        $this->patch(route('customer.dashboard.orders.cancel', $order))->assertSessionHasErrors('status');
+        $this->assertSame(5, $book->fresh()->stock);
+        $this->assertDatabaseCount('book_stock_movements', 2);
+    }
+
+    public function test_insufficient_preorder_stock_blocks_rates_and_checkout_without_side_effects(): void
+    {
+        [$user, $book, $address] = $this->checkoutData();
+        $code = PreOrderCode::create(['code' => 'PO-LOW-STOCK']);
+        $book->update(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id, 'stock' => 1]);
+        $user->cart->items()->update(['quantity' => 2]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->getJson(route('customer.dashboard.checkout.rates', ['address_id' => $address->id]))
+            ->assertUnprocessable();
+        $this->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertSessionHasErrors('items');
+
+        foreach (['orders', 'wallet_transactions', 'shipments', 'book_stock_movements'] as $table) {
+            $this->assertDatabaseCount($table, 0);
+        }
+        $this->assertDatabaseCount('cart_items', 1);
+        $this->assertSame(1, $book->fresh()->stock);
+        $this->assertSame('200000.00', $user->wallet->fresh()->balance);
+        Http::assertNothingSent();
+    }
+
+    public function test_preorder_stock_is_revalidated_after_rates_are_loaded(): void
+    {
+        [$user, $book, $address] = $this->checkoutData();
+        $code = PreOrderCode::create(['code' => 'PO-CHANGED-STOCK']);
+        $book->update(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        config(['services.biteship.key' => 'test-key']);
+        Http::fake(function () use ($book) {
+            $book->update(['stock' => 0]);
+
+            return Http::response(['success' => true, 'pricing' => [[
+                'courier_code' => 'jne', 'courier_service_code' => 'REG',
+                'courier_service_name' => 'Reguler', 'price' => 10000, 'duration' => '2-3 hari',
+            ]]], 200);
+        });
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertSessionHasErrors('items');
+
+        foreach (['orders', 'wallet_transactions', 'shipments', 'book_stock_movements'] as $table) {
+            $this->assertDatabaseCount($table, 0);
+        }
+        $this->assertDatabaseCount('cart_items', 1);
+        $this->assertSame(0, $book->fresh()->stock);
+        $this->assertSame('200000.00', $user->wallet->fresh()->balance);
+    }
+
+    public function test_preorder_checkout_is_available_again_after_admin_replenishes_stock(): void
+    {
+        [$user, $book, $address] = $this->checkoutData();
+        $code = PreOrderCode::create(['code' => 'PO-REPLENISHED']);
+        $book->update(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id, 'stock' => 0]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->getJson(route('customer.dashboard.checkout.rates', ['address_id' => $address->id]))
+            ->assertUnprocessable();
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        app(InventoryService::class)->adjust($book, StockMovementType::AdjustmentIn, 3, 'Tambah kuota PO.', $admin);
+
+        $this->getJson(route('customer.dashboard.checkout.rates', ['address_id' => $address->id]))->assertOk();
+        $this->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertRedirect(route('customer.dashboard.orders.index'));
+
+        $this->assertSame(2, $book->fresh()->stock);
+        $this->assertDatabaseHas('book_stock_movements', ['book_id' => $book->id, 'type' => 'adjustment_in', 'quantity' => 3]);
+        $this->assertDatabaseHas('book_stock_movements', ['book_id' => $book->id, 'type' => 'order', 'quantity' => -1]);
+    }
+
+    public function test_processing_preorder_does_not_deduct_stock_again(): void
+    {
+        [$user, $book, $address] = $this->checkoutData();
+        $code = PreOrderCode::create(['code' => 'PO-PROCESSING']);
+        $book->update(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertRedirect(route('customer.dashboard.orders.index'));
+
+        $order = $user->orders()->firstOrFail();
+        $admin = User::factory()->create(['role' => 'admin']);
+        foreach (['processing', 'packing'] as $status) {
+            $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => $status, 'note' => null])
+                ->assertRedirect()->assertSessionHasNoErrors();
+            $this->assertSame($status, $order->fresh()->status->value);
+            $this->assertSame(4, $book->fresh()->stock);
+            $this->assertDatabaseCount('book_stock_movements', 1);
+        }
+    }
+
     public function test_rates_use_store_origin_customer_destination_and_cart_items(): void
     {
         [$user, $book, $address] = $this->checkoutData();
@@ -77,6 +211,123 @@ class CheckoutTest extends TestCase
             && $request['destination_area_id'] === 'destination-area'
             && $request['items'][0]['quantity'] === 1
             && $request['items'][0]['name'] === $book->title);
+    }
+
+    public function test_checkout_rejects_mixed_ready_stock_and_preorder_books_without_changing_cart_or_wallet(): void
+    {
+        [$user, $book, $address] = $this->checkoutData();
+        $code = PreOrderCode::query()->create(['code' => 'PO-1']);
+        $preorderBook = Book::factory()->create(['sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $preorderBook->id, 'quantity' => 1]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->get(route('customer.dashboard.checkout'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('customer/dashboard/carts/checkout')
+                ->where('items.0.book.sale_type', 'ready_stock')
+                ->where('items.1.book.sale_type', 'preorder')
+                ->where('items.1.book.pre_order_code_id', $code->id));
+        $this->actingAs($user)->getJson(route('customer.dashboard.checkout.rates', ['address_id' => $address->id]))
+            ->assertUnprocessable()->assertJsonPath('message', 'Checkout hanya bisa untuk buku ready stock atau preorder dengan kode yang sama. Hapus item lain dari keranjang.');
+        $this->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertSessionHasErrors('items');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('cart_items', 2);
+        $this->assertSame(5, $book->fresh()->stock);
+        $this->assertSame('200000.00', $user->wallet->fresh()->balance);
+        foreach (['order_items', 'wallet_transactions', 'shipments', 'voucher_usages', 'book_stock_movements'] as $table) {
+            $this->assertDatabaseCount($table, 0);
+        }
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'api.biteship.com'));
+    }
+
+    public function test_checkout_rejects_preorder_books_with_different_codes(): void
+    {
+        [$user, , $address] = $this->checkoutData();
+        $firstCode = PreOrderCode::query()->create(['code' => 'PO-1']);
+        $secondCode = PreOrderCode::query()->create(['code' => 'PO-2']);
+        $firstBook = Book::factory()->create(['price' => 50000, 'sale_type' => 'preorder', 'pre_order_code_id' => $firstCode->id]);
+        $secondBook = Book::factory()->create(['price' => 50000, 'sale_type' => 'preorder', 'pre_order_code_id' => $secondCode->id]);
+        $user->cart->items()->delete();
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $firstBook->id, 'quantity' => 1]);
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $secondBook->id, 'quantity' => 1]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertSessionHasErrors('items');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('cart_items', 2);
+        $this->assertSame('200000.00', $user->wallet->fresh()->balance);
+    }
+
+    public function test_checkout_rejects_preorder_books_without_a_code(): void
+    {
+        [$user, $book, $address] = $this->checkoutData();
+        $book->update(['sale_type' => 'preorder', 'pre_order_code_id' => null]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertSessionHasErrors('items');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('cart_items', 1);
+        $this->assertSame('200000.00', $user->wallet->fresh()->balance);
+    }
+
+    public function test_checkout_accepts_preorder_books_with_the_same_code(): void
+    {
+        [$user, , $address] = $this->checkoutData();
+        $code = PreOrderCode::query()->create(['code' => 'PO-1']);
+        $firstBook = Book::factory()->create(['price' => 50000, 'stock' => 3, 'sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        $secondBook = Book::factory()->create(['price' => 50000, 'stock' => 4, 'sale_type' => 'preorder', 'pre_order_code_id' => $code->id]);
+        $user->cart->items()->delete();
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $firstBook->id, 'quantity' => 1]);
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $secondBook->id, 'quantity' => 1]);
+        $this->fakeRates();
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertRedirect(route('customer.dashboard.orders.index'));
+
+        $this->assertDatabaseCount('order_items', 2);
+        $this->assertDatabaseCount('cart_items', 0);
+        $this->assertSame(2, $firstBook->fresh()->stock);
+        $this->assertSame(3, $secondBook->fresh()->stock);
+        $this->assertDatabaseCount('book_stock_movements', 2);
+    }
+
+    public function test_checkout_revalidates_preorder_codes_after_rates_are_loaded(): void
+    {
+        [$user, , $address] = $this->checkoutData();
+        $firstCode = PreOrderCode::query()->create(['code' => 'PO-1']);
+        $secondCode = PreOrderCode::query()->create(['code' => 'PO-2']);
+        $firstBook = Book::factory()->create(['price' => 50000, 'stock' => 5, 'sale_type' => 'preorder', 'pre_order_code_id' => $firstCode->id]);
+        $secondBook = Book::factory()->create(['price' => 50000, 'stock' => 5, 'sale_type' => 'preorder', 'pre_order_code_id' => $firstCode->id]);
+        $user->cart->items()->delete();
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $firstBook->id, 'quantity' => 1]);
+        CartItem::query()->create(['cart_id' => $user->cart->id, 'book_id' => $secondBook->id, 'quantity' => 1]);
+        config(['services.biteship.key' => 'test-key']);
+        Http::fake(function () use ($secondBook, $secondCode) {
+            $secondBook->update(['pre_order_code_id' => $secondCode->id]);
+
+            return Http::response(['success' => true, 'pricing' => [[
+                'courier_code' => 'jne', 'courier_service_code' => 'REG',
+                'courier_service_name' => 'Reguler', 'price' => 10000, 'duration' => '2-3 hari',
+            ]]], 200);
+        });
+
+        $this->actingAs($user)->post(route('customer.dashboard.checkout.store'), [
+            'address_id' => $address->id, 'courier_company' => 'jne', 'courier_type' => 'REG', 'shipping_cost' => '10000.00',
+        ])->assertSessionHasErrors('items');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('cart_items', 2);
+        $this->assertSame('200000.00', $user->wallet->fresh()->balance);
     }
 
     public function test_voucher_and_multiple_books_apply_discount_once(): void

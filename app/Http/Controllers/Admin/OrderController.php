@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BookSaleType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
@@ -10,10 +11,13 @@ use App\Http\Requests\Admin\Orders\UpdateOrderStatusRequest;
 use App\Http\Requests\Admin\Orders\UpdatePaymentStatusRequest;
 use App\Http\Resources\Admin\OrderDetailResource;
 use App\Http\Resources\Admin\OrderResource;
+use App\Models\Book;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\Admin\OrderStatusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,11 +28,12 @@ class OrderController extends Controller
     public function index(Request $request): Response
     {
         $request->validate([
-            'date_from' => ['nullable', 'date_format:Y-m-d'],
-            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from'],
+            'pre_order_code' => ['nullable', 'string', 'max:255'],
+            'eta' => ['nullable', 'date_format:Y-m'],
         ]);
 
-        $filters = $request->only(['search', 'status', 'date_from', 'date_to']);
+        $filters = $request->only(['search', 'status', 'pre_order_code', 'eta']);
+        $eta = $request->filled('eta') ? Carbon::createFromFormat('!Y-m', $filters['eta']) : null;
         $status = OrderStatus::tryFrom($request->string('status')->toString());
         $orders = Order::query()
             ->with([
@@ -36,11 +41,24 @@ class OrderController extends Controller
                 'items' => fn ($query) => $query->orderBy('id'),
                 'items.book' => fn ($query) => $query->withTrashed(),
                 'items.book.images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
+                'shipments' => fn ($query) => $query->latest('created_at')->latest('id'),
             ])
+            ->withMin(['items as preorder_estimated_date' => fn ($query) => $query->where('sale_type', BookSaleType::Preorder)], 'preorder_estimated_date')
+            ->withCasts(['preorder_estimated_date' => 'date'])
             ->search($request->string('search')->toString())
             ->status($status)
-            ->when($request->date('date_from'), fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
-            ->when($request->date('date_to'), fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->when($request->filled('pre_order_code'), fn ($query) => $query
+                ->whereHas('items', fn ($items) => $items
+                    ->where('sale_type', BookSaleType::Preorder)
+                    ->whereIn('book_id', Book::withTrashed()->select('id')
+                        ->whereHas('preOrderCode', fn ($codes) => $codes->where('code', 'like', '%'.$filters['pre_order_code'].'%')))))
+            ->when($eta, fn ($query, $month) => $query->whereIn('id', OrderItem::query()
+                ->select('order_id')
+                ->where('sale_type', BookSaleType::Preorder)
+                ->groupBy('order_id')
+                ->havingRaw('MIN(preorder_estimated_date) BETWEEN ? AND ?', [
+                    $month->toDateString(), $month->copy()->endOfMonth()->toDateString(),
+                ])))
             ->latest()
             ->paginate(15)
             ->appends($filters);
@@ -48,6 +66,14 @@ class OrderController extends Controller
         return Inertia::render('admin/orders/index', [
             'orders' => OrderResource::collection($orders),
             'filters' => $filters,
+            'eta_months' => OrderItem::query()
+                ->where('sale_type', BookSaleType::Preorder)
+                ->whereNotNull('preorder_estimated_date')
+                ->distinct()
+                ->orderBy('preorder_estimated_date')
+                ->pluck('preorder_estimated_date')
+                ->map(fn ($date) => Carbon::parse($date)->format('Y-m'))
+                ->unique()->values(),
         ]);
     }
 

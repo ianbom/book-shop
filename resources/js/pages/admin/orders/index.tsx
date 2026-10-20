@@ -16,14 +16,15 @@ import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { formatDate, rupiah } from '@/lib/format';
+import { formatDate, formatMonthYear, rupiah } from '@/lib/format';
 import admin from '@/routes/admin';
 import type { Order, OrderStatus, Paginated } from '@/types/admin';
 
 type Props = {
     orders: Paginated<Order>;
+    eta_months: string[];
     filters: Record<
-        'search' | 'status' | 'date_from' | 'date_to',
+        'search' | 'status' | 'pre_order_code' | 'eta',
         string | undefined
     >;
 };
@@ -44,7 +45,7 @@ function paymentDetails(order: Order) {
     return { paid, remaining };
 }
 
-export default function OrdersIndex({ orders, filters }: Props) {
+export default function OrdersIndex({ orders, filters, eta_months }: Props) {
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         router.get(
@@ -60,8 +61,8 @@ export default function OrdersIndex({ orders, filters }: Props) {
             {
                 search: filters.search ?? '',
                 status,
-                date_from: filters.date_from ?? '',
-                date_to: filters.date_to ?? '',
+                pre_order_code: filters.pre_order_code ?? '',
+                eta: filters.eta ?? '',
             },
             { preserveState: true, replace: true },
         );
@@ -78,33 +79,49 @@ export default function OrdersIndex({ orders, filters }: Props) {
                 <Card className="border-border/90 shadow-sm">
                     <CardContent className="py-3 sm:py-1">
                         <form
+                            key={JSON.stringify(filters)}
                             onSubmit={submit}
                             className="grid gap-4 xl:grid-cols-[0.9fr_0.9fr_1.35fr_1fr_auto_auto] xl:items-end"
                         >
                             <label className="text-foreground grid gap-2 text-xs font-bold">
                                 <span className="flex items-center gap-2">
-                                    <CalendarDays className="text-primary size-4" />{' '}
-                                    Tanggal Mulai
+                                    <Tag className="text-primary size-4" /> Kode
+                                    Preorder
                                 </span>
                                 <Input
-                                    type="date"
-                                    name="date_from"
-                                    defaultValue={filters.date_from}
+                                    name="pre_order_code"
+                                    defaultValue={filters.pre_order_code}
+                                    placeholder="Contoh: PO-OKT-2026"
                                     className="bg-background h-10"
                                 />
                             </label>
                             <label className="text-foreground grid gap-2 text-xs font-bold">
                                 <span className="flex items-center gap-2">
                                     <CalendarDays className="text-primary size-4" />{' '}
-                                    Tanggal Akhir
+                                    ETA
                                 </span>
-                                <Input
-                                    type="date"
-                                    name="date_to"
-                                    defaultValue={filters.date_to}
-                                    min={filters.date_from}
-                                    className="bg-background h-10"
-                                />
+                                <select
+                                    name="eta"
+                                    defaultValue={filters.eta ?? ''}
+                                    className="border-input bg-background focus:border-ring focus:ring-ring/20 h-10 min-w-0 rounded-md border px-3 text-sm outline-none focus:ring-4"
+                                >
+                                    <option value="">Semua ETA</option>
+                                    {eta_months.map((month) => (
+                                        <option key={month} value={month}>
+                                            {new Intl.DateTimeFormat('id-ID', {
+                                                month: 'short',
+                                                year: 'numeric',
+                                                timeZone: 'UTC',
+                                            })
+                                                .format(
+                                                    new Date(
+                                                        `${month}-01T00:00:00Z`,
+                                                    ),
+                                                )
+                                                .toUpperCase()}
+                                        </option>
+                                    ))}
+                                </select>
                             </label>
                             <label className="text-foreground grid gap-2 text-xs font-bold">
                                 <span className="flex items-center gap-2">
@@ -208,7 +225,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-[1440px] text-left text-sm">
+                            <table className="w-full min-w-[1680px] text-left text-sm">
                                 <thead className="bg-muted/85 text-muted-foreground border-b text-xs font-semibold">
                                     <tr>
                                         <th className="px-4 py-4">
@@ -225,7 +242,13 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                             Pembayaran
                                         </th>
                                         <th className="px-4 py-4">Tanggal</th>
-                                        <th className="px-4 py-4">Status</th>
+                                        <th className="px-4 py-4">
+                                            Status Pesanan
+                                        </th>
+                                        <th className="px-4 py-4">
+                                            Status Pengiriman
+                                        </th>
+                                        <th className="px-4 py-4">ETA</th>
                                         <th className="px-4 py-4 text-right">
                                             Aksi
                                         </th>
@@ -339,6 +362,20 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                                     <StatusBadge
                                                         value={order.status}
                                                     />
+                                                </td>
+                                                <td className="px-4 py-3.5">
+                                                    {order.shipment_status ? (
+                                                        <StatusBadge
+                                                            value={
+                                                                order.shipment_status
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        '-'
+                                                    )}
+                                                </td>
+                                                <td className="text-muted-foreground px-4 py-3.5 text-xs whitespace-nowrap">
+                                                    {formatMonthYear(order.eta)}
                                                 </td>
                                                 <td className="px-4 py-3.5 text-right">
                                                     <Button

@@ -30,10 +30,9 @@ class OrderController extends Controller
 
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
+            'pre_order_code' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', Rule::enum(OrderStatus::class)],
             'payment' => ['nullable', Rule::enum(PaymentStatus::class)],
-            'date_from' => ['nullable', 'date_format:Y-m-d'],
-            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from'],
         ]);
 
         return Inertia::render('customer/dashboard/orders/index', [

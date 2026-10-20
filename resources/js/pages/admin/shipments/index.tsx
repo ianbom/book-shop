@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { formatDate, rupiah } from '@/lib/format';
+import { shipmentStatusLabels } from '@/lib/shipment-status';
 import admin from '@/routes/admin';
 import type { Paginated, Shipment } from '@/types/admin';
 
@@ -139,14 +140,13 @@ export default function ShipmentsIndex({ shipments, filters }: Props) {
                                     className={selectClass}
                                 >
                                     <option value="">Semua Status</option>
-                                    {tabs.slice(1).map((tab) => (
-                                        <option
-                                            key={tab.value}
-                                            value={tab.value}
-                                        >
-                                            {tab.label}
-                                        </option>
-                                    ))}
+                                    {Object.entries(shipmentStatusLabels).map(
+                                        ([value, label]) => (
+                                            <option key={value} value={value}>
+                                                {label}
+                                            </option>
+                                        ),
+                                    )}
                                 </select>
                             </label>
                             <label className="text-foreground grid gap-2 text-xs font-bold">

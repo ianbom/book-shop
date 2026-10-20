@@ -4,6 +4,7 @@ namespace Tests\Feature\Customer;
 
 use App\Models\Book;
 use App\Models\Cart;
+use App\Models\PreOrderCode;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -83,6 +84,47 @@ class CartPageTest extends TestCase
                 ->where('subtotal', '59500.00')
                 ->where('total', '59500.00')
                 ->where('cartCount', 5));
+    }
+
+    public function test_cart_includes_preorder_code_and_estimated_date(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $cart = Cart::create(['user_id' => $customer->id]);
+        $code = PreOrderCode::create(['code' => 'PO-2026-001']);
+        $book = Book::factory()->create([
+            'sale_type' => 'preorder',
+            'pre_order_code_id' => $code->id,
+            'preorder_estimated_date' => '2026-12-15',
+        ]);
+        $cart->items()->create(['book_id' => $book->id, 'quantity' => 1]);
+
+        $this->actingAs($customer)->get('/customer/dashboard/carts')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('items.0.book.sale_type', 'preorder')
+                ->where('items.0.book.preorder_estimated_date', '2026-12-15')
+                ->where('items.0.book.pre_order_code.id', $code->id)
+                ->where('items.0.book.pre_order_code.code', 'PO-2026-001'));
+    }
+
+    public function test_cart_handles_missing_preorder_details_and_ready_stock(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $cart = Cart::create(['user_id' => $customer->id]);
+        foreach (['preorder', 'ready_stock'] as $saleType) {
+            $book = Book::factory()->create(['sale_type' => $saleType]);
+            $cart->items()->create(['book_id' => $book->id, 'quantity' => 1]);
+        }
+
+        $this->actingAs($customer)->get('/customer/dashboard/carts')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('items.0.book.sale_type', 'preorder')
+                ->where('items.0.book.preorder_estimated_date', null)
+                ->where('items.0.book.pre_order_code', null)
+                ->where('items.1.book.sale_type', 'ready_stock')
+                ->where('items.1.book.preorder_estimated_date', null)
+                ->where('items.1.book.pre_order_code', null));
     }
 
     public function test_quantity_changes_validate_stock_and_ownership(): void

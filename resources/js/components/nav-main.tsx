@@ -96,7 +96,13 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
                                 tooltip={{ children: item.title }}
                                 className="h-11 rounded-xl px-3 text-[13px] font-semibold group-data-[collapsible=icon]:justify-center"
                             >
-                                <Link href={item.href} prefetch>
+                                <Link
+                                    href={item.href}
+                                    prefetch={
+                                        pathFor(item.href) !==
+                                        '/customer/dashboard/carts'
+                                    }
+                                >
                                     {item.icon && <item.icon />}
                                     <span>{item.title}</span>
                                 </Link>

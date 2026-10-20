@@ -11,7 +11,7 @@ class DomainSchemaTest extends TestCase
     use RefreshDatabase;
 
     private const DOMAIN_TABLES = [
-        'users', 'store_settings', 'user_addresses', 'categories', 'books',
+        'users', 'store_settings', 'user_addresses', 'categories', 'pre_order_codes', 'books',
         'book_images', 'book_categories', 'wallets', 'wallet_topups',
         'wallet_transactions', 'carts', 'cart_items', 'vouchers', 'orders',
         'order_items', 'order_shipping_addresses', 'voucher_usages',
@@ -25,7 +25,7 @@ class DomainSchemaTest extends TestCase
             $this->assertTrue(Schema::hasTable($table), "Missing table: {$table}");
         }
 
-        foreach (['users', 'user_addresses', 'categories', 'books', 'vouchers'] as $table) {
+        foreach (['users', 'user_addresses', 'categories', 'pre_order_codes', 'books', 'vouchers'] as $table) {
             $this->assertTrue(Schema::hasColumn($table, 'deleted_at'), "Missing deleted_at: {$table}");
         }
 
@@ -45,6 +45,7 @@ class DomainSchemaTest extends TestCase
     {
         foreach ([
             'categories' => ['slug'],
+            'pre_order_codes' => ['code'],
             'books' => ['slug'],
             'book_categories' => ['book_id', 'category_id'],
             'wallets' => ['user_id'],

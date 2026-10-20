@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources\Customer;
 
+use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/** @mixin Book */
 class BookResource extends JsonResource
 {
     /** @return array<string, mixed> */
@@ -22,6 +24,12 @@ class BookResource extends JsonResource
             'description' => $this->description,
             'price' => $this->price,
             'stock' => $this->stock,
+            'sale_type' => $this->sale_type->value,
+            'preorder_estimated_date' => $this->preorder_estimated_date?->toDateString(),
+            'pre_order_code' => $this->preOrderCode ? [
+                'id' => $this->preOrderCode->id,
+                'code' => $this->preOrderCode->code,
+            ] : null,
             'categories' => $this->categories
                 ->map(fn ($category) => [
                     'id' => $category->id,

@@ -12,18 +12,21 @@ import type {
     CatalogFilters,
     CustomerBook,
     CustomerCategory,
+    CustomerPreOrderCode,
     PaginatedData,
 } from '@/types';
 
 interface CatalogPageProps {
     books: PaginatedData<CustomerBook>;
     categories: CustomerCategory[];
+    preOrderCodes: CustomerPreOrderCode[];
     filters: CatalogFilters;
 }
 
 export default function BooksIndex({
     books,
     categories,
+    preOrderCodes,
     filters,
 }: CatalogPageProps) {
     const [search, setSearch] = useState(filters.search);
@@ -40,6 +43,9 @@ export default function BooksIndex({
             availability: next.availability,
             sort: next.sort,
         };
+        if (next.pre_order_code_id) {
+            payload.pre_order_code_id = next.pre_order_code_id;
+        }
         if (next.categories && next.categories.length > 0) {
             payload.categories = next.categories;
         }
@@ -69,6 +75,7 @@ export default function BooksIndex({
             search: '',
             categories: [],
             availability: '',
+            pre_order_code_id: '',
             sort: 'latest',
         });
     };
@@ -105,6 +112,7 @@ export default function BooksIndex({
                 <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
                     <BookFilters
                         categories={categories}
+                        preOrderCodes={preOrderCodes}
                         filters={filters}
                         search={search}
                         onSearchChange={setSearch}

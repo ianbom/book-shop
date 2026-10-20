@@ -2,8 +2,10 @@
 
 namespace App\Services\Customer\Dashboard;
 
+use App\Enums\BookSaleType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Models\Book;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -22,13 +24,20 @@ class OrderListService
                 'items',
                 'items.book' => fn ($query) => $query->withTrashed(),
                 'items.book.images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
+                'shipments' => fn ($query) => $query->latest('created_at')->latest('id'),
             ])
             ->withCount('shipments')
+            ->withMin(['items as preorder_estimated_date' => fn ($query) => $query->where('sale_type', BookSaleType::Preorder)], 'preorder_estimated_date')
+            ->withCasts(['preorder_estimated_date' => 'date'])
             ->search($filters['search'] ?? null)
+            ->when(filled($filters['pre_order_code'] ?? null), function ($query) use ($filters): void {
+                $query->whereHas('items', fn ($items) => $items
+                    ->where('sale_type', BookSaleType::Preorder)
+                    ->whereIn('book_id', Book::withTrashed()->select('id')
+                        ->whereHas('preOrderCode', fn ($codes) => $codes->where('code', 'like', '%'.$filters['pre_order_code'].'%'))));
+            })
             ->status(OrderStatus::tryFrom($filters['status'] ?? ''))
             ->paymentStatus(PaymentStatus::tryFrom($filters['payment'] ?? ''))
-            ->when($filters['date_from'] ?? null, fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
-            ->when($filters['date_to'] ?? null, fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
             ->latest()
             ->paginate(15)
             ->appends($filters);
@@ -53,6 +62,8 @@ class OrderListService
                     'status' => $order->getRawOriginal('status'),
                     'can_cancel' => in_array($order->status, [OrderStatus::Pending, OrderStatus::WaitingPreorder], true),
                     'payment_status' => $order->getRawOriginal('payment_status'),
+                    'shipment_status' => $order->shipments->first()?->getRawOriginal('status'),
+                    'preorder_estimated_date' => $order->getAttribute('preorder_estimated_date')?->toDateString(),
                     'shipments_count' => $order->shipments_count,
                     'created_at' => $order->created_at?->toISOString(),
                 ];

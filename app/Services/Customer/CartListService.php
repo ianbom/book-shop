@@ -12,6 +12,7 @@ class CartListService
         $cart = $user->cart()->with([
             'items' => fn ($query) => $query->orderBy('id'),
             'items.book.images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
+            'items.book.preOrderCode',
         ])->first();
 
         $items = [];
@@ -35,6 +36,13 @@ class CartListService
                     'price' => $book->price,
                     'stock' => $book->stock,
                     'is_active' => $book->is_active,
+                    'sale_type' => $book->sale_type->value,
+                    'pre_order_code_id' => $book->pre_order_code_id,
+                    'preorder_estimated_date' => $book->preorder_estimated_date?->toDateString(),
+                    'pre_order_code' => $book->preOrderCode ? [
+                        'id' => $book->preOrderCode->id,
+                        'code' => $book->preOrderCode->code,
+                    ] : null,
                     'primary_image' => $image ? [
                         'url' => Storage::disk('public')->url($image->image_path),
                         'alt_text' => $image->alt_text,

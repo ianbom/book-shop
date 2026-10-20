@@ -63,17 +63,22 @@ class BiteshipOrderFlowTest extends TestCase
         $order->shippingAddress()->create(['destination_contact_name' => 'Penerima', 'destination_contact_phone' => '08123456789', 'destination_address' => 'Jalan Tujuan', 'destination_postal_code' => '12345']);
         StoreSetting::factory()->create();
         config(['services.biteship.key' => 'test-key']);
-        Http::fake(['api.biteship.com/v1/orders' => Http::response(['success' => false, 'code' => 40002060, 'details' => ['order_id' => 'existing-1', 'reference_id' => 'SHP-RETRY', 'waybill_id' => 'WB-2']], 400)]);
+        Http::fake([
+            'api.biteship.com/v1/orders' => Http::response(['success' => false, 'code' => 40002060, 'details' => ['order_id' => 'existing-1', 'reference_id' => 'SHP-RETRY', 'waybill_id' => 'WB-2']], 400),
+            'api.biteship.com/v1/orders/existing-1' => Http::response(['success' => true, 'id' => 'existing-1', 'status' => 'on_hold', 'courier' => ['waybill_id' => 'WB-2']]),
+        ]);
 
         $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'shipping'])->assertRedirect();
         $this->assertSame('existing-1', $shipment->fresh()->biteship_order_id);
         $this->assertSame('WB-2', $shipment->fresh()->waybill_id);
+        $this->assertSame('on_hold', $shipment->fresh()->status->value);
         $this->assertSame(OrderStatus::Shipping, $order->fresh()->status);
     }
 
     public function test_webhook_updates_shipment_and_completes_order_idempotently(): void
     {
-        config(['services.biteship.webhook_secret' => 'secret']);
+        config(['services.biteship.webhook_secret' => 'secret', 'services.biteship.key' => 'test-key']);
+        Http::fake(['api.biteship.com/v1/orders/provider-1' => Http::response(['success' => true, 'id' => 'provider-1', 'status' => 'delivered', 'courier' => ['waybill_id' => 'WB-1', 'tracking_id' => 'TRACK-1']])]);
         $order = $this->order(['status' => OrderStatus::Shipping]);
         $shipment = $order->shipments()->create(['shipment_code' => 'SHP-WEB', 'courier_company' => 'jne', 'courier_type' => 'reg', 'price' => 10000, 'biteship_order_id' => 'provider-1', 'status' => 'in_transit']);
         $payload = ['event' => 'order.status', 'order_id' => 'provider-1', 'status' => 'delivered', 'courier_waybill_id' => 'WB-1', 'courier_tracking_id' => 'TRACK-1'];
@@ -96,9 +101,9 @@ class BiteshipOrderFlowTest extends TestCase
         $shipment = $order->shipments()->create(['shipment_code' => 'SHP-MANUAL', 'courier_company' => 'jne', 'courier_type' => 'reg', 'price' => 10000]);
 
         $url = route('admin.orders.shipments.status', [$order, $shipment]);
-        $this->actingAs($admin)->patch($url, ['status' => 'booked'])->assertSessionHasErrors('status');
+        $this->actingAs($admin)->patch($url, ['status' => 'booked', 'description' => 'Uji tanpa booking'])->assertSessionHasErrors('status');
         $this->assertSame('pending', $shipment->fresh()->status->value);
-        $this->actingAs($admin)->patch($url, ['status' => 'cancelled'])->assertSessionHasErrors('status');
+        $this->actingAs($admin)->patch($url, ['status' => 'cancelled', 'description' => 'Uji tanpa booking'])->assertSessionHasErrors('status');
         $shipment->update(['status' => 'cancelled']);
         $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'shipping'])->assertSessionHasErrors('status');
         $this->assertSame(OrderStatus::Packing, $order->fresh()->status);

@@ -10,10 +10,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { CatalogFilters, CustomerCategory } from '@/types';
+import type {
+    CatalogFilters,
+    CustomerCategory,
+    CustomerPreOrderCode,
+} from '@/types';
 
 interface BookFiltersProps {
     categories: CustomerCategory[];
+    preOrderCodes: CustomerPreOrderCode[];
     filters: CatalogFilters;
     search: string;
     onSearchChange: (value: string) => void;
@@ -26,6 +31,7 @@ interface BookFiltersProps {
 
 export function BookFilters({
     categories,
+    preOrderCodes,
     filters,
     search,
     onSearchChange,
@@ -37,6 +43,7 @@ export function BookFilters({
         filters.search ||
         selectedCategories.length > 0 ||
         filters.availability ||
+        filters.pre_order_code_id ||
         filters.sort !== 'latest',
     );
 
@@ -150,6 +157,39 @@ export function BookFilters({
                         <SelectItem value="all">Semua Stok</SelectItem>
                         <SelectItem value="available">Tersedia</SelectItem>
                         <SelectItem value="out_of_stock">Stok Habis</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-2">
+                <Label
+                    htmlFor="catalog-pre-order-code"
+                    className="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
+                >
+                    Kode Pre Order
+                </Label>
+                <Select
+                    value={filters.pre_order_code_id || 'all'}
+                    onValueChange={(value) =>
+                        onChange(
+                            'pre_order_code_id',
+                            value === 'all' ? '' : value,
+                        )
+                    }
+                >
+                    <SelectTrigger
+                        id="catalog-pre-order-code"
+                        className="bg-background w-full rounded-lg text-sm"
+                    >
+                        <SelectValue placeholder="Semua kode" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg">
+                        <SelectItem value="all">Semua kode</SelectItem>
+                        {preOrderCodes.map((code) => (
+                            <SelectItem key={code.id} value={String(code.id)}>
+                                {code.code}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>

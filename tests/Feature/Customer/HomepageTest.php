@@ -5,6 +5,7 @@ namespace Tests\Feature\Customer;
 use App\Models\Book;
 use App\Models\BookImage;
 use App\Models\Category;
+use App\Models\PreOrderCode;
 use App\Models\StoreSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -13,6 +14,24 @@ use Tests\TestCase;
 class HomepageTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_homepage_exposes_preorder_details_in_featured_and_latest_books(): void
+    {
+        $code = PreOrderCode::create(['code' => 'PO-HOME']);
+        $book = Book::factory()->create([
+            'sale_type' => 'preorder', 'pre_order_code_id' => $code->id, 'preorder_estimated_date' => '2027-01-01',
+        ]);
+        $code->delete();
+
+        $this->get(route('home'))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('featuredBooks.0.id', $book->id)
+            ->where('featuredBooks.0.sale_type', 'preorder')
+            ->where('featuredBooks.0.preorder_estimated_date', '2027-01-01')
+            ->where('featuredBooks.0.pre_order_code.code', 'PO-HOME')
+            ->where('latestBooks.0.sale_type', 'preorder')
+            ->where('latestBooks.0.preorder_estimated_date', '2027-01-01')
+            ->where('latestBooks.0.pre_order_code.code', 'PO-HOME'));
+    }
 
     public function test_homepage_exposes_active_books_with_a_primary_image_fallback(): void
     {

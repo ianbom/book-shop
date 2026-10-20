@@ -2,13 +2,15 @@ import { Head } from '@inertiajs/react';
 import { PageHeader } from '@/components/admin/shared/page-header';
 import { BookForm } from '@/components/admin/books/book-form';
 import admin from '@/routes/admin';
-import type { Book, Category } from '@/types/admin';
+import type { Book, Category, PreOrderCode } from '@/types/admin';
 export default function EditBook({
     book,
     categories,
+    preOrderCodes,
 }: {
     book: Book;
     categories: { data: Category[] } | Category[];
+    preOrderCodes: PreOrderCode[];
 }) {
     return (
         <>
@@ -19,6 +21,7 @@ export default function EditBook({
                     description="Perbarui informasi katalog tanpa mengubah stok."
                 />
                 <BookForm
+                    preOrderCodes={preOrderCodes}
                     book={book}
                     categories={
                         Array.isArray(categories) ? categories : categories.data

@@ -7,14 +7,14 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PaymentProofController;
+use App\Http\Controllers\Admin\PreOrderCodeController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\StoreSettingController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\WalletTopupController;
 use App\Http\Controllers\Admin\WalletTransactionController;
-use App\Http\Controllers\BiteshipWebhookController;
 use App\Http\Controllers\Customer\BookController as CustomerBookController;
 use App\Http\Controllers\Customer\CartItemController;
 use App\Http\Controllers\Customer\Dashboard\AddressController as CustomerDashboardAddressController;
@@ -31,8 +31,6 @@ use App\Http\Controllers\Customer\OrderTrackingController;
 use App\Http\Middleware\EnsureAdminRole;
 use App\Http\Middleware\EnsureCustomerRole;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('books', [CustomerBookController::class, 'index'])->name('books.index');
@@ -61,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('orders/{order}', [CustomerDashboardOrderController::class, 'show'])->name('orders.show');
         Route::get('wallets', CustomerDashboardWalletController::class)->name('wallets.index');
         Route::post('wallets/top-ups', CustomerDashboardWalletTopupController::class)->name('wallets.topups.store');
+        Route::get('wallets/top-ups/{walletTopup}/proof', [CustomerDashboardWalletTopupController::class, 'proof'])->name('wallets.topups.proof');
         Route::get('vouchers', CustomerDashboardVoucherController::class)->name('vouchers.index');
     });
 
@@ -83,6 +82,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
         Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
+        Route::get('pre-order-codes', [PreOrderCodeController::class, 'index'])->name('pre-order-codes.index');
+        Route::post('pre-order-codes', [PreOrderCodeController::class, 'store'])->name('pre-order-codes.store');
+        Route::patch('pre-order-codes/{preOrderCode}', [PreOrderCodeController::class, 'update'])->name('pre-order-codes.update');
+        Route::delete('pre-order-codes/{preOrderCode}', [PreOrderCodeController::class, 'destroy'])->name('pre-order-codes.destroy');
+        Route::get('pre-order-codes/{preOrderCode}/books', [PreOrderCodeController::class, 'books'])->name('pre-order-codes.books');
+
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
@@ -97,6 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::patch('orders/{order}/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus'])->name('orders.shipments.status');
+        Route::post('orders/{order}/shipments/{shipment}/sync', [ShipmentController::class, 'sync'])->middleware('throttle:10,1')->name('orders.shipments.sync');
         Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
         Route::patch('orders/{order}/shipping-cost', [OrderController::class, 'updateShippingCost'])->name('orders.shipping-cost');
         Route::post('orders/{order}/payment-proofs', [PaymentProofController::class, 'store'])->name('orders.payment-proofs.store');

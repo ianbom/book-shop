@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { ArrowRight, BookOpen, GraduationCap, Heart, Lightbulb, Palette, Sparkles, WandSparkles } from 'lucide-react';
 import { BookDetailDialog } from '@/components/customer/books/book-detail-dialog';
+import { BookPreOrderDetails } from '@/components/customer/books/book-preorder-details';
 import { HeroSection } from '@/components/customer/home/hero-section';
 import { StoreBenefits } from '@/components/customer/home/store-benefits';
 import { SectionContainer } from '@/components/customer/shared/section-container';
@@ -35,6 +36,7 @@ function BookTile({ book, onView }: { book: CustomerBook; onView: (book: Custome
                 <span className="bg-secondary text-primary w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold">{book.categories[0]?.name ?? 'Buku'}</span>
                 <h3 className="mt-1 line-clamp-2 text-xs font-bold leading-5 sm:text-sm">{book.title}</h3>
                 <p className="text-muted-foreground line-clamp-1 text-[11px]">{book.author}</p>
+                <BookPreOrderDetails book={book} />
                 <div className="mt-auto flex flex-wrap items-end justify-between gap-2 pt-2">
                     <strong className="text-primary text-xs sm:text-sm">{rupiah(book.price)}</strong>
                     <button type="button" onClick={() => onView(book)} className="border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground rounded-md border px-2 py-1 text-[10px] font-bold transition sm:px-3">Lihat Detail</button>

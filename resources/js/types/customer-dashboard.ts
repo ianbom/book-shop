@@ -1,6 +1,7 @@
 import type {
     OrderStatus,
     PaymentStatus,
+    ShipmentStatus,
     WalletTransactionType,
 } from '@/types/admin';
 import type { PaginationLink } from '@/types/pagination';
@@ -23,6 +24,8 @@ export type CustomerOrder = {
     status: OrderStatus;
     can_cancel: boolean;
     payment_status: PaymentStatus;
+    shipment_status: ShipmentStatus | null;
+    preorder_estimated_date: string | null;
     shipments_count: number;
     created_at: string | null;
 };
@@ -47,6 +50,7 @@ export type CustomerBankAccount = {
 export type CustomerWalletTopup = {
     id: number;
     topup_code: string;
+    proof_url: string;
     requested_amount: string;
     credited_amount: string | null;
     status: 'pending' | 'approved' | 'rejected';

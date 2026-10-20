@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property BookSaleType $sale_type
  * @property Carbon|null $preorder_estimated_date
  */
-#[Fillable(['title', 'slug', 'isbn', 'sku', 'author', 'description', 'price', 'shipping_category', 'weight', 'height', 'length', 'width', 'stock', 'sale_type', 'preorder_estimated_date', 'preorder_note', 'is_active'])]
+#[Fillable(['title', 'slug', 'isbn', 'sku', 'author', 'description', 'price', 'shipping_category', 'weight', 'height', 'length', 'width', 'stock', 'sale_type', 'pre_order_code_id', 'preorder_estimated_date', 'preorder_note', 'is_active'])]
 class Book extends Model
 {
     /** @use HasFactory<BookFactory> */
@@ -39,6 +40,7 @@ class Book extends Model
             'length' => 'decimal:2',
             'width' => 'decimal:2',
             'stock' => 'integer',
+            'pre_order_code_id' => 'integer',
             'sale_type' => BookSaleType::class,
             'preorder_estimated_date' => 'date',
             'is_active' => 'boolean',
@@ -70,6 +72,12 @@ class Book extends Model
     {
         $slugs = is_array($slug) ? array_values(array_filter($slug)) : ($slug !== null && $slug !== '' ? array_values(array_filter(explode(',', $slug))) : []);
         $query->when($slugs !== [], fn (Builder $query) => $query->whereHas('categories', fn (Builder $query) => $query->whereIn('slug', $slugs)));
+    }
+
+    /** @return BelongsTo<PreOrderCode, $this> */
+    public function preOrderCode(): BelongsTo
+    {
+        return $this->belongsTo(PreOrderCode::class)->withTrashed();
     }
 
     /** @return HasMany<BookImage, $this> */

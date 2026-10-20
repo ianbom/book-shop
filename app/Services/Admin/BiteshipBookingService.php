@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 
 class BiteshipBookingService
 {
+    public function __construct(private readonly BiteshipShipmentService $shipments) {}
+
     public function book(Order $order, Shipment $shipment): void
     {
         if ($shipment->biteship_order_id !== null) {
@@ -101,18 +103,13 @@ class BiteshipBookingService
             throw ValidationException::withMessages(['status' => 'Biteship gagal membuat pengiriman. Periksa data alamat dan coba lagi.']);
         }
 
-        $shipment->update([
-            'biteship_order_id' => (string) ($duplicate ? $response->json('details.order_id') : $response->json('id')),
-            'tracking_id' => $response->json('courier.tracking_id'),
-            'waybill_id' => $duplicate ? $response->json('details.waybill_id') : $response->json('courier.waybill_id'),
-            'courier_link' => $response->json('courier.link'),
-            'biteship_status' => $duplicate ? 'confirmed' : $response->json('status'),
-            'response_payload' => $response->json(),
-            'status' => 'booked',
-        ]);
-        $shipment->statusHistories()->create([
-            'status' => 'booked', 'provider_status' => $duplicate ? 'confirmed' : $response->json('status'),
-            'description' => 'Order pengiriman dibuat di Biteship.', 'occurred_at' => now(),
-        ]);
+        $providerId = (string) ($duplicate ? $response->json('details.order_id') : $response->json('id'));
+        try {
+            $snapshot = $duplicate ? $this->shipments->retrieve($providerId) : $response->json();
+            $shipment->update(['biteship_order_id' => $providerId, 'status' => 'booked']);
+            $this->shipments->apply($shipment, $snapshot);
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(['status' => collect($exception->errors())->flatten()->first()]);
+        }
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Resources\Admin\BookResource;
 use App\Http\Resources\Admin\CategoryResource;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\PreOrderCode;
 use App\Services\Admin\BookService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class BookController extends Controller
     public function create(): Response
     {
         return Inertia::render('admin/books/create', [
+            'preOrderCodes' => PreOrderCode::query()->orderBy('code')->get(['id', 'code']),
             'categories' => CategoryResource::collection(Category::query()->orderBy('name')->get()),
         ]);
     }
@@ -68,9 +70,10 @@ class BookController extends Controller
 
     public function edit(Request $request, Book $book): Response
     {
-        $book->load(['categories', 'images' => fn ($query) => $query->orderBy('sort_order')]);
+        $book->load(['preOrderCode', 'categories', 'images' => fn ($query) => $query->orderBy('sort_order')]);
 
         return Inertia::render('admin/books/edit', [
+            'preOrderCodes' => PreOrderCode::query()->orderBy('code')->get(['id', 'code']),
             'book' => (new BookResource($book))->resolve($request),
             'categories' => CategoryResource::collection(Category::query()->orderBy('name')->get()),
         ]);

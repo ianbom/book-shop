@@ -33,6 +33,12 @@ class BookResource extends JsonResource
             'width' => $this->width,
             'stock' => $this->stock,
             'sale_type' => $this->sale_type->value,
+            'pre_order_code_id' => $this->pre_order_code_id,
+            'pre_order_code' => $this->whenLoaded('preOrderCode', fn () => $this->preOrderCode ? [
+                'id' => $this->preOrderCode->id,
+                'code' => $this->preOrderCode->code,
+                'is_deleted' => $this->preOrderCode->trashed(),
+            ] : null),
             'preorder_estimated_date' => $this->preorder_estimated_date?->format('Y-m-d'),
             'preorder_note' => $this->preorder_note,
             'is_active' => $this->is_active,

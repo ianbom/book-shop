@@ -4,6 +4,11 @@ export interface CustomerCategory {
     slug: string;
 }
 
+export interface CustomerPreOrderCode {
+    id: number;
+    code: string;
+}
+
 export interface CustomerBookImage {
     id: number;
     url: string;
@@ -21,6 +26,9 @@ export interface CustomerBook {
     description: string | null;
     price: string | number;
     stock: number;
+    sale_type: 'ready_stock' | 'preorder';
+    preorder_estimated_date: string | null;
+    pre_order_code: CustomerPreOrderCode | null;
     categories: CustomerCategory[];
     images: CustomerBookImage[];
     primary_image: CustomerBookImage | null;
@@ -30,6 +38,7 @@ export interface CatalogFilters {
     search: string;
     categories: string[];
     category?: string;
+    pre_order_code_id: string;
     availability: '' | 'available' | 'out_of_stock';
     sort: 'latest' | 'title_asc' | 'title_desc' | 'price_asc' | 'price_desc';
 }

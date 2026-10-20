@@ -2,11 +2,13 @@ import { Head } from '@inertiajs/react';
 import { PageHeader } from '@/components/admin/shared/page-header';
 import { BookForm } from '@/components/admin/books/book-form';
 import admin from '@/routes/admin';
-import type { Category } from '@/types/admin';
+import type { Category, PreOrderCode } from '@/types/admin';
 export default function CreateBook({
     categories,
+    preOrderCodes,
 }: {
     categories: { data: Category[] } | Category[];
+    preOrderCodes: PreOrderCode[];
 }) {
     return (
         <>
@@ -17,6 +19,7 @@ export default function CreateBook({
                     description="Tambahkan buku baru ke katalog."
                 />
                 <BookForm
+                    preOrderCodes={preOrderCodes}
                     categories={
                         Array.isArray(categories) ? categories : categories.data
                     }

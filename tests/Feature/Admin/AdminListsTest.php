@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\BookImage;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PreOrderCode;
 use App\Models\Shipment;
 use App\Models\User;
 use App\Models\Voucher;
@@ -195,7 +196,7 @@ class AdminListsTest extends TestCase
                 && str_contains($url, 'page=2')));
     }
 
-    public function test_order_list_displays_primary_book_image_and_filters_date_range(): void
+    public function test_order_list_displays_primary_book_image(): void
     {
         $admin = $this->admin();
         $customer = User::factory()->create(['role' => UserRole::Customer]);
@@ -211,14 +212,14 @@ class AdminListsTest extends TestCase
         $book->delete();
 
         $this->actingAs($admin)->get(route('admin.orders.index', [
-            'date_from' => '2026-09-21', 'date_to' => '2026-09-21', 'payment' => 'paid',
+            'search' => 'ORD-INSIDE',
         ]))->assertInertia(fn (Assert $page) => $page
             ->has('orders.data', 1)
             ->where('orders.data.0.book_title', 'Buku Contoh')
             ->where('orders.data.0.quantity', 3)
             ->where('orders.data.0.primary_image_url', Storage::disk('public')->url('books/cover.webp'))
-            ->where('filters.date_from', '2026-09-21')
-            ->where('filters.date_to', '2026-09-21')
+            ->where('orders.data.0.eta', null)
+            ->where('orders.data.0.shipment_status', null)
             ->missing('filters.payment'));
 
         $this->actingAs($admin)->get(route('admin.orders.index', ['search' => 'ORD-OUTSIDE']))
@@ -251,34 +252,104 @@ class AdminListsTest extends TestCase
                 ->where('orders.data.0.customer_email', $customer->email));
     }
 
-    public function test_order_date_filter_rejects_invalid_or_reversed_ranges(): void
-    {
-        $admin = $this->admin();
-
-        $this->actingAs($admin)->get(route('admin.orders.index', [
-            'date_from' => '2026-09-22', 'date_to' => '2026-09-21',
-        ]))->assertSessionHasErrors('date_to');
-
-        $this->actingAs($admin)->get(route('admin.orders.index', ['date_from' => 'not-a-date']))
-            ->assertSessionHasErrors('date_from');
-    }
-
-    public function test_order_pagination_preserves_both_dates_without_payment_filter(): void
+    public function test_order_list_filters_by_preorder_code_and_nearest_eta_month(): void
     {
         $admin = $this->admin();
         $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $code = PreOrderCode::create(['code' => 'PO-ALPHA']);
+        $book = Book::factory()->create([
+            'sale_type' => 'preorder', 'pre_order_code_id' => $code->id,
+            'preorder_estimated_date' => '2026-12-20',
+        ]);
+        $order = $this->order($customer, 'ORD-ALPHA');
+        OrderItem::create([
+            'order_id' => $order->id, 'book_id' => $book->id, 'name' => $book->title,
+            'sale_type' => 'preorder', 'preorder_estimated_date' => '2026-10-20',
+            'sku' => 'PO-1', 'value' => 100000, 'quantity' => 1, 'weight' => 500, 'subtotal' => 100000,
+        ]);
+        OrderItem::create([
+            'order_id' => $order->id, 'name' => 'Buku ETA November', 'sale_type' => 'preorder',
+            'preorder_estimated_date' => '2026-11-05', 'sku' => 'PO-2', 'value' => 100000,
+            'quantity' => 1, 'weight' => 500, 'subtotal' => 100000,
+        ]);
+        Shipment::create([
+            'order_id' => $order->id, 'shipment_code' => 'SHP-OLD', 'courier_company' => 'JNE',
+            'courier_type' => 'reg', 'price' => 10000, 'status' => 'pending', 'created_at' => '2026-10-01',
+        ]);
+        Shipment::create([
+            'order_id' => $order->id, 'shipment_code' => 'SHP-NEW', 'courier_company' => 'JNE',
+            'courier_type' => 'reg', 'price' => 10000, 'status' => 'booked', 'created_at' => '2026-10-02',
+        ]);
+        $otherCode = PreOrderCode::create(['code' => 'PO-BETA']);
+        $otherBook = Book::factory()->create([
+            'sale_type' => 'preorder', 'pre_order_code_id' => $otherCode->id,
+            'preorder_estimated_date' => '2026-10-12',
+        ]);
+        $otherOrder = $this->order($customer, 'ORD-BETA');
+        OrderItem::create([
+            'order_id' => $otherOrder->id, 'book_id' => $otherBook->id, 'name' => $otherBook->title,
+            'sale_type' => 'preorder', 'preorder_estimated_date' => '2026-10-12',
+            'sku' => 'PO-3', 'value' => 100000, 'quantity' => 1, 'weight' => 500, 'subtotal' => 100000,
+        ]);
+        $book->delete();
+        $code->delete();
+
+        $this->actingAs($admin)->get(route('admin.orders.index', [
+            'pre_order_code' => 'ALPHA', 'eta' => '2026-10',
+        ]))->assertInertia(fn (Assert $page) => $page
+            ->has('orders.data', 1)
+            ->where('orders.data.0.order_code', 'ORD-ALPHA')
+            ->where('orders.data.0.eta', '2026-10-20')
+            ->where('orders.data.0.shipment_status', 'booked')
+            ->where('filters.pre_order_code', 'ALPHA')
+            ->where('filters.eta', '2026-10')
+            ->where('eta_months', ['2026-10', '2026-11']));
+
+        $this->actingAs($admin)->get(route('admin.orders.index', ['eta' => '2026-11']))
+            ->assertInertia(fn (Assert $page) => $page->has('orders.data', 0));
+
+        $this->actingAs($admin)->get(route('admin.orders.index', ['pre_order_code' => 'UNKNOWN']))
+            ->assertInertia(fn (Assert $page) => $page->has('orders.data', 0));
+    }
+
+    public function test_order_preorder_filters_reject_invalid_values(): void
+    {
+        $admin = $this->admin();
+
+        foreach (['not-a-month', '2026-13', '2026-10-20'] as $eta) {
+            $this->actingAs($admin)->get(route('admin.orders.index', ['eta' => $eta]))
+                ->assertSessionHasErrors('eta');
+        }
+
+        $this->actingAs($admin)->get(route('admin.orders.index', ['pre_order_code' => ['PO-1']]))
+            ->assertSessionHasErrors('pre_order_code');
+    }
+
+    public function test_order_pagination_preserves_preorder_filters(): void
+    {
+        $admin = $this->admin();
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+        $code = PreOrderCode::create(['code' => 'PO-PAGE']);
+        $book = Book::factory()->create([
+            'sale_type' => 'preorder', 'pre_order_code_id' => $code->id,
+            'preorder_estimated_date' => '2026-10-15',
+        ]);
         foreach (range(1, 16) as $index) {
-            $this->order($customer, sprintf('ORD-DATE-%02d', $index))
-                ->forceFill(['created_at' => '2026-09-21 10:00:00'])->save();
+            $order = $this->order($customer, sprintf('ORD-PO-%02d', $index));
+            OrderItem::create([
+                'order_id' => $order->id, 'book_id' => $book->id, 'name' => $book->title,
+                'sale_type' => 'preorder', 'preorder_estimated_date' => '2026-10-15',
+                'sku' => 'PO-PAGE', 'value' => 100000, 'quantity' => 1, 'weight' => 500, 'subtotal' => 100000,
+            ]);
         }
 
         $this->actingAs($admin)->get(route('admin.orders.index', [
-            'date_from' => '2026-09-21', 'date_to' => '2026-09-21', 'payment' => 'paid',
+            'pre_order_code' => 'PO-PAGE', 'eta' => '2026-10', 'payment' => 'paid',
         ]))->assertInertia(fn (Assert $page) => $page
             ->has('orders.data', 15)
             ->where('orders.meta.total', 16)
-            ->where('orders.links.next', fn (string $url) => str_contains($url, 'date_from=2026-09-21')
-                && str_contains($url, 'date_to=2026-09-21')
+            ->where('orders.links.next', fn (string $url) => str_contains($url, 'pre_order_code=PO-PAGE')
+                && str_contains($url, 'eta=2026-10')
                 && ! str_contains($url, 'payment=')));
     }
 

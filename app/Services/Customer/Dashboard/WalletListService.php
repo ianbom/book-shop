@@ -60,6 +60,7 @@ class WalletListService
             'data' => $topupPaginator->getCollection()->map(fn (WalletTopup $topup): array => [
                 'id' => $topup->id,
                 'topup_code' => $topup->topup_code,
+                'proof_url' => route('customer.dashboard.wallets.topups.proof', $topup),
                 'requested_amount' => $topup->requested_amount,
                 'credited_amount' => $topup->credited_amount,
                 'status' => $topup->getRawOriginal('status'),
