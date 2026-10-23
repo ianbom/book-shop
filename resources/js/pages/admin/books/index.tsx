@@ -1,6 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
     BookOpen,
+    Download,
+    Upload,
     ChevronRight,
     House,
     Plus,
@@ -57,11 +59,23 @@ export default function BooksIndex({
                             Buku
                         </span>
                     </nav>
-                    <Button asChild size="sm">
-                        <Link href={admin.books.create()}>
-                            <Plus /> Tambah Buku
-                        </Link>
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                        <Button asChild variant="outline" size="sm">
+                            <a href="/admin/books/import/template">
+                                <Download /> Template Excel
+                            </a>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/admin/books/import">
+                                <Upload /> Import Excel
+                            </Link>
+                        </Button>
+                        <Button asChild size="sm">
+                            <Link href={admin.books.create()}>
+                                <Plus /> Tambah Buku
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
                 <section className="bg-muted/60 relative overflow-hidden rounded-2xl border border-white/80 px-5 py-6 sm:px-7 sm:py-7">
                     <div className="relative z-10 max-w-2xl">

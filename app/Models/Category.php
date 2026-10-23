@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\BookReferenceName;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,14 @@ class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saving(function (Category $category): void {
+            $category->name = BookReferenceName::display($category->name);
+            $category->setAttribute('normalized_key', BookReferenceName::key($category->name));
+        });
+    }
 
     protected function casts(): array
     {

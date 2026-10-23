@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\BookController;
 use App\Http\Controllers\Admin\BookImageController;
+use App\Http\Controllers\Admin\BookImportController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -68,6 +69,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('profile/address/areas', [CustomerDashboardAddressController::class, 'areas'])->middleware('throttle:30,1')->name('profile.address.areas');
         Route::get('profile/address/map-center', [CustomerDashboardAddressController::class, 'mapCenter'])->middleware('throttle:30,1')->name('profile.address.map-center');
         Route::put('profile/address', [CustomerDashboardAddressController::class, 'save'])->name('profile.address.save');
+        Route::get('books/import', [BookImportController::class, 'index'])->name('books.import.index');
+        Route::get('books/import/template', [BookImportController::class, 'template'])->name('books.import.template');
+        Route::post('books/import', [BookImportController::class, 'store'])->middleware('throttle:10,1')->name('books.import.store');
+        Route::get('books/import/{draft}', [BookImportController::class, 'show'])->name('books.import.show');
+        Route::patch('books/import/{draft}/rows/{row}', [BookImportController::class, 'update'])->name('books.import.rows.update');
+        Route::delete('books/import/{draft}/rows/{row}', [BookImportController::class, 'destroyRow'])->name('books.import.rows.destroy');
+        Route::post('books/import/{draft}/commit', [BookImportController::class, 'commit'])->name('books.import.commit');
         Route::resource('books', BookController::class);
         Route::patch('books/{book}/status', [BookController::class, 'updateStatus'])->name('books.status');
         Route::post('books/{book}/images', [BookImageController::class, 'store'])->name('books.images.store');

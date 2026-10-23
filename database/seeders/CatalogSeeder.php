@@ -6,6 +6,7 @@ use App\Enums\StockMovementType;
 use App\Models\Book;
 use App\Models\BookStockMovement;
 use App\Models\Category;
+use App\Support\BookReferenceName;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,7 @@ class CatalogSeeder extends Seeder
     {
         $category = Category::withTrashed()->firstOrNew(['slug' => $data['slug']]);
         $category->fill($data);
+        $category->forceFill(['normalized_key' => BookReferenceName::key($data['name'])]);
         if ($category->exists && $category->trashed()) {
             $category->restore();
         }
