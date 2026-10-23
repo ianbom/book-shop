@@ -47,7 +47,7 @@ class AdminWorkflowTest extends TestCase
     {
         $admin = $this->admin();
         $book = Book::factory()->create();
-        $order = Order::factory()->create(['book_id' => $book->id]);
+        $order = Order::factory()->create();
         $setting = StoreSetting::factory()->create();
 
         $this->actingAs($admin)->get(route('admin.books.show', $book))
@@ -74,7 +74,7 @@ class AdminWorkflowTest extends TestCase
             'stock_before' => 0,
             'stock_after' => 1,
         ]);
-        $order = Order::factory()->create(['book_id' => $book->id]);
+        $order = Order::factory()->create();
 
         $this->actingAs($admin)->get(route('admin.books.show', $book))
             ->assertInertia(fn (Assert $page) => $page
@@ -83,7 +83,7 @@ class AdminWorkflowTest extends TestCase
             );
         $this->actingAs($admin)->get(route('admin.orders.show', $order))
             ->assertInertia(fn (Assert $page) => $page
-                ->has('order.payment_proofs', 0)
+                ->has('order.wallet_transactions', 0)
                 ->has('order.status_histories', 0)
                 ->has('order.stock_movements', 0),
             );
@@ -254,7 +254,15 @@ class AdminWorkflowTest extends TestCase
     {
         $admin = $this->admin();
         $book = Book::factory()->create(['stock' => 5]);
-        $order = Order::factory()->create(['book_id' => $book->id, 'quantity' => 2, 'status' => OrderStatus::Pending]);
+        $order = Order::factory()->create(['status' => OrderStatus::Pending]);
+        $item = $order->items()->create([
+            'book_id' => $book->id, 'name' => $book->title, 'value' => 50000,
+            'quantity' => 2, 'weight' => 500, 'subtotal' => 100000, 'sale_type' => 'ready_stock',
+        ]);
+        BookStockMovement::create([
+            'book_id' => $book->id, 'order_id' => $order->id, 'order_item_id' => $item->id,
+            'type' => StockMovementType::Order, 'quantity' => -2, 'stock_before' => 7, 'stock_after' => 5,
+        ]);
 
         $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => OrderStatus::Cancelled->value])->assertRedirect();
 

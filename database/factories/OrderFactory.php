@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
-use App\Models\Book;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -16,27 +16,17 @@ class OrderFactory extends Factory
 
     public function definition(): array
     {
-        $book = Book::factory()->create();
-        $quantity = fake()->numberBetween(1, 5);
-        $unitPrice = fake()->randomFloat(2, 25000, 300000);
-        $subtotal = $unitPrice * $quantity;
+        $subtotal = fake()->numberBetween(25000, 300000);
 
         return [
             'order_code' => 'BO-'.Str::upper(Str::random(10)),
-            'customer_name' => fake()->name(),
-            'customer_phone' => fake()->e164PhoneNumber(),
-            'customer_email' => fake()->optional()->safeEmail(),
-            'customer_address' => fake()->address(),
+            'user_id' => User::factory(),
             'customer_note' => fake()->optional()->sentence(),
-            'book_id' => $book->id,
-            'book_title' => $book->title,
-            'book_isbn' => $book->isbn,
-            'book_author' => $book->author,
-            'unit_price' => $unitPrice,
-            'quantity' => $quantity,
             'subtotal' => $subtotal,
+            'voucher_discount' => 0,
             'shipping_cost' => 0,
             'total' => $subtotal,
+            'wallet_amount' => 0,
             'status' => OrderStatus::Pending,
             'payment_status' => PaymentStatus::Unpaid,
         ];

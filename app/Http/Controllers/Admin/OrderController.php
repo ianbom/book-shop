@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\BookSaleType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\ShipmentStatus;
+use App\Enums\WalletTransactionType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Orders\UpdateOrderShippingCostRequest;
 use App\Http\Requests\Admin\Orders\UpdateOrderStatusRequest;
-use App\Http\Requests\Admin\Orders\UpdatePaymentStatusRequest;
 use App\Http\Resources\Admin\OrderDetailResource;
 use App\Http\Resources\Admin\OrderResource;
 use App\Models\Book;
@@ -18,6 +19,8 @@ use App\Services\Admin\OrderStatusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -101,22 +104,36 @@ class OrderController extends Controller
         return back();
     }
 
-    public function updatePaymentStatus(UpdatePaymentStatusRequest $request, Order $order): RedirectResponse
-    {
-        $order->update(['payment_status' => PaymentStatus::from($request->validated('payment_status'))]);
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Status pembayaran berhasil diperbarui.']);
-
-        return back();
-    }
-
     public function updateShippingCost(UpdateOrderShippingCostRequest $request, Order $order): RedirectResponse
     {
-        $shippingCost = $request->validated('shipping_cost');
+        DB::transaction(function () use ($request, $order): void {
+            $order = Order::lockForUpdate()->findOrFail($order->id);
+            $shipments = $order->shipments()->lockForUpdate()->get();
+            if ($order->payment_status !== PaymentStatus::Unpaid
+                || $order->status === OrderStatus::Cancelled
+                || (int) str_replace('.', '', $order->wallet_amount) !== 0
+                || $order->walletTransactions()->whereIn('type', [WalletTransactionType::OrderPayment, WalletTransactionType::OrderRefund])->exists()
+                || $shipments->contains(fn ($shipment) => $shipment->status !== ShipmentStatus::Pending
+                    || $shipment->biteship_order_id !== null || $shipment->tracking_id !== null
+                    || $shipment->waybill_id !== null || $shipment->courier_link !== null
+                    || $shipment->biteship_status !== null)) {
+                throw ValidationException::withMessages(['shipping_cost' => 'Ongkir hanya dapat diubah sebelum pembayaran dan pengiriman diproses.']);
+            }
 
-        $order->update([
-            'shipping_cost' => $shippingCost,
-            'total' => number_format((float) $order->subtotal + (float) $shippingCost, 2, '.', ''),
-        ]);
+            [$whole, $fraction] = array_pad(explode('.', (string) $request->validated('shipping_cost')), 2, '');
+            $shippingCents = (int) $whole * 100 + (int) str_pad($fraction, 2, '0');
+            $totalCents = (int) str_replace('.', '', $order->subtotal)
+                - (int) str_replace('.', '', $order->voucher_discount) + $shippingCents;
+            if ($totalCents < 0 || $totalCents > 999999999999999) {
+                throw ValidationException::withMessages(['shipping_cost' => 'Total order berada di luar batas nominal yang diperbolehkan.']);
+            }
+
+            $formatMoney = fn (int $cents): string => sprintf('%d.%02d', intdiv($cents, 100), $cents % 100);
+            $order->update([
+                'shipping_cost' => $formatMoney($shippingCents),
+                'total' => $formatMoney($totalCents),
+            ]);
+        });
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Ongkir order berhasil diperbarui.']);
 
         return back();

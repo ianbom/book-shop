@@ -32,7 +32,7 @@ class CustomerOrderCancellationTest extends TestCase
             'payment_status' => PaymentStatus::Paid,
             'subtotal' => 100000,
             'total' => 100000,
-            'wallet_amount' => 120000,
+            'wallet_amount' => 100000,
         ]);
         $item = $order->items()->create([
             'book_id' => $book->id,

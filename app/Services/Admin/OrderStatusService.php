@@ -71,38 +71,41 @@ class OrderStatusService
 
     private function refundWalletPayment(Order $order, User $admin): void
     {
-        if ($order->payment_status === PaymentStatus::Unpaid) {
-            return;
-        }
-
         $toCents = fn (string $amount): int => (int) str_replace('.', '', $amount);
         $formatMoney = fn (int $cents): string => sprintf('%d.%02d', intdiv($cents, 100), $cents % 100);
-        $chargedCents = $order->walletTransactions()
-            ->where('type', WalletTransactionType::OrderPayment)
-            ->get()
-            ->sum(fn ($transaction) => $toCents($transaction->amount));
-        $paymentCents = min($toCents($order->wallet_amount), $chargedCents);
-        if ($paymentCents === 0) {
-            throw ValidationException::withMessages(['status' => 'Transaksi pembayaran saldo tidak ditemukan; refund belum diproses.']);
+        $transactions = $order->walletTransactions()
+            ->whereIn('type', [WalletTransactionType::OrderPayment, WalletTransactionType::OrderRefund])
+            ->lockForUpdate()->get();
+        if ($transactions->contains(fn ($transaction) => $toCents($transaction->amount) <= 0
+            || $transaction->direction !== ($transaction->type === WalletTransactionType::OrderPayment
+                ? WalletTransactionDirection::Debit : WalletTransactionDirection::Credit))) {
+            throw ValidationException::withMessages(['status' => 'Ledger pembayaran saldo tidak valid; refund belum diproses.']);
         }
-        $refundCents = $order->walletTransactions()
-            ->where('type', WalletTransactionType::OrderRefund)
-            ->get()
-            ->sum(fn ($transaction) => $toCents($transaction->amount));
-        if ($refundCents > $paymentCents) {
-            throw ValidationException::withMessages(['status' => 'Jumlah refund melebihi pembayaran saldo.']);
-        }
-        $amountCents = $paymentCents - $refundCents;
 
-        if ($amountCents === 0) {
-            $order->update(['payment_status' => PaymentStatus::Refunded]);
+        $paymentCents = $transactions->where('type', WalletTransactionType::OrderPayment)
+            ->sum(fn ($transaction) => $toCents($transaction->amount));
+        $refundCents = $transactions->where('type', WalletTransactionType::OrderRefund)
+            ->sum(fn ($transaction) => $toCents($transaction->amount));
+        if ($paymentCents !== $toCents($order->wallet_amount) || $refundCents > $paymentCents) {
+            throw ValidationException::withMessages(['status' => 'Ledger tidak sesuai pembayaran order; refund belum diproses.']);
+        }
+        if ($paymentCents === 0) {
+            if ($order->payment_status !== PaymentStatus::Unpaid) {
+                throw ValidationException::withMessages(['status' => 'Transaksi pembayaran saldo tidak ditemukan; refund belum diproses.']);
+            }
 
             return;
         }
 
         $wallet = Wallet::query()->where('user_id', $order->user_id)->lockForUpdate()->first();
-        if ($wallet === null) {
-            throw ValidationException::withMessages(['status' => 'Wallet pelanggan tidak ditemukan; refund belum diproses.']);
+        if ($wallet === null || $transactions->contains(fn ($transaction) => $transaction->wallet_id !== $wallet->id)) {
+            throw ValidationException::withMessages(['status' => 'Wallet pembayaran pelanggan tidak sesuai; refund belum diproses.']);
+        }
+        $amountCents = $paymentCents - $refundCents;
+        if ($amountCents === 0) {
+            $order->update(['payment_status' => PaymentStatus::Refunded]);
+
+            return;
         }
         $balanceBefore = $toCents($wallet->balance);
         $balanceAfter = $balanceBefore + $amountCents;

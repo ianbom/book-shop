@@ -26,7 +26,6 @@ use App\Http\Controllers\Customer\Dashboard\VoucherController as CustomerDashboa
 use App\Http\Controllers\Customer\Dashboard\WalletController as CustomerDashboardWalletController;
 use App\Http\Controllers\Customer\Dashboard\WalletTopupController as CustomerDashboardWalletTopupController;
 use App\Http\Controllers\Customer\HomeController;
-use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\OrderTrackingController;
 use App\Http\Middleware\EnsureAdminRole;
 use App\Http\Middleware\EnsureCustomerRole;
@@ -34,7 +33,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('books', [CustomerBookController::class, 'index'])->name('books.index');
-Route::post('orders', [CustomerOrderController::class, 'store'])->name('orders.store');
 Route::get('track-order', [OrderTrackingController::class, 'index'])->name('track-order.index');
 Route::get('track-order/{orderCode}', [OrderTrackingController::class, 'show'])->name('track-order.show');
 
@@ -103,7 +101,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::patch('orders/{order}/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus'])->name('orders.shipments.status');
         Route::post('orders/{order}/shipments/{shipment}/sync', [ShipmentController::class, 'sync'])->middleware('throttle:10,1')->name('orders.shipments.sync');
-        Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
         Route::patch('orders/{order}/shipping-cost', [OrderController::class, 'updateShippingCost'])->name('orders.shipping-cost');
         Route::post('orders/{order}/payment-proofs', [PaymentProofController::class, 'store'])->name('orders.payment-proofs.store');
         Route::delete('orders/{order}/payment-proofs/{paymentProof}', [PaymentProofController::class, 'destroy'])->name('orders.payment-proofs.destroy');

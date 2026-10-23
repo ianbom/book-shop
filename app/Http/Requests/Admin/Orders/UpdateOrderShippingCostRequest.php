@@ -17,6 +17,6 @@ class UpdateOrderShippingCostRequest extends FormRequest
      */
     public function rules(): array
     {
-        return ['shipping_cost' => ['required', 'numeric', 'min:0']];
+        return ['shipping_cost' => ['required', 'numeric', 'min:0', 'regex:/^\d{1,13}(?:\.\d{1,2})?$/']];
     }
 }
