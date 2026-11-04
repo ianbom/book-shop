@@ -15,6 +15,7 @@ export type CustomerDashboardPage<T> = {
 };
 
 export type CustomerOrder = {
+    source: 'website' | 'imported';
     id: number;
     order_code: string;
     item_summary: string;

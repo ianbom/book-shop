@@ -53,6 +53,11 @@ const mainNavItems: NavItem[] = [
         href: admin.orders.index(),
         children: [
             { title: 'Pesanan', href: admin.orders.index(), icon: ShoppingBag },
+            {
+                title: 'Import Pesanan',
+                href: '/admin/orders/import',
+                icon: BookOpen,
+            },
         ],
     },
     {
@@ -181,13 +186,15 @@ export function AppSidebar({ role }: { role?: 'admin' | 'customer' }) {
                 <NavMain items={items} />
             </SidebarContent>
 
-            <SidebarFooter className="mx-3 mb-2 overflow-hidden p-0 group-data-[collapsible=icon]:hidden">
-                <img
-                    src="/dashboard-image/footer-sidebar.png"
-                    alt="Good books, brighter days, happier kids"
-                    className="h-28 w-full object-contain"
-                />
-            </SidebarFooter>
+            {!isAdmin && (
+                <SidebarFooter className="mx-3 mb-2 overflow-hidden p-0 group-data-[collapsible=icon]:hidden">
+                    <img
+                        src="/dashboard-image/footer-sidebar.png"
+                        alt="Good books, brighter days, happier kids"
+                        className="h-28 w-full object-contain"
+                    />
+                </SidebarFooter>
+            )}
         </Sidebar>
     );
 }

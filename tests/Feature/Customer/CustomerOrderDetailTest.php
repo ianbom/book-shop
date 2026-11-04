@@ -55,6 +55,30 @@ class CustomerOrderDetailTest extends TestCase
                 ->missing('order.wallet_transactions.0.balance_after'));
     }
 
+    public function test_detail_uses_current_order_and_shipment_status_without_removing_history(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Customer]);
+        $order = Order::create(['order_code' => 'ORD-STATUS-1', 'user_id' => $owner->id, 'status' => 'packing', 'subtotal' => 100000, 'total' => 100000, 'wallet_amount' => 100000]);
+        $order->statusHistories()->create(['status' => 'pending', 'created_at' => now()->subDays(3)]);
+        $order->statusHistories()->create(['status' => 'packing', 'created_at' => now()->subDays(2)]);
+        $latest = $order->statusHistories()->create(['status' => 'packing', 'created_at' => now()->subDay()]);
+        $shipment = $order->shipments()->create(['shipment_code' => 'SHP-STATUS-1', 'courier_company' => 'jne', 'courier_type' => 'reg', 'status' => 'in_transit', 'price' => 0]);
+        $shipment->statusHistories()->create(['status' => 'in_transit', 'occurred_at' => now()]);
+        $shipment->statusHistories()->create(['status' => 'pending', 'occurred_at' => now()->subDay()]);
+
+        $this->actingAs($owner)->get(route('customer.dashboard.orders.show', $order))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('order.status', 'packing')
+                ->where('order.shipments.0.status', 'in_transit')
+                ->has('order.status_histories', 2)
+                ->where('order.status_histories.0.status', 'pending')
+                ->where('order.status_histories.1.status', 'packing')
+                ->where('order.status_histories.1.created_at', $latest->created_at->toISOString())
+                ->has('order.shipments.0.status_histories', 2));
+        $this->assertDatabaseCount('order_status_histories', 3);
+        $this->assertDatabaseCount('shipment_status_histories', 2);
+    }
+
     public function test_detail_shows_primary_book_cover_even_when_book_is_archived(): void
     {
         $owner = User::factory()->create(['role' => UserRole::Customer]);

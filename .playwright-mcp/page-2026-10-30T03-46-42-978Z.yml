@@ -1,0 +1,253 @@
+- generic [ref=e2]:
+  - generic [ref=e38]:
+    - generic [ref=e42]:
+      - list [ref=e44]:
+        - listitem [ref=e45]:
+          - link [ref=e46] [cursor=pointer]:
+            - /url: /admin
+            - img "Wonder Prince Library" [ref=e47]
+      - generic [ref=e49]:
+        - generic [ref=e50]: Menu Utama
+        - list [ref=e51]:
+          - listitem [ref=e52]:
+            - link "Dashboard" [ref=e53] [cursor=pointer]:
+              - /url: /admin
+          - listitem [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: Katalog
+              - link "Buku" [ref=e63] [cursor=pointer]:
+                - /url: /admin/books
+              - link "Kategori" [ref=e67] [cursor=pointer]:
+                - /url: /admin/categories
+              - link "Kode Preorder" [ref=e73] [cursor=pointer]:
+                - /url: /admin/pre-order-codes
+          - listitem [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e80]: Order
+              - link "Pesanan" [ref=e81] [cursor=pointer]:
+                - /url: /admin/orders
+              - link "Import Pesanan" [ref=e86] [cursor=pointer]:
+                - /url: /admin/orders/import
+              - link "Review Transfer" [ref=e90] [cursor=pointer]:
+                - /url: /admin/orders?review=pending
+          - listitem [ref=e94]:
+            - generic [ref=e95]:
+              - generic [ref=e96]: Pengiriman
+              - link "Shipment" [ref=e97] [cursor=pointer]:
+                - /url: /admin/shipments
+          - listitem [ref=e104]:
+            - generic [ref=e105]:
+              - generic [ref=e106]: Pengguna
+              - link "Customer" [ref=e107] [cursor=pointer]:
+                - /url: /admin/customers
+          - listitem [ref=e114]:
+            - generic [ref=e115]:
+              - generic [ref=e116]: Wallet
+              - link "Permintaan Top-up" [ref=e117] [cursor=pointer]:
+                - /url: /admin/top-ups
+              - link "Transaksi Wallet" [ref=e121] [cursor=pointer]:
+                - /url: /admin/wallet-transactions
+          - listitem [ref=e126]:
+            - generic [ref=e127]:
+              - generic [ref=e128]: Promosi
+              - link "Voucher" [ref=e129] [cursor=pointer]:
+                - /url: /admin/vouchers
+          - listitem [ref=e134]:
+            - generic [ref=e135]:
+              - generic [ref=e136]: Inventaris
+              - link "Manajemen Stok" [ref=e137] [cursor=pointer]:
+                - /url: /admin/inventory
+              - link "Riwayat Stok" [ref=e149] [cursor=pointer]:
+                - /url: /admin/inventory/history
+          - listitem [ref=e155]:
+            - link "Pengaturan" [ref=e156] [cursor=pointer]:
+              - /url: /admin/settings
+      - img "Good books, brighter days, happier kids" [ref=e162]
+    - main [ref=e163]:
+      - generic [ref=e164]:
+        - searchbox "Cari pesanan" [ref=e166]
+        - button "Menu profil Browser Admin" [ref=e168]:
+          - generic [ref=e169]: B
+          - generic [ref=e171]:
+            - generic [ref=e172]: Halo, Browser
+            - generic [ref=e173]: Administrator
+      - generic [ref=e176]:
+        - main [ref=e177]:
+          - generic [ref=e179]:
+            - heading "Dashboard" [level=1] [ref=e180]
+            - paragraph [ref=e181]: Pantau pekerjaan harian, aliran pesanan, dan saldo customer.
+          - region "Ringkasan operasional" [ref=e182]:
+            - generic [ref=e184]:
+              - paragraph [ref=e185]: Order perlu diproses
+              - paragraph [ref=e186]: "0"
+              - paragraph [ref=e187]: Pending, diproses, dikemas · import sudah lunas dan disetujui
+            - generic [ref=e192]:
+              - paragraph [ref=e193]: Top-up menunggu tinjauan
+              - paragraph [ref=e194]: "0"
+              - paragraph [ref=e195]: Permintaan customer
+            - generic [ref=e200]:
+              - paragraph [ref=e201]: Stok berisiko
+              - paragraph [ref=e202]: "0"
+              - paragraph [ref=e203]: Buku aktif dengan stok ≤ 5
+          - region [ref=e208]:
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - paragraph [ref=e211]: Posisi finansial
+                - heading "Saldo & penggunaan wallet" [level=2] [ref=e212]
+              - paragraph [ref=e213]: Akumulasi sepanjang waktu · refund ditampilkan terpisah
+            - generic [ref=e214]:
+              - generic [ref=e215]:
+                - generic [ref=e216]: Saldo wallet customer
+                - paragraph [ref=e220]: Rp 0
+              - generic [ref=e221]:
+                - generic [ref=e222]: Pembayaran wallet · bruto
+                - paragraph [ref=e226]: Rp 0
+              - generic [ref=e227]:
+                - generic [ref=e228]: Refund saldo
+                - paragraph [ref=e232]: Rp 0
+              - generic [ref=e233]:
+                - generic [ref=e234]: Alokasi buku
+                - paragraph [ref=e237]: Rp 0
+              - generic [ref=e238]:
+                - generic [ref=e239]: Alokasi ongkir
+                - paragraph [ref=e245]: Rp 0
+              - generic [ref=e246]:
+                - generic [ref=e247]: Voucher terpakai
+                - paragraph [ref=e250]: Rp 0
+          - region [ref=e251]:
+            - heading "Pembayaran pesanan import" [level=2] [ref=e252]
+            - paragraph [ref=e253]: Akumulasi sepanjang waktu · terpisah dari wallet
+            - generic [ref=e254]:
+              - generic [ref=e255]:
+                - term [ref=e256]: Pembayaran historis
+                - definition [ref=e257]: Rp0,00
+                - paragraph [ref=e258]: Catatan Excel, bukan penerimaan baru pada tanggal import. DP tidak dijumlahkan.
+              - generic [ref=e259]:
+                - term [ref=e260]: Transfer baru disetujui
+                - definition [ref=e261]: Rp0,00
+                - paragraph [ref=e262]: Hanya bukti approved; pending dan ditolak belum menjadi pembayaran.
+          - generic [ref=e263]:
+            - region [ref=e264]:
+              - generic [ref=e265]:
+                - generic [ref=e266]:
+                  - paragraph [ref=e267]: Aktivitas order
+                  - heading "Tren pesanan website" [level=2] [ref=e270]
+                  - paragraph [ref=e271]: 0 order website dalam 30 hari · tanpa import
+                - generic "Rentang grafik" [ref=e272]:
+                  - button "7 hari" [ref=e273]
+                  - button "30 hari" [pressed] [ref=e274]
+              - generic [ref=e275]:
+                - generic [ref=e279]: "0"
+                - generic [ref=e280]: dibanding 30 hari sebelumnya (0 order)
+              - img "Grafik tren jumlah pesanan harian, 30 hari terakhir" [ref=e281]:
+                - generic [ref=e282]: Belum ada pesanan pada rentang ini.
+              - generic [ref=e283]:
+                - generic [ref=e284]: 1 Okt
+                - generic [ref=e285]: 15 Okt
+                - generic [ref=e286]: 30 Okt
+              - generic [ref=e287]:
+                - generic [ref=e288]:
+                  - generic [ref=e289]:
+                    - heading "Status order website" [level=3] [ref=e290]
+                    - paragraph [ref=e291]: Klik status untuk membuka daftar terfilter.
+                  - generic [ref=e292]: Periode 30 hari
+                - generic "Komposisi status order" [ref=e293]
+                - generic [ref=e294]:
+                  - link "Menunggu 0" [ref=e295] [cursor=pointer]:
+                    - /url: /admin/orders?status=pending&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e297]: Menunggu
+                    - generic [ref=e298]: "0"
+                  - link "Preorder 0" [ref=e299] [cursor=pointer]:
+                    - /url: /admin/orders?status=waiting_preorder&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e301]: Preorder
+                    - generic [ref=e302]: "0"
+                  - link "Diproses 0" [ref=e303] [cursor=pointer]:
+                    - /url: /admin/orders?status=processing&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e305]: Diproses
+                    - generic [ref=e306]: "0"
+                  - link "Dikemas 0" [ref=e307] [cursor=pointer]:
+                    - /url: /admin/orders?status=packing&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e309]: Dikemas
+                    - generic [ref=e310]: "0"
+                  - link "Dikirim 0" [ref=e311] [cursor=pointer]:
+                    - /url: /admin/orders?status=shipping&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e313]: Dikirim
+                    - generic [ref=e314]: "0"
+                  - link "Selesai 0" [ref=e315] [cursor=pointer]:
+                    - /url: /admin/orders?status=completed&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e317]: Selesai
+                    - generic [ref=e318]: "0"
+                  - link "Batal 0" [ref=e319] [cursor=pointer]:
+                    - /url: /admin/orders?status=cancelled&source=website&date_from=2026-10-01&date_to=2026-10-30
+                    - generic [ref=e321]: Batal
+                    - generic [ref=e322]: "0"
+            - complementary [ref=e323]:
+              - generic [ref=e325]:
+                - paragraph [ref=e326]: Fokus hari ini
+                - heading "Perlu tindakan" [level=2] [ref=e327]
+              - generic [ref=e330]:
+                - generic [ref=e331]:
+                  - term [ref=e332]: Import menunggu pelunasan / pengiriman
+                  - definition [ref=e333]: "0"
+                - generic [ref=e334]:
+                  - term [ref=e335]: Import menunggu review transfer
+                  - definition [ref=e336]: "0"
+              - paragraph [ref=e337]: Belum siap diproses · arsip historis tidak masuk antrean.
+              - generic [ref=e338]:
+                - link "Order pending siap diproses Buka daftar untuk meninjau 0" [ref=e339] [cursor=pointer]:
+                  - /url: /admin/orders?status=pending
+                  - generic [ref=e344]:
+                    - generic [ref=e345]: Order pending siap diproses
+                    - text: Buka daftar untuk meninjau
+                  - generic [ref=e346]: "0"
+                - link "Top-up menunggu tinjauan Buka daftar untuk meninjau 0" [ref=e349] [cursor=pointer]:
+                  - /url: /admin/top-ups?status=pending
+                  - generic [ref=e354]:
+                    - generic [ref=e355]: Top-up menunggu tinjauan
+                    - text: Buka daftar untuk meninjau
+                  - generic [ref=e356]: "0"
+                - link "Shipment menunggu proses Buka daftar untuk meninjau 0" [ref=e359] [cursor=pointer]:
+                  - /url: /admin/shipments?status=pending
+                  - generic [ref=e366]:
+                    - generic [ref=e367]: Shipment menunggu proses
+                    - text: Buka daftar untuk meninjau
+                  - generic [ref=e368]: "0"
+                - link "Buku stok berisiko Buka daftar untuk meninjau 0" [ref=e371] [cursor=pointer]:
+                  - /url: /admin/inventory
+                  - generic [ref=e377]:
+                    - generic [ref=e378]: Buku stok berisiko
+                    - text: Buka daftar untuk meninjau
+                  - generic [ref=e379]: "0"
+          - generic [ref=e382]:
+            - generic [ref=e383]:
+              - generic [ref=e384]:
+                - generic [ref=e385]:
+                  - heading "Pesanan terbaru" [level=2] [ref=e386]
+                  - paragraph [ref=e387]: Aktivitas order yang paling baru masuk.
+                - link "Semua order" [ref=e388] [cursor=pointer]:
+                  - /url: /admin/orders
+              - generic [ref=e391]:
+                - table [ref=e392]:
+                  - rowgroup [ref=e393]:
+                    - row [ref=e394]:
+                      - columnheader "Order" [ref=e395]
+                      - columnheader "Customer" [ref=e396]
+                      - columnheader "Total" [ref=e397]
+                      - columnheader "Status" [ref=e398]
+                  - rowgroup
+                - paragraph [ref=e399]: Belum ada order terbaru.
+            - complementary [ref=e400]:
+              - generic [ref=e401]:
+                - generic [ref=e402]:
+                  - paragraph [ref=e403]: Inventaris
+                  - heading "Peringatan stok" [level=2] [ref=e408]
+                - link "Kelola stok" [ref=e409] [cursor=pointer]:
+                  - /url: /admin/inventory
+              - paragraph [ref=e411]: Stok buku aktif dalam batas aman.
+        - generic [ref=e412]:
+          - generic [ref=e413]: © 2026 Wonder Book. All rights reserved.
+          - generic [ref=e414]:
+            - generic [ref=e415]: Syarat & Ketentuan
+            - generic [ref=e416]: FAQ
+            - generic [ref=e417]: Hubungi Kami
+  - region "Notifications alt+T"

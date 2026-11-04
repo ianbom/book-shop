@@ -22,8 +22,7 @@ import { edit as profileEdit } from '@/routes/profile';
 
 const navigation = [
     { label: 'Beranda', href: '/' },
-    { label: 'Katalog Buku', href: '/books' },
-    { label: 'Lacak Pesanan', href: '/track-order' },
+    { label: 'Katalog Buku', href: '/books' }
 ];
 
 function Brand({ logoSrc }: { logoSrc: string }) {

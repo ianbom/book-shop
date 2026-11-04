@@ -32,7 +32,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { formatDate, formatMonthYear, rupiah } from '@/lib/format';
+import { exactRupiah, formatDate, formatMonthYear, rupiah } from '@/lib/format';
 import type {
     CustomerDashboardPage,
     CustomerOrder,
@@ -70,7 +70,10 @@ export default function OrdersIndex({
         null,
     );
     const cancelForm = useForm({});
-    const cancellationError = String(Object.values(cancelForm.errors)[0] ?? '');
+    const cancellationError =
+        Object.values(cancelForm.errors).find(
+            (error): error is string => typeof error === 'string',
+        ) ?? '';
 
     useEffect(() => {
         setSearch(filters.search ?? '');
@@ -335,8 +338,15 @@ export default function OrdersIndex({
                                         {order.quantity} buku
                                     </p>
                                     <p className="mt-2 text-sm font-extrabold">
-                                        {rupiah(order.total)}
+                                        {order.source === 'imported'
+                                            ? exactRupiah(order.total)
+                                            : rupiah(order.total)}
                                     </p>
+                                    {order.source === 'imported' && (
+                                        <p className="text-primary text-xs">
+                                            Pesanan import · transfer bank
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                             <dl className="grid grid-cols-2 divide-x border-t py-3 text-[11px]">
@@ -611,7 +621,18 @@ export default function OrdersIndex({
                                                     {order.quantity} buku
                                                 </td>
                                                 <td className="text-foreground px-4 py-3.5 font-bold">
-                                                    {rupiah(order.total)}
+                                                    {order.source === 'imported'
+                                                        ? exactRupiah(
+                                                              order.total,
+                                                          )
+                                                        : rupiah(order.total)}
+                                                    {order.source ===
+                                                        'imported' && (
+                                                        <p className="text-primary text-xs font-normal">
+                                                            Pesanan import ·
+                                                            transfer bank
+                                                        </p>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3.5 text-xs leading-5">
                                                     <StatusBadge

@@ -1,0 +1,201 @@
+- generic [ref=f7e2]:
+  - generic [ref=f7e3]:
+    - generic [ref=f7e7]:
+      - list [ref=f7e9]:
+        - listitem [ref=f7e10]:
+          - link [ref=f7e11] [cursor=pointer]:
+            - /url: /admin
+            - img "Wonder Prince Library" [ref=f7e12]
+      - generic [ref=f7e14]:
+        - generic [ref=f7e15]: Menu Utama
+        - list [ref=f7e16]:
+          - listitem [ref=f7e17]:
+            - link "Dashboard" [ref=f7e18] [cursor=pointer]:
+              - /url: /admin
+          - listitem [ref=f7e25]:
+            - generic [ref=f7e26]:
+              - generic [ref=f7e27]: Katalog
+              - link "Buku" [ref=f7e28] [cursor=pointer]:
+                - /url: /admin/books
+              - link "Kategori" [ref=f7e32] [cursor=pointer]:
+                - /url: /admin/categories
+              - link "Kode Preorder" [ref=f7e38] [cursor=pointer]:
+                - /url: /admin/pre-order-codes
+          - listitem [ref=f7e43]:
+            - generic [ref=f7e44]:
+              - generic [ref=f7e45]: Order
+              - link "Pesanan" [ref=f7e46] [cursor=pointer]:
+                - /url: /admin/orders
+              - link "Import Pesanan" [ref=f7e51] [cursor=pointer]:
+                - /url: /admin/orders/import
+              - link "Review Transfer" [ref=f7e55] [cursor=pointer]:
+                - /url: /admin/orders?review=pending
+          - listitem [ref=f7e59]:
+            - generic [ref=f7e60]:
+              - generic [ref=f7e61]: Pengiriman
+              - link "Shipment" [ref=f7e62] [cursor=pointer]:
+                - /url: /admin/shipments
+          - listitem [ref=f7e69]:
+            - generic [ref=f7e70]:
+              - generic [ref=f7e71]: Pengguna
+              - link "Customer" [ref=f7e72] [cursor=pointer]:
+                - /url: /admin/customers
+          - listitem [ref=f7e79]:
+            - generic [ref=f7e80]:
+              - generic [ref=f7e81]: Wallet
+              - link "Permintaan Top-up" [ref=f7e82] [cursor=pointer]:
+                - /url: /admin/top-ups
+              - link "Transaksi Wallet" [ref=f7e86] [cursor=pointer]:
+                - /url: /admin/wallet-transactions
+          - listitem [ref=f7e91]:
+            - generic [ref=f7e92]:
+              - generic [ref=f7e93]: Promosi
+              - link "Voucher" [ref=f7e94] [cursor=pointer]:
+                - /url: /admin/vouchers
+          - listitem [ref=f7e99]:
+            - generic [ref=f7e100]:
+              - generic [ref=f7e101]: Inventaris
+              - link "Manajemen Stok" [ref=f7e102] [cursor=pointer]:
+                - /url: /admin/inventory
+              - link "Riwayat Stok" [ref=f7e114] [cursor=pointer]:
+                - /url: /admin/inventory/history
+          - listitem [ref=f7e120]:
+            - link "Pengaturan" [ref=f7e121] [cursor=pointer]:
+              - /url: /admin/settings
+      - img "Good books, brighter days, happier kids" [ref=f7e127]
+    - main [ref=f7e128]:
+      - generic [ref=f7e129]:
+        - searchbox "Cari pesanan" [ref=f7e131]
+        - button "Menu profil Browser Admin" [ref=f7e133]:
+          - generic [ref=f7e134]: B
+          - generic [ref=f7e136]:
+            - generic [ref=f7e137]: Halo, Browser
+            - generic [ref=f7e138]: Administrator
+      - generic [ref=f7e141]:
+        - main [ref=f7e142]:
+          - generic [ref=f7e143]:
+            - link "Kembali ke pesanan" [ref=f7e144] [cursor=pointer]:
+              - /url: /admin/orders
+            - generic [ref=f7e147]: Diperbarui 30 Okt 2026, 10.56
+          - generic [ref=f7e148]:
+            - generic [ref=f7e149]:
+              - heading "LAWAS-001" [level=1] [ref=f7e150]
+              - paragraph [ref=f7e151]: Pesanan dibuat 30 Okt 2026, 10.49
+            - generic [ref=f7e152]: Menunggu Preorder
+          - region "Pelunasan pesanan import" [ref=f7e153]:
+            - generic [ref=f7e154]:
+              - heading "Pesanan import · Pelunasan transfer" [level=2] [ref=f7e155]
+              - paragraph [ref=f7e156]: DP hanya informasi, bukan pengurang tagihan. Transfer diperiksa admin sebelum pesanan dapat diproses.
+            - generic [ref=f7e157]:
+              - generic [ref=f7e158]:
+                - term [ref=f7e159]: Total net buku
+                - definition [ref=f7e160]: Rp155.000,00
+              - generic [ref=f7e161]:
+                - term [ref=f7e162]: DP historis (informasi)
+                - definition [ref=f7e163]: Rp70.000,00
+              - generic [ref=f7e164]:
+                - term [ref=f7e165]: Sudah dibayar historis
+                - definition [ref=f7e166]: Rp90.000,00
+              - generic [ref=f7e167]:
+                - term [ref=f7e168]: Transfer disetujui
+                - definition [ref=f7e169]: Rp0,00
+              - generic [ref=f7e170]:
+                - term [ref=f7e171]: Sisa buku
+                - definition [ref=f7e172]: Rp65.000,00
+              - generic [ref=f7e173]:
+                - term [ref=f7e174]: Berat total
+                - definition [ref=f7e175]: 1100 gram
+              - generic [ref=f7e176]:
+                - term [ref=f7e177]: Ongkos kirim
+                - definition [ref=f7e178]: Rp20.000,00
+              - generic [ref=f7e179]:
+                - term [ref=f7e180]: Sisa pelunasan
+                - definition [ref=f7e181]: Rp85.000,00
+            - paragraph [ref=f7e182]: Tagihan dan pengiriman terkunci selama pemeriksaan pembayaran.
+            - generic [ref=f7e183]:
+              - heading "Riwayat bukti transfer" [level=3] [ref=f7e184]
+              - generic [ref=f7e185]:
+                - paragraph [ref=f7e186]: Menunggu pemeriksaan · Rp85.000,00
+                - paragraph [ref=f7e187]: Bank Contoh · 001234 · Toko Test
+                - paragraph [ref=f7e188]: Diajukan 30 Okt 2026, 10.56
+                - 'link "Lihat / unduh bukti #1" [ref=f7e189] [cursor=pointer]':
+                  - /url: http://127.0.0.1:8127/order-payments/1/proof
+                - generic [ref=f7e190]:
+                  - generic [ref=f7e191]: Keputusan
+                  - combobox "Keputusan" [ref=f7e192]:
+                    - option "Setujui"
+                    - option "Tolak" [selected]
+                  - generic [ref=f7e193]: Alasan (wajib untuk penolakan, terlihat customer)
+                  - textbox "Alasan (wajib untuk penolakan, terlihat customer)" [ref=f7e194]
+                  - button "Simpan keputusan" [ref=f7e195]
+          - tablist "Data order" [ref=f7e196]:
+            - tab "Ringkasan" [selected] [ref=f7e197]
+            - tab "Status" [ref=f7e200]
+            - tab "Produk" [ref=f7e206]
+            - tab "Pembayaran" [ref=f7e209]
+            - tab "Pengiriman" [ref=f7e212]
+            - tab "Riwayat" [ref=f7e218]
+            - tab "Stok" [ref=f7e223]
+          - tabpanel [ref=f7e234]:
+            - generic [ref=f7e235]:
+              - generic [ref=f7e236]:
+                - generic [ref=f7e237]: Data pelanggan
+                - generic [ref=f7e240]:
+                  - generic [ref=f7e241]:
+                    - paragraph [ref=f7e242]: Nama
+                    - generic [ref=f7e243]: Browser Customer
+                  - generic [ref=f7e244]:
+                    - paragraph [ref=f7e245]: Telepon
+                    - generic [ref=f7e246]: —
+                  - generic [ref=f7e247]:
+                    - paragraph [ref=f7e248]: Email
+                    - generic [ref=f7e249]: customer@browser.example
+                  - generic [ref=f7e250]:
+                    - paragraph [ref=f7e251]: Kode order
+                    - generic [ref=f7e252]: LAWAS-001
+                  - generic [ref=f7e253]:
+                    - paragraph [ref=f7e254]: Catatan pelanggan
+                    - generic [ref=f7e255]: —
+              - generic [ref=f7e256]:
+                - generic [ref=f7e257]: Alamat pengiriman
+                - generic [ref=f7e260]:
+                  - generic [ref=f7e261]:
+                    - paragraph [ref=f7e262]: Penerima
+                    - generic [ref=f7e263]: Browser Customer
+                  - generic [ref=f7e264]:
+                    - paragraph [ref=f7e265]: Telepon
+                    - generic [ref=f7e266]: "+6281234567890"
+                  - generic [ref=f7e267]:
+                    - paragraph [ref=f7e268]: Email
+                    - generic [ref=f7e269]: customer@browser.example
+                  - generic [ref=f7e270]:
+                    - paragraph [ref=f7e271]: Alamat
+                    - generic [ref=f7e272]: Alamat sintetis browser test, Desa Test, 01234
+                  - generic [ref=f7e273]:
+                    - paragraph [ref=f7e274]: Catatan alamat
+                    - generic [ref=f7e275]: —
+                  - generic [ref=f7e276]:
+                    - paragraph [ref=f7e277]: Koordinat
+                    - generic [ref=f7e278]: "-6.2000000, 106.8000000"
+              - generic [ref=f7e279]:
+                - generic [ref=f7e280]: Rincian biaya
+                - generic [ref=f7e282]:
+                  - generic [ref=f7e283]:
+                    - generic [ref=f7e284]: Subtotal
+                    - generic [ref=f7e285]: Rp155.000,00
+                  - generic [ref=f7e286]:
+                    - generic [ref=f7e287]: Ongkos kirim
+                    - generic [ref=f7e288]: Rp20.000,00
+                  - generic [ref=f7e289]:
+                    - generic [ref=f7e290]: Total order
+                    - generic [ref=f7e291]: Rp175.000,00
+                  - generic [ref=f7e292]:
+                    - paragraph [ref=f7e293]: Status pembayaran
+                    - generic [ref=f7e294]: Belum Dibayar
+        - generic [ref=f7e296]:
+          - generic [ref=f7e297]: © 2026 Wonder Book. All rights reserved.
+          - generic [ref=f7e298]:
+            - generic [ref=f7e299]: Syarat & Ketentuan
+            - generic [ref=f7e300]: FAQ
+            - generic [ref=f7e301]: Hubungi Kami
+  - region "Notifications alt+T"

@@ -4,17 +4,22 @@ namespace App\Services\Admin;
 
 use App\Enums\BookSaleType;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\ShipmentStatus;
 use App\Enums\TopupStatus;
 use App\Enums\UserRole;
 use App\Enums\WalletTransactionType;
 use App\Models\Book;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\OrderPaymentSubmission;
 use App\Models\Shipment;
 use App\Models\VoucherUsage;
 use App\Models\Wallet;
 use App\Models\WalletTopup;
 use App\Models\WalletTransaction;
+use App\Support\OrderImportMoney as Money;
+use Brick\Math\BigDecimal;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -28,9 +33,42 @@ class DashboardDataService
         $end = $today->copy()->endOfDay();
         $risk = Book::query()->where('is_active', true)->where('sale_type', BookSaleType::ReadyStock)->where('stock', '<=', 5);
         $lowStock = (clone $risk)->orderBy('stock')->orderBy('id')->limit(6)->get(['id', 'title', 'author', 'stock']);
-        $pendingOrders = Order::query()->where('status', OrderStatus::Pending)->count();
+        $readyImports = [];
+        $awaitingSettlement = $pendingReviews = 0;
+        $activeStatuses = [OrderStatus::Pending, OrderStatus::WaitingPreorder, OrderStatus::Processing, OrderStatus::Packing];
+        foreach (Order::query()->where('source', 'imported')->whereIn('status', [...$activeStatuses, OrderStatus::Shipping])
+            ->with(['items', 'paymentSubmissions'])->lazyById() as $order) {
+            if ($order->isArchivedImport()) {
+                continue;
+            }
+            $historical = $subtotal = $approved = 0;
+            foreach ($order->items as $item) {
+                $subtotal = Money::add($subtotal, Money::cents($item->subtotal));
+                $historical = Money::add($historical, Money::cents($item->historical_paid));
+            }
+            foreach ($order->paymentSubmissions->where('status', 'approved') as $submission) {
+                $approved = Money::add($approved, Money::cents($submission->amount));
+            }
+            $pending = $order->paymentSubmissions->contains('status', 'pending');
+            $ready = ! $pending && $order->shipping_selected_at !== null
+                && $order->payment_status === PaymentStatus::Paid
+                && $order->paymentSubmissions->contains('status', 'approved')
+                && $historical <= $subtotal
+                && Money::add($historical, $approved) === Money::add($subtotal, Money::cents($order->shipping_cost));
+            if ($ready) {
+                $readyImports[] = $order->id;
+            } elseif (in_array($order->status, $activeStatuses, true)) {
+                if ($pending) {
+                    $pendingReviews++;
+                } else {
+                    $awaitingSettlement++;
+                }
+            }
+        }
+        $processable = fn ($query) => $query->where(fn ($orders) => $orders->where('source', 'website')->orWhereIn('id', $readyImports));
+        $pendingOrders = Order::query()->where('status', OrderStatus::Pending)->where($processable)->count();
 
-        $daily = DB::table('orders')->whereBetween('created_at', [$start, $end])
+        $daily = DB::table('orders')->where('source', 'website')->whereBetween('created_at', [$start, $end])
             ->selectRaw('DATE(created_at) AS day, COUNT(*) AS total')
             ->groupByRaw('DATE(created_at)')->pluck('total', 'day');
         $days = [];
@@ -38,10 +76,10 @@ class DashboardDataService
             $date = $start->copy()->addDays($offset)->toDateString();
             $days[] = ['date' => $date, 'count' => (int) ($daily[$date] ?? 0)];
         }
-        $previousTotal = Order::query()->whereBetween('created_at', [
+        $previousTotal = Order::query()->where('source', 'website')->whereBetween('created_at', [
             $start->copy()->subDays($period), $start->copy()->subSecond(),
         ])->count();
-        $statusTotals = DB::table('orders')->whereBetween('created_at', [$start, $end])
+        $statusTotals = DB::table('orders')->where('source', 'website')->whereBetween('created_at', [$start, $end])
             ->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status');
         $statuses = [
             OrderStatus::Pending, OrderStatus::WaitingPreorder, OrderStatus::Processing,
@@ -53,11 +91,13 @@ class DashboardDataService
             'operational' => [
                 'orders_to_process' => Order::query()->whereIn('status', [
                     OrderStatus::Pending, OrderStatus::Processing, OrderStatus::Packing,
-                ])->count(),
+                ])->where($processable)->count(),
                 'pending_orders' => $pendingOrders,
+                'awaiting_settlement' => $awaitingSettlement,
+                'pending_payment_reviews' => $pendingReviews,
                 'pending_topups' => WalletTopup::query()->where('status', TopupStatus::Pending)->count(),
                 'pending_shipments' => Shipment::query()->where('status', ShipmentStatus::Pending)
-                    ->whereHas('order', fn ($query) => $query->where('status', '!=', OrderStatus::Cancelled))->count(),
+                    ->whereHas('order', fn ($query) => $query->where('status', '!=', OrderStatus::Cancelled)->where($processable))->count(),
                 'risky_stock' => (clone $risk)->count(),
             ],
             'finance' => $this->finance(),
@@ -74,6 +114,7 @@ class DashboardDataService
                 ->latest()->limit(8)->get()->map(fn (Order $order) => [
                     'id' => $order->id,
                     'order_code' => $order->order_code,
+                    'source' => $order->source,
                     'customer_name' => $order->user?->name ?? 'Customer',
                     'item_summary' => $order->items->first()?->name ?? 'Buku',
                     'quantity' => $order->items->sum('quantity'),
@@ -101,7 +142,21 @@ class DashboardDataService
             ->value('total');
         $money = fn (float $amount): string => number_format($amount, 2, '.', '');
 
+        $historical = BigDecimal::of('0.00');
+        foreach (OrderItem::query()->whereHas('order', fn ($query) => $query->where('source', 'imported'))
+            ->select(['id', 'historical_paid'])->lazyById() as $item) {
+            $historical = $historical->plus($item->historical_paid);
+        }
+        $transfers = BigDecimal::of('0.00');
+        foreach (OrderPaymentSubmission::query()->where('status', 'approved')
+            ->whereHas('order', fn ($query) => $query->where('source', 'imported'))
+            ->select(['id', 'amount'])->lazyById() as $submission) {
+            $transfers = $transfers->plus($submission->amount);
+        }
+
         return [
+            'imported_historical_paid' => (string) $historical,
+            'approved_order_transfers' => (string) $transfers,
             'customer_wallet_balance' => $money((float) Wallet::query()->whereHas('user',
                 fn ($query) => $query->where('role', UserRole::Customer))->sum('balance')),
             'gross_order_payments' => $money($gross),

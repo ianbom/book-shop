@@ -1,0 +1,36 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e6]:
+      - paragraph [ref=e7]: Temukan cerita berikutnya
+      - paragraph [ref=e8]: Cerita baru selalu menunggu untuk ditemukan.
+    - generic [ref=e9]:
+      - link "Wonder Book" [ref=e10] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - heading "Selamat datang kembali" [level=1] [ref=e15]
+          - paragraph [ref=e16]: Masuk untuk melanjutkan cerita bersama Wonder Book.
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - generic [ref=e20]: Email
+            - textbox "Email" [ref=e21]:
+              - /placeholder: nama@email.com
+          - generic [ref=e22]:
+            - generic [ref=e23]:
+              - generic [ref=e24]: Kata sandi
+              - link "Lupa kata sandi?" [ref=e25] [cursor=pointer]:
+                - /url: /forgot-password
+            - generic [ref=e26]:
+              - textbox "Kata sandi" [ref=e27]:
+                - /placeholder: Masukkan kata sandi
+              - button "Show password" [ref=e28]
+          - generic [ref=e32]:
+            - checkbox "Ingat saya" [ref=e33]
+            - checkbox [aria-hidden]
+            - generic [ref=e34]: Ingat saya
+          - button "Masuk" [ref=e35]
+        - paragraph [ref=e36]:
+          - text: Belum punya akun?
+          - link "Daftar sekarang" [ref=e37] [cursor=pointer]:
+            - /url: /register
+  - region "Notifications alt+T"

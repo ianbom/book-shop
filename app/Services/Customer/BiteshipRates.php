@@ -2,8 +2,10 @@
 
 namespace App\Services\Customer;
 
+use App\Models\OrderShippingAddress;
 use App\Models\StoreSetting;
 use App\Models\UserAddress;
+use App\Support\OrderImportMoney;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -42,7 +44,21 @@ class BiteshipRates
         ];
     }
 
-    public function get(array $payload): array
+    public function orderPayload(StoreSetting $setting, UserAddress|OrderShippingAddress $address, Collection $items): array
+    {
+        $payload = $this->payload($setting, (new UserAddress)->setRawAttributes($address->getAttributes()), collect());
+        $payload['items'] = $items->map(fn ($item): array => array_filter([
+            'name' => $item->name, 'description' => $item->description,
+            'category' => $item->category ?? 'others', 'sku' => $item->sku,
+            'value' => intdiv(OrderImportMoney::cents($item->value) + 50, 100),
+            'quantity' => $item->quantity, 'weight' => $item->weight,
+            'height' => $item->height, 'length' => $item->length, 'width' => $item->width,
+        ], fn ($value) => $value !== null))->values()->all();
+
+        return $payload;
+    }
+
+    public function get(array $payload, bool $exact = false): array
     {
         $key = config('services.biteship.key');
         if (blank($key)) {
@@ -68,7 +84,9 @@ class BiteshipRates
                 'courier_company' => (string) $rate['courier_code'],
                 'courier_type' => (string) $rate['courier_service_code'],
                 'courier_service_name' => (string) ($rate['courier_service_name'] ?? $rate['courier_service_code']),
-                'price' => number_format((float) $rate['price'], 2, '.', ''),
+                'price' => $exact
+                    ? OrderImportMoney::decimal(OrderImportMoney::cents((string) $rate['price']))
+                    : number_format((float) $rate['price'], 2, '.', ''),
                 'duration' => $rate['duration'] ?? null,
                 'rate_response' => $rate,
             ])->values()->all();

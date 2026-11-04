@@ -24,7 +24,7 @@ type Props = {
     orders: Paginated<Order>;
     eta_months: string[];
     filters: Record<
-        'search' | 'status' | 'pre_order_code' | 'eta',
+        'search' | 'status' | 'pre_order_code' | 'eta' | 'review' | 'source',
         string | undefined
     >;
 };
@@ -39,8 +39,19 @@ const orderTabs: Array<{ label: string; value: OrderStatus | '' }> = [
 ];
 
 function paymentDetails(order: Order) {
-    const paid = order.payment_status === 'paid' ? order.total : '0';
-    const remaining = order.payment_status === 'paid' ? '0' : order.total;
+    const received = order.settlement_summary
+        ? BigInt(order.settlement_summary.historical_paid.replace('.', '')) +
+          BigInt(order.settlement_summary.approved_paid.replace('.', ''))
+        : null;
+    const paid =
+        received !== null
+            ? `${received / 100n}.${String(received % 100n).padStart(2, '0')}`
+            : order.payment_status === 'paid'
+              ? order.total
+              : '0';
+    const remaining =
+        order.settlement_summary?.outstanding ??
+        (order.payment_status === 'paid' ? '0' : order.total);
 
     return { paid, remaining };
 }
@@ -59,10 +70,8 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
         router.get(
             admin.orders.index(),
             {
-                search: filters.search ?? '',
+                ...filters,
                 status,
-                pre_order_code: filters.pre_order_code ?? '',
-                eta: filters.eta ?? '',
             },
             { preserveState: true, replace: true },
         );
@@ -83,6 +92,14 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                             onSubmit={submit}
                             className="grid gap-4 xl:grid-cols-[0.9fr_0.9fr_1.35fr_1fr_auto_auto] xl:items-end"
                         >
+                            <input type="hidden" name="source" value={filters.source ?? ''} />
+                            <label className="text-foreground grid gap-2 text-xs font-bold">
+                                <span>Review transfer</span>
+                                <select name="review" defaultValue={filters.review ?? ''} className="border-input bg-background h-10 rounded-md border px-3 text-sm">
+                                    <option value="">Semua pembayaran</option>
+                                    <option value="pending">Menunggu review</option>
+                                </select>
+                            </label>
                             <label className="text-foreground grid gap-2 text-xs font-bold">
                                 <span className="flex items-center gap-2">
                                     <Tag className="text-primary size-4" /> Kode
@@ -282,6 +299,18 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                                             </div>
                                                         )}
                                                         <div className="min-w-0">
+                                                            {order.source ===
+                                                                'imported' && (
+                                                                <p className="text-primary text-xs font-semibold">
+                                                                    Import
+                                                                    {order.archived_import
+                                                                        ? ' · Arsip'
+                                                                        : ''}
+                                                                    {order.pending_review
+                                                                        ? ' · Review transfer'
+                                                                        : ''}
+                                                                </p>
+                                                            )}
                                                             <p className="text-foreground truncate font-bold">
                                                                 {
                                                                     order.book_title
@@ -317,9 +346,13 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                                     {rupiah(order.subtotal)}
                                                 </td>
                                                 <td className="text-foreground px-4 py-3.5 font-semibold">
-                                                    {rupiah(
-                                                        order.shipping_cost,
-                                                    )}
+                                                    {order.shipping_selected
+                                                        ? rupiah(
+                                                              order.shipping_cost,
+                                                          )
+                                                        : order.archived_import
+                                                          ? 'Historis tidak tersedia'
+                                                          : 'Belum dipilih'}
                                                 </td>
                                                 <td className="text-foreground px-4 py-3.5 font-bold">
                                                     {rupiah(order.total)}

@@ -12,6 +12,14 @@ class RoleAwareLoginResponse implements LoginResponseContract
 {
     public function toResponse($request): Response
     {
+        if ($request->user()?->must_change_password) {
+            $request->session()->forget('url.intended');
+
+            return $request->wantsJson()
+                ? new JsonResponse(['two_factor' => false, 'password_change_required' => true, 'redirect' => route('password.change')])
+                : redirect()->route('password.change');
+        }
+
         $isCustomer = $request->user()?->getRawOriginal('role') === UserRole::Customer->value;
 
         if ($isCustomer) {

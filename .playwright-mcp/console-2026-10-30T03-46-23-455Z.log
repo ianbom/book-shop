@@ -1,0 +1,4 @@
+[    1286ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8127/images/customer/home/hero.jpg:0
+[    1319ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8127/wonderbok.webp:0
+[   19140ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8127/dashboard-image/header-sidebar.png:0
+[   19161ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8127/dashboard-image/footer-sidebar.png:0

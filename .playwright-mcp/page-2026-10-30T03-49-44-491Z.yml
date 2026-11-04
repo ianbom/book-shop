@@ -1,0 +1,149 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e446]:
+    - banner [ref=f1e447]:
+      - generic [ref=f1e448]:
+        - link "WonderBookLibrary, beranda" [ref=f1e449] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f1e454]:
+            - generic [ref=f1e455]: WonderBookLibrary
+            - generic [ref=f1e456]: Little Books, Big Dreams
+        - navigation "Navigasi utama" [ref=f1e457]:
+          - link "Beranda" [ref=f1e458] [cursor=pointer]:
+            - /url: /
+          - link "Katalog Buku" [ref=f1e459] [cursor=pointer]:
+            - /url: /books
+          - link "Lacak Pesanan" [ref=f1e460] [cursor=pointer]:
+            - /url: /track-order
+        - textbox "Cari buku" [ref=f1e465]:
+          - /placeholder: Cari judul buku, penulis, atau kategori...
+        - 'link "Keranjang: 0 buku" [ref=f1e467] [cursor=pointer]':
+          - /url: /login
+        - link "Login" [ref=f1e472] [cursor=pointer]:
+          - /url: /login
+    - main [ref=f1e473]:
+      - generic [ref=f1e475]:
+        - generic [ref=f1e476]:
+          - paragraph [ref=f1e477]: WonderBookLibrary
+          - heading "Buka Buku, Temukan Dunia Baru" [level=1] [ref=f1e478]: Buka Buku,Temukan Dunia Baru
+          - paragraph [ref=f1e479]: Temukan buku-buku pilihan yang seru dan penuh inspirasi untuk menemani rasa ingin tahu, imajinasi, dan perjalanan membaca setiap hari.
+          - generic [ref=f1e480]:
+            - link "Jelajahi Buku" [ref=f1e481] [cursor=pointer]:
+              - /url: /books
+            - link "Lihat Koleksi" [ref=f1e484] [cursor=pointer]:
+              - /url: "#koleksi"
+          - generic [ref=f1e485]:
+            - generic [ref=f1e490]:
+              - generic [ref=f1e491]: Buku Pilihan
+              - generic [ref=f1e492]: untuk Semua Usia
+            - generic [ref=f1e498]:
+              - generic [ref=f1e499]: 100% Original
+              - generic [ref=f1e500]: Garansi Keaslian
+            - generic [ref=f1e508]:
+              - generic [ref=f1e509]: Pengiriman Aman
+              - generic [ref=f1e510]: ke Seluruh Indonesia
+        - generic [ref=f1e511]:
+          - img "Anak-anak membaca buku bersama" [ref=f1e513]
+          - generic [aria-hidden] [ref=f1e514]: Good books,brighter days
+      - generic [ref=f1e521]:
+        - generic [ref=f1e522]:
+          - generic [ref=f1e523]:
+            - heading "Koleksi untuk Setiap Cerita" [level=2] [ref=f1e524]
+            - paragraph [ref=f1e527]: Temukan kategori buku sesuai minat dan imajinasi mereka.
+          - link "Lihat Semua" [ref=f1e528] [cursor=pointer]:
+            - /url: /books
+        - generic [ref=f1e531]:
+          - link "Cerita & Imajinasi Petualangan dan cerita yang menghidupkan imajinasi. Lihat Koleksi" [ref=f1e532] [cursor=pointer]:
+            - /url: /books?category=import-7b4000df-43da-47ed-9382-885519c48a18
+            - generic [ref=f1e533]:
+              - generic [ref=f1e534]: Cerita & Imajinasi
+              - generic [ref=f1e535]: Petualangan dan cerita yang menghidupkan imajinasi.
+              - generic [ref=f1e536]: Lihat Koleksi
+          - link "Belajar & Bertumbuh Buku terbaik untuk pengetahuan dan masa depan cerah. Lihat Koleksi" [ref=f1e539] [cursor=pointer]:
+            - /url: /books
+            - generic [ref=f1e540]:
+              - generic [ref=f1e541]: Belajar & Bertumbuh
+              - generic [ref=f1e542]: Buku terbaik untuk pengetahuan dan masa depan cerah.
+              - generic [ref=f1e543]: Lihat Koleksi
+          - link "Pilihan Keluarga Bacaan untuk momen hangat bersama keluarga. Lihat Koleksi" [ref=f1e546] [cursor=pointer]:
+            - /url: /books
+            - generic [ref=f1e547]:
+              - generic [ref=f1e548]: Pilihan Keluarga
+              - generic [ref=f1e549]: Bacaan untuk momen hangat bersama keluarga.
+              - generic [ref=f1e550]: Lihat Koleksi
+      - generic [ref=f1e554]:
+        - generic [ref=f1e555]:
+          - generic [ref=f1e556]:
+            - heading "Buku Pilihan Minggu Ini" [level=2] [ref=f1e557]
+            - paragraph [ref=f1e560]: Bacaan yang sedang disukai para pembaca WonderBookLibrary.
+          - link "Lihat Semua" [ref=f1e561] [cursor=pointer]:
+            - /url: /books
+        - paragraph [ref=f1e564]: Buku pilihan segera hadir.
+      - generic [ref=f1e566]:
+        - img "Anak membaca buku dengan gembira" [ref=f1e567]
+        - generic [ref=f1e568]:
+          - text: Reading Journey
+          - heading "Setiap Buku Membuka Petualangan Baru" [level=2] [ref=f1e569]
+          - paragraph [ref=f1e570]: Membaca menumbuhkan imajinasi, memperluas cara pandang, dan membuat hari-hari terasa bermakna.
+          - link "Temukan Bacaanmu" [ref=f1e571] [cursor=pointer]:
+            - /url: /books
+      - generic [ref=f1e575]:
+        - generic [ref=f1e576]:
+          - generic [ref=f1e577]:
+            - heading "Buku Terbaru" [level=2] [ref=f1e578]
+            - paragraph [ref=f1e581]: Temukan buku terbaru untuk menemani petualanganmu.
+          - group "Filter buku terbaru" [ref=f1e582]:
+            - button "Semua" [ref=f1e583]
+            - button "Novel" [ref=f1e584]
+        - paragraph [ref=f1e585]: Belum ada buku terbaru di kategori ini.
+      - generic [ref=f1e587]:
+        - generic [ref=f1e594]:
+          - heading "Pengiriman Cepat" [level=2] [ref=f1e595]
+          - paragraph [ref=f1e596]: Ke seluruh Indonesia
+        - generic [ref=f1e601]:
+          - heading "100% Original" [level=2] [ref=f1e602]
+          - paragraph [ref=f1e603]: Buku asli, garansi resmi
+        - generic [ref=f1e607]:
+          - heading "Layanan Pelanggan" [level=2] [ref=f1e608]
+          - paragraph [ref=f1e609]: Siap membantu 24/7
+        - generic [ref=f1e615]:
+          - heading "Promo Menarik" [level=2] [ref=f1e616]
+          - paragraph [ref=f1e617]: Diskon & penawaran spesial
+      - generic [ref=f1e620]:
+        - heading "Temukan Buku untuk Petualangan Berikutnya" [level=2] [ref=f1e621]
+        - paragraph [ref=f1e622]: Karena setiap halaman membawa kemungkinan baru.
+        - link "Jelajahi Semua Buku" [ref=f1e623] [cursor=pointer]:
+          - /url: /books
+    - contentinfo [ref=f1e626]:
+      - generic [ref=f1e627]:
+        - generic [ref=f1e628]:
+          - link "WonderBookLibrary Little Books, Big Dreams" [ref=f1e629] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f1e631]:
+              - generic [ref=f1e632]: WonderBookLibrary
+              - generic [ref=f1e633]: Little Books, Big Dreams
+          - paragraph [ref=f1e634]: Menemani setiap cerita dan petualangan kecil lewat buku pilihan.
+        - generic [ref=f1e635]:
+          - heading "Tentang Kami" [level=2] [ref=f1e636]
+          - list [ref=f1e637]:
+            - listitem [ref=f1e638]: Profil Kami
+            - listitem [ref=f1e639]: Karir
+            - listitem [ref=f1e640]: Blog
+        - generic [ref=f1e641]:
+          - heading "Bantuan" [level=2] [ref=f1e642]
+          - list [ref=f1e643]:
+            - listitem [ref=f1e644]: Pusat Bantuan
+            - listitem [ref=f1e645]: Cara Belanja
+            - listitem [ref=f1e646]: Pengembalian Buku
+        - generic [ref=f1e647]:
+          - heading "Informasi" [level=2] [ref=f1e648]
+          - list [ref=f1e649]:
+            - listitem [ref=f1e650]: Syarat & Ketentuan
+            - listitem [ref=f1e651]: Kebijakan Privasi
+            - listitem [ref=f1e652]:
+              - link "Kontak" [ref=f1e653] [cursor=pointer]:
+                - /url: "#kontak"
+        - heading "Ikuti Kami" [level=2] [ref=f1e655]
+      - generic [ref=f1e673]:
+        - generic [ref=f1e674]: © 2026 WonderBookLibrary. Semua hak dilindungi.
+        - generic [ref=f1e675]: 5935 Harris Divide Suite 308 Donnaberg, MI 71071
+  - region "Notifications alt+T"

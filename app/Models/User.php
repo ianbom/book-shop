@@ -16,6 +16,7 @@ use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
+/** @property bool $must_change_password */
 #[Fillable(['name', 'email', 'phone', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'profile_photo_path'])]
 class User extends Authenticatable implements PasskeyUser
@@ -30,6 +31,7 @@ class User extends Authenticatable implements PasskeyUser
             'password' => 'hashed',
             'role' => UserRole::class,
             'two_factor_confirmed_at' => 'datetime',
+            'must_change_password' => 'boolean',
         ];
     }
 

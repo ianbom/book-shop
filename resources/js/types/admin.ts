@@ -85,15 +85,6 @@ export type StockMovementType =
     | 'adjustment_out'
     | 'order'
     | 'cancellation';
-export type PaymentProof = {
-    id: number;
-    image_url: string;
-    payment_amount: string | null;
-    paid_at: string | null;
-    note: string | null;
-    uploaded_by?: { id: number | null; name: string | null };
-    created_at: string;
-};
 export type OrderStatusHistory = {
     id: number;
     status: OrderStatus;
@@ -114,6 +105,15 @@ export type StockMovement = {
     changed_by?: { id: number; name: string } | null;
 };
 export type Order = {
+    source: 'website' | 'imported';
+    pending_review: boolean;
+    shipping_selected: boolean;
+    archived_import: boolean;
+    settlement_summary: {
+        historical_paid: string;
+        approved_paid: string;
+        outstanding: string;
+    } | null;
     id: number;
     order_code: string;
     customer_name: string | null;

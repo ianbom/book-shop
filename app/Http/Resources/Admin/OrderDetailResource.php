@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Admin;
 
+use App\Http\Resources\OrderSettlementResource;
+use App\Services\Admin\OrderStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,6 +17,9 @@ class OrderDetailResource extends JsonResource
         return [
             'id' => $this->id,
             'order_code' => $this->order_code,
+            'source' => $this->source,
+            'can_complete_imported_delivery' => app(OrderStatusService::class)->canCompleteImportedDelivery($this->resource),
+            'settlement' => $this->isImported() ? (new OrderSettlementResource($this->resource))->resolve($request) : null,
             'status' => $this->status->value,
             'payment_status' => $this->payment_status->value,
             'customer_note' => $this->customer_note,
@@ -55,6 +60,10 @@ class OrderDetailResource extends JsonResource
                 'sale_type' => $item->sale_type?->value,
                 'preorder_estimated_date' => $item->preorder_estimated_date?->toDateString(),
                 'preorder_ready_at' => $item->preorder_ready_at?->toISOString(),
+                'pre_order_code' => $item->pre_order_code,
+                'line_discount' => $item->line_discount,
+                'historical_dp' => $item->historical_dp,
+                'historical_paid' => $item->historical_paid,
                 'quantity' => $item->quantity,
                 'value' => $item->value,
                 'subtotal' => $item->subtotal,

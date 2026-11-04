@@ -19,6 +19,10 @@ class OrderCancellationService
         return DB::transaction(function () use ($order, $customer): Order {
             $order = Order::query()->where('user_id', $customer->id)->lockForUpdate()->findOrFail($order->id);
 
+            if ($order->isImported()) {
+                throw ValidationException::withMessages(['status' => 'Pembatalan pesanan import dinonaktifkan.']);
+            }
+
             if (! in_array($order->status, [OrderStatus::Pending, OrderStatus::WaitingPreorder], true)) {
                 throw ValidationException::withMessages(['status' => 'Pesanan hanya dapat dibatalkan sebelum diproses.']);
             }

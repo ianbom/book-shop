@@ -12,7 +12,6 @@ use App\Http\Requests\Admin\Orders\UpdateOrderShippingCostRequest;
 use App\Http\Requests\Admin\Orders\UpdateOrderStatusRequest;
 use App\Http\Resources\Admin\OrderDetailResource;
 use App\Http\Resources\Admin\OrderResource;
-use App\Models\Book;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\Admin\OrderStatusService;
@@ -33,12 +32,16 @@ class OrderController extends Controller
         $request->validate([
             'pre_order_code' => ['nullable', 'string', 'max:255'],
             'eta' => ['nullable', 'date_format:Y-m'],
+            'review' => ['nullable', 'in:pending'],
+            'source' => ['nullable', 'in:website,imported'],
         ]);
 
-        $filters = $request->only(['search', 'status', 'pre_order_code', 'eta']);
+        $filters = $request->only(['search', 'status', 'pre_order_code', 'eta', 'review', 'source']);
         $eta = $request->filled('eta') ? Carbon::createFromFormat('!Y-m', $filters['eta']) : null;
         $status = OrderStatus::tryFrom($request->string('status')->toString());
         $orders = Order::query()
+            ->withExists(['paymentSubmissions as pending_review' => fn ($query) => $query->where('status', 'pending')])
+            ->when($request->input('review') === 'pending', fn ($query) => $query->whereHas('paymentSubmissions', fn ($submissions) => $submissions->where('status', 'pending')))
             ->with([
                 'user' => fn ($query) => $query->withTrashed()->select('id', 'name', 'email'),
                 'items' => fn ($query) => $query->orderBy('id'),
@@ -48,13 +51,10 @@ class OrderController extends Controller
             ])
             ->withMin(['items as preorder_estimated_date' => fn ($query) => $query->where('sale_type', BookSaleType::Preorder)], 'preorder_estimated_date')
             ->withCasts(['preorder_estimated_date' => 'date'])
+            ->when($request->filled('source'), fn ($query) => $query->where('source', $filters['source']))
             ->search($request->string('search')->toString())
             ->status($status)
-            ->when($request->filled('pre_order_code'), fn ($query) => $query
-                ->whereHas('items', fn ($items) => $items
-                    ->where('sale_type', BookSaleType::Preorder)
-                    ->whereIn('book_id', Book::withTrashed()->select('id')
-                        ->whereHas('preOrderCode', fn ($codes) => $codes->where('code', 'like', '%'.$filters['pre_order_code'].'%')))))
+            ->preOrderCode($filters['pre_order_code'] ?? null)
             ->when($eta, fn ($query, $month) => $query->whereIn('id', OrderItem::query()
                 ->select('order_id')
                 ->where('sale_type', BookSaleType::Preorder)
@@ -109,7 +109,7 @@ class OrderController extends Controller
         DB::transaction(function () use ($request, $order): void {
             $order = Order::lockForUpdate()->findOrFail($order->id);
             $shipments = $order->shipments()->lockForUpdate()->get();
-            if ($order->payment_status !== PaymentStatus::Unpaid
+            if ($order->isImported() || $order->payment_status !== PaymentStatus::Unpaid
                 || $order->status === OrderStatus::Cancelled
                 || (int) str_replace('.', '', $order->wallet_amount) !== 0
                 || $order->walletTransactions()->whereIn('type', [WalletTransactionType::OrderPayment, WalletTransactionType::OrderRefund])->exists()

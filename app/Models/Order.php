@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookSaleType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use Database\Factories\OrderFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['order_code', 'user_id', 'address_id', 'voucher_id', 'subtotal', 'voucher_discount', 'shipping_cost', 'total', 'wallet_amount', 'status', 'payment_status', 'customer_note'])]
+#[Fillable(['order_code', 'user_id', 'address_id', 'voucher_id', 'subtotal', 'voucher_discount', 'shipping_cost', 'total', 'wallet_amount', 'status', 'payment_status', 'customer_note', 'source', 'import_group_key', 'import_metadata', 'shipping_selected_at'])]
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
@@ -36,6 +37,8 @@ class Order extends Model
             'wallet_amount' => 'decimal:2',
             'status' => OrderStatus::class,
             'payment_status' => PaymentStatus::class,
+            'import_metadata' => 'array',
+            'shipping_selected_at' => 'datetime',
         ];
     }
 
@@ -59,6 +62,17 @@ class Order extends Model
     public function scopePaymentStatus(Builder $query, ?PaymentStatus $status): void
     {
         $query->when($status, fn (Builder $query, PaymentStatus $status) => $query->where('payment_status', $status));
+    }
+
+    /** @param Builder<Order> $query */
+    public function scopePreOrderCode(Builder $query, ?string $code): void
+    {
+        $query->when(filled($code), fn ($orders) => $orders->whereHas('items', fn ($items) => $items
+            ->where('sale_type', BookSaleType::Preorder)
+            ->where(fn ($match) => $match->where('pre_order_code', 'like', '%'.$code.'%')
+                ->orWhere(fn ($legacy) => $legacy->whereNull('pre_order_code')
+                    ->whereHas('order', fn ($order) => $order->where('source', 'website'))
+                    ->whereIn('book_id', Book::withTrashed()->select('id')->whereHas('preOrderCode', fn ($codes) => $codes->where('code', 'like', '%'.$code.'%')))))));
     }
 
     /** @return BelongsTo<User, $this> */
@@ -113,6 +127,22 @@ class Order extends Model
     public function shipments(): HasMany
     {
         return $this->hasMany(Shipment::class);
+    }
+
+    public function isImported(): bool
+    {
+        return $this->source === 'imported';
+    }
+
+    public function isArchivedImport(): bool
+    {
+        return $this->isImported() && in_array($this->import_metadata['original_status'] ?? null, ['delivered', 'shipping', 'completed', 'cancelled'], true);
+    }
+
+    /** @return HasMany<OrderPaymentSubmission, $this> */
+    public function paymentSubmissions(): HasMany
+    {
+        return $this->hasMany(OrderPaymentSubmission::class);
     }
 
     /** @return HasMany<BookStockMovement, $this> */

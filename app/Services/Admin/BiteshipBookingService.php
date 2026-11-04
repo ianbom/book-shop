@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\StoreSetting;
+use App\Services\Customer\OrderSettlementService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
@@ -15,6 +16,9 @@ class BiteshipBookingService
 
     public function book(Order $order, Shipment $shipment): void
     {
+        $order = Order::query()->findOrFail($order->id);
+        abort_unless($shipment->order_id === $order->id, 404);
+        app(OrderSettlementService::class)->assertFulfillable($order);
         if ($shipment->biteship_order_id !== null) {
             return;
         }
