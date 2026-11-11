@@ -56,6 +56,107 @@ it('previews grouped source rows with exact totals without business writes', fun
     }
 });
 
+it('accepts source workbooks containing email and web hyperlinks', function (string $target, string $relationshipType) {
+    $path = legacyWorkbook([legacyRow()]);
+    try {
+        $zip = new ZipArchive;
+        $zip->open($path);
+        $zip->addFromString('xl/worksheets/_rels/sheet1.xml.rels',
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            .'<Relationship Id="rId1" Type="'.$relationshipType.'" Target="'.$target.'" TargetMode="External"/>'
+            .'</Relationships>');
+        $zip->close();
+        $state = app(OrderImportService::class)->read($path);
+        expect($state['groups'][0]['errors'])->toBe([])
+            ->and($state['rows'][0]['data']['email'])->toBe('customer@example.com');
+        $this->assertDatabaseCount('orders', 0);
+    } finally {
+        unlink($path);
+    }
+})->with([
+    ['mailto:customer@example.com', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink'],
+    ['https://example.com', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink'],
+    ['https://example.com', 'http://purl.oclc.org/ooxml/officeDocument/relationships/hyperlink'],
+]);
+
+it('still rejects external workbook relationships when hyperlinks are allowed', function () {
+    $path = legacyWorkbook([legacyRow()]);
+    try {
+        $zip = new ZipArchive;
+        $zip->open($path);
+        $zip->addFromString('xl/_rels/workbook.xml.rels',
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            .'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/externalLink" Target="https://example.com/workbook.xlsx" TargetMode="External"/>'
+            .'</Relationships>');
+        $zip->close();
+        expect(fn () => app(OrderImportService::class)->read($path))->toThrow(ValidationException::class);
+        $this->assertDatabaseCount('orders', 0);
+    } finally {
+        unlink($path);
+    }
+});
+
+it('marks every unsaved source row with an existing order code and clears the error after correction', function () {
+    Order::factory()->create(['order_code' => 'LAWAS-001']);
+    $admin = User::factory()->create(['role' => 'admin']);
+    $service = app(OrderImportService::class);
+    $message = 'Kode order sudah tersimpan. Ganti kode draf.';
+    $path = legacyWorkbook([
+        legacyRow(['order_code' => ' lawas-001 ']),
+        legacyRow(['email' => 'invalid-email']),
+        legacyRow(['order_code' => 'OTHER']),
+    ]);
+    try {
+        $state = $service->read($path);
+        $state['rows'][0]['source_errors']['order_code'] = ['Identifier harus teks.'];
+        $state = $service->preview($service->preview($state));
+        expect($state['groups'][0]['errors'])->toContain($message)
+            ->and($state['rows'][0]['errors']['order_code'])->toBe(['Identifier harus teks.', $message])
+            ->and($state['rows'][1]['errors']['order_code'])->toBe([$message])
+            ->and($state['rows'][1]['errors'])->toHaveKey('email')
+            ->and($state['rows'][2]['errors'])->toBe([])
+            ->and($service->commitGroup($state, $state['groups'][0]['id'], $admin)['status'])->toBe('invalid');
+        $this->assertDatabaseCount('orders', 1);
+
+        unset($state['rows'][0]['source_errors']['order_code']);
+        $state['rows'][0]['data']['order_code'] = 'NEW-001';
+        $state = $service->preview($state);
+        expect($state['rows'][0]['errors'])->toBe([])
+            ->and($state['rows'][1]['errors']['order_code'])->toBe([$message]);
+
+        $state['rows'][1]['data']['order_code'] = 'NEW-001';
+        $state = $service->preview($state);
+        expect($state['groups'][0]['errors'])->not->toContain($message)
+            ->and($state['rows'][1]['errors'])->not->toHaveKey('order_code')
+            ->and($state['rows'][1]['errors'])->toHaveKey('email');
+    } finally {
+        unlink($path);
+    }
+});
+
+it('returns duplicate order code errors on every source pagination page', function () {
+    Order::factory()->create(['order_code' => 'LAWAS-001']);
+    $this->withoutVite()->actingAs(User::factory()->create(['role' => 'admin']));
+    $path = legacyWorkbook(array_fill(0, 26, legacyRow()));
+    try {
+        $response = $this->post('/admin/orders/import', [
+            'file' => new UploadedFile($path, 'duplicates.xlsx', null, null, true),
+        ])->assertSessionHasNoErrors()->assertRedirect();
+        $url = $response->headers->get('Location');
+        $this->withCookie(config('session.cookie'), session()->getId());
+        foreach ([1 => 25, 2 => 1] as $pageNumber => $count) {
+            $this->get($url.'?page='.$pageNumber)->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('draft.rows', $count)
+                ->where('draft.rows', fn ($rows) => $rows->every(fn ($row) => $row['errors']['order_code'] === ['Kode order sudah tersimpan. Ganti kode draf.']))
+                ->where('draft.groups.0.errors', fn ($errors) => $errors->contains('Kode order sudah tersimpan. Ganti kode draf.')));
+        }
+    } finally {
+        if (is_file($path)) {
+            unlink($path);
+        }
+    }
+});
+
 it('imports processing without a shipping snapshot even when Excel supplies an address', function (bool $withAddress) {
     $path = legacyWorkbook([legacyRow($withAddress ? [] : ['address' => '', 'postal_code' => ''])]);
     try {
@@ -309,6 +410,9 @@ it('preserves saved preview totals and existing customer credentials', function 
         $state = $service->preview($state);
         $state = $service->preview($state);
         expect($state['groups'][0]['subtotal'])->toBe('110000.00')->and($state['groups'][0]['historical_paid'])->toBe('80000.00');
+        expect($state['groups'][0]['errors'])->toBe([])
+            ->and($state['rows'][0]['errors'])->toBe([])
+            ->and($state['rows'][0]['order_id'])->toBe($result['order_id']);
         expect(Order::findOrFail($result['order_id'])->user_id)->toBe($customer->id)
             ->and($customer->fresh()->name)->toBe('Existing')->and($customer->fresh()->password)->toBe($password)
             ->and($customer->fresh()->must_change_password)->toBeFalse();

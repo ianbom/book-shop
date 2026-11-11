@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use DOMDocument;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 use ZipArchive;
@@ -33,13 +34,28 @@ final class XlsxArchive
                 }
                 if (preg_match('/\.(xml|rels)$/i', $name)) {
                     $xml = $zip->getFromIndex($index);
-                    if ($xml === false || str_contains($xml, "\0") || preg_match('/<!DOCTYPE|<!ENTITY|TargetMode\s*=\s*[\'\"]External|macroEnabled/i', $xml)) {
+                    if ($xml === false || str_contains($xml, "\0") || preg_match('/<!DOCTYPE|<!ENTITY|macroEnabled/i', $xml)) {
                         throw new \RuntimeException;
+                    }
+                    if (str_ends_with(strtolower($name), '.rels')) {
+                        $document = new DOMDocument;
+                        if (! @$document->loadXML($xml, LIBXML_NONET)) {
+                            throw new \RuntimeException;
+                        }
+                        foreach ($document->getElementsByTagNameNS('*', 'Relationship') as $relationship) {
+                            if (strcasecmp($relationship->getAttribute('TargetMode'), 'External') === 0
+                                && ! in_array($relationship->getAttribute('Type'), [
+                                    'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink',
+                                    'http://purl.oclc.org/ooxml/officeDocument/relationships/hyperlink',
+                                ], true)) {
+                                throw new \RuntimeException;
+                            }
+                        }
                     }
                 }
             }
         } catch (Throwable $exception) {
-            throw ValidationException::withMessages(['file' => 'Workbook tidak aman, terenkripsi, atau melebihi batas ekstraksi (100 MB). Gunakan template tanpa macro/tautan eksternal.']);
+            throw ValidationException::withMessages(['file' => 'Workbook tidak aman, terenkripsi, atau melebihi batas ekstraksi (100 MB). Gunakan template tanpa macro/referensi workbook eksternal.']);
         } finally {
             $zip->close();
         }

@@ -238,7 +238,14 @@ class OrderImportService
                     $errors[] = 'Perbaiki kesalahan baris dalam kelompok.';
                 }
                 if (Order::whereRaw('upper(order_code) = ?', [$code])->exists()) {
-                    $errors[] = 'Kode order sudah tersimpan. Ganti kode draf.';
+                    $message = 'Kode order sudah tersimpan. Ganti kode draf.';
+                    $errors[] = $message;
+                    foreach ($state['rows'] as &$row) {
+                        if ($row['group_id'] === $state['group_ids'][$code]) {
+                            $row['errors']['order_code'] = array_values(array_unique([...($row['errors']['order_code'] ?? []), $message]));
+                        }
+                    }
+                    unset($row);
                 }
                 $users = User::withTrashed()->whereRaw('lower(email) = ?', [$rows[0]['data']['email']])->get();
                 if ($users->count() > 1 || $users->contains(fn ($user) => $user->trashed() || $user->role !== UserRole::Customer)) {
