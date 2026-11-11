@@ -1,5 +1,6 @@
 import { Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { LockKeyhole } from 'lucide-react';
 import type { FormEvent } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -74,6 +75,7 @@ export default function OrderSettlement({
     };
     return (
         <div
+            data-order-settlement={admin ? 'admin' : undefined}
             className={
                 admin
                     ? 'bg-card space-y-5 rounded-xl border p-4 sm:p-5'
@@ -88,10 +90,19 @@ export default function OrderSettlement({
             )}
             {admin && (
                 <>
-                    <div>
-                        <h2 className="font-heading text-lg font-bold">
+                    <div className="order-detail-import-notice">
+                        <LockKeyhole
+                            className="order-detail-desktop"
+                            aria-hidden="true"
+                        />
+                        <h2 className="order-detail-settlement-title font-heading text-lg font-bold">
                             Pesanan import · Pelunasan transfer
                         </h2>
+                        <span className="order-detail-desktop">
+                            {settlement.archived
+                                ? 'Pesanan impor · Arsip historis'
+                                : 'Pesanan impor · Pelunasan transfer'}
+                        </span>
                         <p className="text-muted-foreground text-sm">
                             {settlement.archived
                                 ? 'Arsip historis. Tidak menerima pembayaran atau perubahan pengiriman.'
@@ -130,10 +141,25 @@ export default function OrderSettlement({
                         ].map(([label, value]) => (
                             <div
                                 key={label}
+                                data-summary-field={label}
                                 className="flex flex-wrap justify-between gap-x-4 gap-y-1"
                             >
                                 <dt>{label}</dt>
-                                <dd className="font-semibold">{value}</dd>
+                                <dd className="font-semibold">
+                                    {label === 'Sisa pelunasan' ? (
+                                        <>
+                                            {rupiah(summary.outstanding)}
+                                            {!summary.shipping_selected && (
+                                                <span className="order-detail-shipping-note">
+                                                    {' '}
+                                                    (belum termasuk ongkir)
+                                                </span>
+                                            )}
+                                        </>
+                                    ) : (
+                                        value
+                                    )}
+                                </dd>
                             </div>
                         ))}
                     </dl>
@@ -157,7 +183,7 @@ export default function OrderSettlement({
                 </p>
             )}
             {settlement.submissions.length > 0 && (
-                <div className="space-y-3 border-t pt-4">
+                <div className="order-detail-transfer-history space-y-3 border-t pt-4">
                     <h3 className="font-semibold">Riwayat bukti transfer</h3>
                     {settlement.submissions.map((submission) => (
                         <div

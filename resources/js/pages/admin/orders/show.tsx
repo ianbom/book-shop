@@ -32,6 +32,7 @@ import {
 } from '@/lib/shipment-status';
 import admin from '@/routes/admin';
 import type { OrderStatus, ShipmentStatus } from '@/types/admin';
+import '../../../../css/admin-order-detail.css';
 
 type History = {
     id: number;
@@ -174,7 +175,7 @@ const tabs = [
 type Tab = (typeof tabs)[number]['id'];
 function Info({ label, value }: { label: string; value: ReactNode }) {
     return (
-        <div className="min-w-0">
+        <div className="order-detail-field min-w-0">
             <p className="text-muted-foreground text-xs">{label}</p>
             <div className="mt-1 text-sm font-medium break-words">{value}</div>
         </div>
@@ -190,7 +191,7 @@ function Line({
     strong?: boolean;
 }) {
     return (
-        <div className="flex justify-between gap-4 border-b pb-2 text-sm">
+        <div className="order-detail-cost-line flex justify-between gap-4 border-b pb-2 text-sm">
             <span className="text-muted-foreground">{label}</span>
             <span
                 className={
@@ -204,7 +205,7 @@ function Line({
 }
 function Panel({ title, children }: { title: string; children: ReactNode }) {
     return (
-        <Card>
+        <Card data-order-panel={title}>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
             </CardHeader>
@@ -213,12 +214,28 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
     );
 }
 
+function EmptyState({
+    children,
+    detail,
+}: {
+    children: ReactNode;
+    detail: string;
+}) {
+    return (
+        <div className="order-detail-empty">
+            <Package className="order-detail-desktop" aria-hidden="true" />
+            <p className="text-muted-foreground text-sm">{children}</p>
+            <p className="order-detail-desktop">{detail}</p>
+        </div>
+    );
+}
+
 function OrderProgress({ order }: { order: OrderDetail }) {
     const steps = getOrderProgress(order);
     const icons = [ClipboardList, Check, ShieldCheck, Package, Truck, Check];
 
     return (
-        <Card className="bg-card border-primary/20 min-w-0 shadow-none xl:col-span-2">
+        <Card className="order-detail-progress bg-card border-primary/20 min-w-0 shadow-none xl:col-span-2">
             <CardHeader>
                 <CardTitle className="text-primary">Progres Pesanan</CardTitle>
                 {order.status === 'cancelled' && (
@@ -292,6 +309,12 @@ function OrderProgress({ order }: { order: OrderDetail }) {
                         })}
                     </ol>
                 </div>
+                {order.settlement?.archived && (
+                    <p className="order-detail-desktop order-detail-progress-note">
+                        Progres historis bukan bukti adanya data shipment.
+                        Tanggal yang tidak tersedia tetap ditandai —.
+                    </p>
+                )}
             </CardContent>
         </Card>
     );
@@ -330,7 +353,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
     return (
         <>
             <Head title={'Order ' + order.order_code} />
-            <main className="flex flex-1 flex-col gap-5 p-4 md:p-6">
+            <main className="order-detail-page flex min-w-0 flex-1 flex-col gap-5 p-4 md:p-6">
                 <div className="flex items-center justify-between gap-3">
                     <Link
                         href={admin.orders.index()}
@@ -348,7 +371,14 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                     description={
                         'Pesanan dibuat ' + formatDate(order.created_at)
                     }
-                    actions={<StatusBadge value={order.status} />}
+                    actions={
+                        <div className="flex items-center gap-2">
+                            <StatusBadge value={order.status} />
+                            <span className="order-detail-desktop">
+                                <StatusBadge value={order.payment_status} />
+                            </span>
+                        </div>
+                    }
                 />
                 {order.settlement && (
                     <OrderSettlement
@@ -367,8 +397,35 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                             key={id}
                             type="button"
                             role="tab"
+                            id={`order-detail-tab-${id}`}
+                            aria-controls="order-detail-panel"
+                            tabIndex={active === id ? 0 : -1}
                             aria-selected={active === id}
                             onClick={() => setActive(id)}
+                            onKeyDown={(event) => {
+                                const index = tabs.findIndex(
+                                    (tab) => tab.id === id,
+                                );
+                                const next =
+                                    event.key === 'Home'
+                                        ? 0
+                                        : event.key === 'End'
+                                          ? tabs.length - 1
+                                          : event.key === 'ArrowRight'
+                                            ? (index + 1) % tabs.length
+                                            : event.key === 'ArrowLeft'
+                                              ? (index - 1 + tabs.length) %
+                                                tabs.length
+                                              : null;
+                                if (next === null) return;
+                                event.preventDefault();
+                                setActive(tabs[next].id);
+                                document
+                                    .getElementById(
+                                        `order-detail-tab-${tabs[next].id}`,
+                                    )
+                                    ?.focus();
+                            }}
                             className={
                                 'inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ' +
                                 (active === id
@@ -383,6 +440,9 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                 </div>
                 <div
                     role="tabpanel"
+                    id="order-detail-panel"
+                    aria-labelledby={`order-detail-tab-${active}`}
+                    data-active-tab={active}
                     className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]"
                 >
                     {active === 'summary' && (
@@ -626,9 +686,15 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                     ))
                                 ) : (
                                     <Panel title="Status pengiriman">
-                                        <p className="text-muted-foreground text-sm">
+                                        <EmptyState
+                                            detail={
+                                                order.settlement?.archived
+                                                    ? 'Pesanan ini merupakan arsip historis. Perubahan pengiriman tidak tersedia.'
+                                                    : 'Data pengiriman akan tampil setelah shipment tersedia.'
+                                            }
+                                        >
                                             Belum ada data shipment.
-                                        </p>
+                                        </EmptyState>
                                     </Panel>
                                 )}
                             </div>
@@ -645,12 +711,20 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                     order.items.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="grid gap-3 border-b pb-4 sm:grid-cols-[1fr_auto]"
+                                            className="order-detail-item grid gap-3 border-b pb-4 sm:grid-cols-[1fr_auto]"
                                         >
-                                            <div>
+                                            <div className="order-detail-item-description">
+                                                <BookOpen
+                                                    className="order-detail-desktop order-detail-item-icon"
+                                                    aria-hidden="true"
+                                                />
                                                 <h3 className="font-semibold">
                                                     {item.name}
                                                 </h3>
+                                                <p className="order-detail-desktop order-detail-item-quantity">
+                                                    {item.quantity} buku ·{' '}
+                                                    {item.weight} g per buku
+                                                </p>
                                                 <p className="text-muted-foreground text-sm">
                                                     {item.author || '—'} · SKU{' '}
                                                     {item.sku || '—'} · ISBN{' '}
@@ -688,50 +762,89 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                                         )}
                                                     </p>
                                                 )}
-                                            </div>
-                                            <div className="space-y-1 text-right">
                                                 {item.pre_order_code && (
-                                                    <p>
+                                                    <p className="order-detail-desktop text-primary font-semibold">
+                                                        PO:{' '}
+                                                        {item.pre_order_code}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="order-detail-item-costs space-y-1 text-right">
+                                                {item.pre_order_code && (
+                                                    <p className="order-detail-item-code">
                                                         PO:{' '}
                                                         {item.pre_order_code}
                                                     </p>
                                                 )}
                                                 <p>
-                                                    Bruto: {item.quantity} ×{' '}
-                                                    {money(item.value)}
+                                                    <span>Bruto</span>
+                                                    <span>
+                                                        <span className="order-detail-item-colon">
+                                                            :{' '}
+                                                        </span>
+                                                        {item.quantity} ×{' '}
+                                                        {money(item.value)}
+                                                    </span>
                                                 </p>
                                                 {order.settlement && (
                                                     <>
                                                         <p>
-                                                            Diskon baris:{' '}
-                                                            {money(
-                                                                item.line_discount,
-                                                            )}
+                                                            <span>
+                                                                Diskon baris
+                                                            </span>
+                                                            <span>
+                                                                <span className="order-detail-item-colon">
+                                                                    :{' '}
+                                                                </span>
+                                                                {money(
+                                                                    item.line_discount,
+                                                                )}
+                                                            </span>
                                                         </p>
                                                         <p>
-                                                            DP (informasi):{' '}
-                                                            {money(
-                                                                item.historical_dp,
-                                                            )}
+                                                            <span>
+                                                                DP (informasi)
+                                                            </span>
+                                                            <span>
+                                                                <span className="order-detail-item-colon">
+                                                                    :{' '}
+                                                                </span>
+                                                                {money(
+                                                                    item.historical_dp,
+                                                                )}
+                                                            </span>
                                                         </p>
                                                         <p>
-                                                            Dibayar historis:{' '}
-                                                            {money(
-                                                                item.historical_paid,
-                                                            )}
+                                                            <span>
+                                                                Dibayar historis
+                                                            </span>
+                                                            <span>
+                                                                <span className="order-detail-item-colon">
+                                                                    :{' '}
+                                                                </span>
+                                                                {money(
+                                                                    item.historical_paid,
+                                                                )}
+                                                            </span>
                                                         </p>
                                                     </>
                                                 )}
                                                 <b>
-                                                    Net: {money(item.subtotal)}
+                                                    <span>Net</span>
+                                                    <span>
+                                                        <span className="order-detail-item-colon">
+                                                            :{' '}
+                                                        </span>
+                                                        {money(item.subtotal)}
+                                                    </span>
                                                 </b>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-muted-foreground text-sm">
+                                    <EmptyState detail="Tidak ada item yang tercatat pada pesanan ini.">
                                         Item tidak tersedia.
-                                    </p>
+                                    </EmptyState>
                                 )}
                             </Panel>
                         </div>
@@ -808,9 +921,9 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-muted-foreground text-sm">
+                                    <EmptyState detail="Tidak ada transaksi wallet yang tercatat pada pesanan ini.">
                                         Tidak ada transaksi saldo.
-                                    </p>
+                                    </EmptyState>
                                 )}
                             </Panel>
                         </div>
@@ -828,9 +941,15 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                 ))
                             ) : (
                                 <Panel title="Pengiriman">
-                                    <p className="text-muted-foreground text-sm">
+                                    <EmptyState
+                                        detail={
+                                            order.settlement?.archived
+                                                ? 'Pesanan ini merupakan arsip historis. Perubahan pengiriman tidak tersedia.'
+                                                : 'Data pengiriman akan tampil setelah shipment tersedia.'
+                                        }
+                                    >
                                         Belum ada data shipment.
-                                    </p>
+                                    </EmptyState>
                                 </Panel>
                             )}
                         </div>
@@ -842,7 +961,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                     order.status_histories.map((event) => (
                                         <div
                                             key={event.id}
-                                            className="flex flex-wrap items-start justify-between gap-3 border-b pb-3"
+                                            className="order-detail-history-event flex flex-wrap items-start justify-between gap-3 border-b pb-3"
                                         >
                                             <div>
                                                 <StatusBadge
@@ -866,9 +985,9 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-muted-foreground text-sm">
+                                    <EmptyState detail="Riwayat perubahan status akan ditampilkan di sini.">
                                         Belum ada riwayat status.
-                                    </p>
+                                    </EmptyState>
                                 )}
                             </Panel>
                         </div>
@@ -926,9 +1045,9 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-muted-foreground text-sm">
+                                    <EmptyState detail="Tidak ada mutasi stok yang tercatat pada pesanan ini.">
                                         Tidak ada mutasi stok.
-                                    </p>
+                                    </EmptyState>
                                 )}
                             </Panel>
                         </div>
