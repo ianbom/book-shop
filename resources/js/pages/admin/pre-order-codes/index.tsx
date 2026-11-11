@@ -2,6 +2,9 @@ import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
     BookOpen,
     Pencil,
     Plus,
@@ -24,11 +27,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import admin from '@/routes/admin';
+import { formatDate } from '@/lib/format';
 import type { Book, Paginated, PreOrderCode } from '@/types/admin';
 
 type Props = {
     preOrderCodes: Paginated<PreOrderCode>;
-    filters: { search?: string };
+    filters: {
+        search?: string;
+        sort: 'code' | 'books_count' | 'created_at';
+        direction: 'asc' | 'desc';
+    };
 };
 type CodeBook = Pick<Book, 'id' | 'title' | 'author' | 'stock' | 'is_active'>;
 
@@ -214,6 +222,21 @@ export default function PreOrderCodesIndex({ preOrderCodes, filters }: Props) {
     const [viewing, setViewing] = useState<PreOrderCode | null>(null);
     const form = useForm({ code: '' });
 
+    const sortBy = (sort: Props['filters']['sort']) => {
+        router.get(
+            admin.preOrderCodes.index(),
+            {
+                search: filters.search ?? '',
+                sort,
+                direction:
+                    filters.sort === sort && filters.direction === 'asc'
+                        ? 'desc'
+                        : 'asc',
+            },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    };
+
     const open = (code?: PreOrderCode) => {
         form.clearErrors();
         form.setData('code', code?.code ?? '');
@@ -265,6 +288,8 @@ export default function PreOrderCodesIndex({ preOrderCodes, filters }: Props) {
                                         search: new FormData(
                                             event.currentTarget,
                                         ).get('search'),
+                                        sort: filters.sort,
+                                        direction: filters.direction,
                                     },
                                     { preserveState: true, replace: true },
                                 );
@@ -303,28 +328,83 @@ export default function PreOrderCodesIndex({ preOrderCodes, filters }: Props) {
                             <table className="w-full min-w-[540px] text-left text-sm">
                                 <thead className="bg-muted/85 text-muted-foreground border-b text-xs font-semibold">
                                     <tr>
-                                        <th className="px-4 py-4">
-                                            Kode Preorder
+                                        <th
+                                            scope="col"
+                                            className="w-16 px-4 py-4"
+                                        >
+                                            No
                                         </th>
-                                        <th className="px-4 py-4">
-                                            Jumlah Buku
-                                        </th>
+                                        {(
+                                            [
+                                                ['code', 'Kode Preorder'],
+                                                ['books_count', 'Jumlah Buku'],
+                                                ['created_at', 'Dibuat pada'],
+                                            ] as const
+                                        ).map(([field, label]) => (
+                                            <th
+                                                key={field}
+                                                scope="col"
+                                                className="px-4 py-4"
+                                                aria-sort={
+                                                    filters.sort === field
+                                                        ? filters.direction ===
+                                                          'asc'
+                                                            ? 'ascending'
+                                                            : 'descending'
+                                                        : undefined
+                                                }
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className="hover:text-primary focus-visible:ring-ring inline-flex items-center gap-1 rounded focus-visible:ring-2 focus-visible:outline-none"
+                                                    onClick={() =>
+                                                        sortBy(field)
+                                                    }
+                                                >
+                                                    {label}
+                                                    {filters.sort !== field ? (
+                                                        <ArrowUpDown
+                                                            className="size-3.5"
+                                                            aria-hidden="true"
+                                                        />
+                                                    ) : filters.direction ===
+                                                      'asc' ? (
+                                                        <ArrowUp
+                                                            className="size-3.5"
+                                                            aria-hidden="true"
+                                                        />
+                                                    ) : (
+                                                        <ArrowDown
+                                                            className="size-3.5"
+                                                            aria-hidden="true"
+                                                        />
+                                                    )}
+                                                </button>
+                                            </th>
+                                        ))}
                                         <th className="px-4 py-4 text-right">
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-border/80 divide-y bg-white">
-                                    {preOrderCodes.data.map((code) => (
+                                    {preOrderCodes.data.map((code, index) => (
                                         <tr
                                             key={code.id}
                                             className="hover:bg-muted/45 transition-colors"
                                         >
+                                            <td className="px-4 py-3.5 tabular-nums">
+                                                {(preOrderCodes.meta.from ??
+                                                    1) + index}
+                                            </td>
                                             <td className="px-4 py-3.5 font-semibold">
                                                 {code.code}
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 {code.books_count ?? 0}
+                                            </td>
+                                            <td className="px-4 py-3.5 whitespace-nowrap">
+                                                {formatDate(code.created_at)}
                                             </td>
                                             <td className="px-4 py-3.5 text-right">
                                                 <Button

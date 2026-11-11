@@ -15,6 +15,7 @@ class PreOrderCodeResource extends JsonResource
         return [
             'id' => $this->id,
             'code' => $this->code,
+            'created_at' => $this->created_at?->toISOString(),
             'books_count' => $this->whenCounted('books'),
         ];
     }

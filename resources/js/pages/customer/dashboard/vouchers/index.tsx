@@ -94,7 +94,7 @@ export default function VouchersIndex({
                                         <CardContent className="flex h-full flex-col p-0">
                                             <div className="bg-muted/60 flex items-center justify-between gap-3 border-b px-5 py-4">
                                                 <span className="text-primary text-xs font-bold tracking-widest uppercase">
-                                                    Wonder Book
+                                                    Wonder Prince Library
                                                 </span>
                                                 <Badge
                                                     variant="secondary"

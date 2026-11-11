@@ -83,6 +83,8 @@ class CheckoutTest extends TestCase
 
         $order = $user->orders()->firstOrFail();
         $this->assertSame('waiting_preorder', $order->status->value);
+        $code->update(['code' => 'PO-RENAMED']);
+        $this->assertSame('PO-STOCK', $order->items()->firstOrFail()->pre_order_code);
         $this->assertSame(3, $book->fresh()->stock);
         $this->assertSame('90000.00', $user->wallet->fresh()->balance);
         $this->assertDatabaseHas('book_stock_movements', [

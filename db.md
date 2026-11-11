@@ -21,137 +21,133 @@
 // Notes:
 // - Biteship API key belongs in .env, NOT in database.
 // - Shipping column names are intentionally aligned as closely
-//   as possible with Biteship request/response JSON.
+// as possible with Biteship request/response JSON.
 // ======================================================
-
 
 // ======================================================
 // ENUMS
 // ======================================================
 
 Enum user_role {
-  admin
-  customer
+admin
+customer
 }
 
 Enum book_sale_type {
-  ready_stock
-  preorder
+ready_stock
+preorder
 }
 
 Enum order_status {
-  pending
-  waiting_preorder
-  processing
-  packing
-  shipping
-  completed
-  cancelled
+pending
+waiting_preorder
+processing
+packing
+shipping
+completed
+cancelled
 }
 
 Enum order_payment_status {
-  unpaid
-  paid
-  partially_refunded
-  refunded
+unpaid
+paid
+partially_refunded
+refunded
 }
 
 Enum topup_status {
-  pending
-  approved
-  rejected
+pending
+approved
+rejected
 }
 
 Enum wallet_transaction_type {
-  topup_credit
-  order_payment
-  order_refund
-  admin_adjustment_credit
-  admin_adjustment_debit
+topup_credit
+order_payment
+order_refund
+admin_adjustment_credit
+admin_adjustment_debit
 }
 
 Enum wallet_transaction_direction {
-  credit
-  debit
+credit
+debit
 }
 
 Enum voucher_type {
-  fixed
-  percentage
+fixed
+percentage
 }
 
 Enum stock_movement_type {
-  initial
-  adjustment_in
-  adjustment_out
-  order
-  cancellation
-  preorder_fulfillment
+initial
+adjustment_in
+adjustment_out
+order
+cancellation
+preorder_fulfillment
 }
 
 Enum shipment_status {
-  pending
-  booked
-  pickup
-  in_transit
-  delivered
-  cancelled
-  failed
-  confirmed
-  scheduled
-  allocated
-  picking_up
-  picked
-  on_hold
-  dropping_off
-  return_in_transit
-  returned
-  rejected
-  disposed
-  courier_not_found
+pending
+booked
+pickup
+in_transit
+delivered
+cancelled
+failed
+confirmed
+scheduled
+allocated
+picking_up
+picked
+on_hold
+dropping_off
+return_in_transit
+returned
+rejected
+disposed
+courier_not_found
 }
-
 
 Enum shipment_delivery_type {
-  now
-  scheduled
+now
+scheduled
 }
-
 
 // ======================================================
 // USERS
 // ======================================================
 
 Table users {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  name varchar(150) [not null]
+name varchar(150) [not null]
 
-  email varchar(150) [not null, unique]
+email varchar(150) [not null, unique]
 
-  phone varchar(30)
+phone varchar(30)
 
-  password varchar(255) [not null]
+password varchar(255) [not null]
 
-  role user_role [not null, default: 'customer']
+role user_role [not null, default: 'customer']
 
-  email_verified_at timestamp
+email_verified_at timestamp
 
-  remember_token varchar(100)
+remember_token varchar(100)
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  deleted_at timestamp
+deleted_at timestamp
 
-  indexes {
-    email [unique]
-    phone
-    role
-  }
+indexes {
+email [unique]
+phone
+role
 }
-
+}
 
 // ======================================================
 // STORE SETTINGS
@@ -178,76 +174,68 @@ Table users {
 // Instant courier requires coordinates.
 
 Table store_settings {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  bank_accounts json // [{bank_name, account_holder, account_number}]
+bank_accounts json // [{bank_name, account_holder, account_number}]
 
-  store_name varchar(150) [not null]
+store_name varchar(150) [not null]
 
-  whatsapp_number varchar(30)
+whatsapp_number varchar(30)
 
-  email varchar(150)
+email varchar(150)
 
-  phone varchar(30)
+phone varchar(30)
 
-  address text
+address text
 
+// --------------------------------------------------
+// BITESHIP RATES API
+// Example:
+// jne,sicepat,anteraja,jnt,tiki
+// --------------------------------------------------
 
-  // --------------------------------------------------
-  // BITESHIP RATES API
-  // Example:
-  // jne,sicepat,anteraja,jnt,tiki
-  // --------------------------------------------------
+couriers text [not null]
 
-  couriers text [not null]
+// --------------------------------------------------
+// BITESHIP SHIPPER
+// --------------------------------------------------
 
+shipper_contact_name varchar(150)
 
-  // --------------------------------------------------
-  // BITESHIP SHIPPER
-  // --------------------------------------------------
+shipper_contact_phone varchar(30)
 
-  shipper_contact_name varchar(150)
+shipper_contact_email varchar(150)
 
-  shipper_contact_phone varchar(30)
+shipper_organization varchar(150)
 
-  shipper_contact_email varchar(150)
+// --------------------------------------------------
+// BITESHIP ORIGIN
+// --------------------------------------------------
 
-  shipper_organization varchar(150)
+origin_contact_name varchar(150) [not null]
 
+origin_contact_phone varchar(30) [not null]
 
-  // --------------------------------------------------
-  // BITESHIP ORIGIN
-  // --------------------------------------------------
+origin_contact_email varchar(150)
 
-  origin_contact_name varchar(150) [not null]
+origin_address text [not null]
 
-  origin_contact_phone varchar(30) [not null]
+origin_note text
 
-  origin_contact_email varchar(150)
+origin_postal_code varchar(10)
 
-  origin_address text [not null]
+origin_area_id varchar(150)
 
-  origin_note text
+origin_location_id varchar(150)
 
-  origin_postal_code varchar(10)
+origin_latitude decimal(10,7)
 
-  origin_area_id varchar(150)
+origin_longitude decimal(10,7)
 
-  origin_location_id varchar(150)
+created_at timestamp
 
-  origin_latitude decimal(10,7)
-
-  origin_longitude decimal(10,7)
-
-
-
-  created_at timestamp
-
-  updated_at timestamp
+updated_at timestamp
 }
-
-
-
 
 // ======================================================
 // USER ADDRESSES
@@ -265,92 +253,87 @@ Table store_settings {
 // Instant courier requires coordinates.
 
 Table user_addresses {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  user_id bigint [not null]
+user_id bigint [not null]
 
-  label varchar(100)
+label varchar(100)
 
+// --------------------------------------------------
+// BITESHIP DESTINATION
+// --------------------------------------------------
 
-  // --------------------------------------------------
-  // BITESHIP DESTINATION
-  // --------------------------------------------------
+destination_contact_name varchar(150) [not null]
 
-  destination_contact_name varchar(150) [not null]
+destination_contact_phone varchar(30) [not null]
 
-  destination_contact_phone varchar(30) [not null]
+destination_contact_email varchar(150)
 
-  destination_contact_email varchar(150)
+destination_address text [not null]
 
-  destination_address text [not null]
+destination_note text
 
-  destination_note text
+destination_postal_code varchar(10)
 
-  destination_postal_code varchar(10)
+destination_area_id varchar(150)
 
-  destination_area_id varchar(150)
+destination_location_id varchar(150)
 
-  destination_location_id varchar(150)
+destination_latitude decimal(10,7)
 
-  destination_latitude decimal(10,7)
+destination_longitude decimal(10,7)
 
-  destination_longitude decimal(10,7)
+// --------------------------------------------------
+// HUMAN-READABLE ADDRESS DATA
+// --------------------------------------------------
 
+province_name varchar(150)
 
-  // --------------------------------------------------
-  // HUMAN-READABLE ADDRESS DATA
-  // --------------------------------------------------
+city_name varchar(150)
 
-  province_name varchar(150)
+district_name varchar(150)
 
-  city_name varchar(150)
+subdistrict_name varchar(150)
 
-  district_name varchar(150)
+is_default boolean [not null, default: false]
 
-  subdistrict_name varchar(150)
+created_at timestamp
 
+updated_at timestamp
 
-  is_default boolean [not null, default: false]
+deleted_at timestamp
 
-  created_at timestamp
-
-  updated_at timestamp
-
-  deleted_at timestamp
-
-  indexes {
-    user_id
-    destination_postal_code
-    destination_area_id
-    destination_location_id
-    (user_id, is_default)
-  }
+indexes {
+user_id
+destination_postal_code
+destination_area_id
+destination_location_id
+(user_id, is_default)
 }
-
+}
 
 // ======================================================
 // CATEGORIES
 // ======================================================
 
 Table categories {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  name varchar(150) [not null]
+name varchar(150) [not null]
 
-  slug varchar(180) [not null, unique]
+slug varchar(180) [not null, unique]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  deleted_at timestamp
+deleted_at timestamp
 
-  indexes {
-    name
-    slug [unique]
-  }
+indexes {
+name
+slug [unique]
 }
-
+}
 
 // ======================================================
 // BOOKS
@@ -359,141 +342,135 @@ Table categories {
 // `height`, `length`, `width` in centimeters.
 //
 // Required Biteship item data:
-// - name     <- title
-// - value    <- price
+// - name <- title
+// - value <- price
 // - quantity <- cart_items.quantity / order_items.quantity
-// - weight   <- weight
+// - weight <- weight
 //
 // Shipping data is snapshotted into order_items at checkout.
 
 Table pre_order_codes {
-  id bigint [pk, increment]
-  code varchar(100) [not null, unique]
-  created_at timestamptz
-  updated_at timestamptz
-  deleted_at timestamptz
+id bigint [pk, increment]
+code varchar(100) [not null, unique]
+created_at timestamptz
+updated_at timestamptz
+deleted_at timestamptz
 }
 
 Table books {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  title varchar(255) [not null]
+title varchar(255) [not null]
 
-  slug varchar(255) [not null, unique]
+slug varchar(255) [not null, unique]
 
-  isbn varchar(50)
+isbn varchar(50)
 
-  sku varchar(100)
+sku varchar(100)
 
-  author varchar(200) [not null]
+author varchar(200) [not null]
 
-  description text
+description text
 
-  price decimal(15,2) [not null]
+price decimal(15,2) [not null]
 
+// --------------------------------------------------
+// BITESHIP ITEM SOURCE
+// --------------------------------------------------
 
-  // --------------------------------------------------
-  // BITESHIP ITEM SOURCE
-  // --------------------------------------------------
+shipping_category varchar(50) [not null, default: 'others']
 
-  shipping_category varchar(50) [not null, default: 'others']
+weight integer [not null]
 
-  weight integer [not null]
+height decimal(8,2)
 
-  height decimal(8,2)
+length decimal(8,2)
 
-  length decimal(8,2)
+width decimal(8,2)
 
-  width decimal(8,2)
+// --------------------------------------------------
+// INVENTORY / SALES
+// --------------------------------------------------
 
+stock integer [not null, default: 0]
 
-  // --------------------------------------------------
-  // INVENTORY / SALES
-  // --------------------------------------------------
+sale_type book_sale_type [not null, default: 'ready_stock']
 
-  stock integer [not null, default: 0]
+pre_order_code_id bigint
 
-  sale_type book_sale_type [not null, default: 'ready_stock']
+preorder_estimated_date date
 
-  pre_order_code_id bigint
+preorder_note text
 
-  preorder_estimated_date date
+is_active boolean [not null, default: true]
 
-  preorder_note text
+created_at timestamp
 
-  is_active boolean [not null, default: true]
+updated_at timestamp
 
+deleted_at timestamp
 
-  created_at timestamp
-
-  updated_at timestamp
-
-  deleted_at timestamp
-
-  indexes {
-    slug [unique]
-    isbn
-    sku
-    title
-    author
-    sale_type
-    pre_order_code_id
-    preorder_estimated_date
-    is_active
-  }
+indexes {
+slug [unique]
+isbn
+sku
+title
+author
+sale_type
+pre_order_code_id
+preorder_estimated_date
+is_active
 }
-
+}
 
 // ======================================================
 // BOOK IMAGES
 // ======================================================
 
 Table book_images {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  book_id bigint [not null]
+book_id bigint [not null]
 
-  image_path varchar(500) [not null]
+image_path varchar(500) [not null]
 
-  alt_text varchar(255)
+alt_text varchar(255)
 
-  sort_order integer [not null, default: 0]
+sort_order integer [not null, default: 0]
 
-  is_primary boolean [not null, default: false]
+is_primary boolean [not null, default: false]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    book_id
-    (book_id, sort_order)
-  }
+indexes {
+book_id
+(book_id, sort_order)
 }
-
+}
 
 // ======================================================
 // BOOK CATEGORIES
 // ======================================================
 
 Table book_categories {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  book_id bigint [not null]
+book_id bigint [not null]
 
-  category_id bigint [not null]
+category_id bigint [not null]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    (book_id, category_id) [unique]
-    book_id
-    category_id
-  }
+indexes {
+(book_id, category_id) [unique]
+book_id
+category_id
 }
-
+}
 
 // ======================================================
 // WALLETS
@@ -504,21 +481,20 @@ Table book_categories {
 // an immutable wallet_transactions record.
 
 Table wallets {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  user_id bigint [not null, unique]
+user_id bigint [not null, unique]
 
-  balance decimal(15,2) [not null, default: 0]
+balance decimal(15,2) [not null, default: 0]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    user_id [unique]
-  }
+indexes {
+user_id [unique]
 }
-
+}
 
 // ======================================================
 // WALLET TOPUPS
@@ -541,39 +517,38 @@ Table wallets {
 // - creates wallet_transactions(type=topup_credit)
 
 Table wallet_topups {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  topup_code varchar(50) [not null, unique]
+topup_code varchar(50) [not null, unique]
 
-  user_id bigint [not null]
+user_id bigint [not null]
 
-  requested_amount decimal(15,2) [not null]
+requested_amount decimal(15,2) [not null]
 
-  credited_amount decimal(15,2)
+credited_amount decimal(15,2)
 
-  proof_image_path varchar(500) [not null]
+proof_image_path varchar(500) [not null]
 
-  status topup_status [not null, default: 'pending']
+status topup_status [not null, default: 'pending']
 
-  reviewed_by bigint
+reviewed_by bigint
 
-  reviewed_at timestamp
+reviewed_at timestamp
 
-  admin_note text
+admin_note text
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    topup_code [unique]
-    user_id
-    status
-    reviewed_by
-    created_at
-  }
+indexes {
+topup_code [unique]
+user_id
+status
+reviewed_by
+created_at
 }
-
+}
 
 // ======================================================
 // WALLET TRANSACTIONS
@@ -584,41 +559,40 @@ Table wallet_topups {
 // direction decides credit / debit.
 
 Table wallet_transactions {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  wallet_id bigint [not null]
+wallet_id bigint [not null]
 
-  topup_id bigint
+topup_id bigint
 
-  order_id bigint
+order_id bigint
 
-  created_by bigint
+created_by bigint
 
-  type wallet_transaction_type [not null]
+type wallet_transaction_type [not null]
 
-  direction wallet_transaction_direction [not null]
+direction wallet_transaction_direction [not null]
 
-  amount decimal(15,2) [not null]
+amount decimal(15,2) [not null]
 
-  balance_before decimal(15,2) [not null]
+balance_before decimal(15,2) [not null]
 
-  balance_after decimal(15,2) [not null]
+balance_after decimal(15,2) [not null]
 
-  note text
+note text
 
-  created_at timestamp [not null]
+created_at timestamp [not null]
 
-  indexes {
-    wallet_id
-    topup_id
-    order_id
-    created_by
-    type
-    direction
-    created_at
-  }
+indexes {
+wallet_id
+topup_id
+order_id
+created_by
+type
+direction
+created_at
 }
-
+}
 
 // ======================================================
 // CARTS
@@ -626,19 +600,18 @@ Table wallet_transactions {
 // One active cart per customer.
 
 Table carts {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  user_id bigint [not null, unique]
+user_id bigint [not null, unique]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    user_id [unique]
-  }
+indexes {
+user_id [unique]
 }
-
+}
 
 // ======================================================
 // CART ITEMS
@@ -647,75 +620,73 @@ Table carts {
 // Re-adding the same book updates quantity.
 
 Table cart_items {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  cart_id bigint [not null]
+cart_id bigint [not null]
 
-  book_id bigint [not null]
+book_id bigint [not null]
 
-  quantity integer [not null, default: 1]
+quantity integer [not null, default: 1]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    (cart_id, book_id) [unique]
-    cart_id
-    book_id
-  }
+indexes {
+(cart_id, book_id) [unique]
+cart_id
+book_id
 }
-
+}
 
 // ======================================================
 // VOUCHERS
 // ======================================================
 
 Table vouchers {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  code varchar(100) [not null, unique]
+code varchar(100) [not null, unique]
 
-  name varchar(150) [not null]
+name varchar(150) [not null]
 
-  description text
+description text
 
-  type voucher_type [not null]
+type voucher_type [not null]
 
-  value decimal(15,2) [not null]
+value decimal(15,2) [not null]
 
-  max_discount decimal(15,2)
+max_discount decimal(15,2)
 
-  min_order_amount decimal(15,2) [not null, default: 0]
+min_order_amount decimal(15,2) [not null, default: 0]
 
-  usage_limit integer
+usage_limit integer
 
-  per_user_limit integer [not null, default: 1]
+per_user_limit integer [not null, default: 1]
 
-  starts_at timestamp
+starts_at timestamp
 
-  ends_at timestamp
+ends_at timestamp
 
-  is_active boolean [not null, default: true]
+is_active boolean [not null, default: true]
 
-  created_by bigint [not null]
+created_by bigint [not null]
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  deleted_at timestamp
+deleted_at timestamp
 
-  indexes {
-    code [unique]
-    type
-    is_active
-    starts_at
-    ends_at
-    created_by
-  }
+indexes {
+code [unique]
+type
+is_active
+starts_at
+ends_at
+created_by
 }
-
+}
 
 // ======================================================
 // ORDERS
@@ -732,47 +703,46 @@ Table vouchers {
 // per shipment through shipments.price / biteship_price.
 
 Table orders {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  order_code varchar(50) [not null, unique]
+order_code varchar(50) [not null, unique]
 
-  user_id bigint [not null]
+user_id bigint [not null]
 
-  address_id bigint
+address_id bigint
 
-  voucher_id bigint
+voucher_id bigint
 
-  subtotal decimal(15,2) [not null]
+subtotal decimal(15,2) [not null]
 
-  voucher_discount decimal(15,2) [not null, default: 0]
+voucher_discount decimal(15,2) [not null, default: 0]
 
-  shipping_cost decimal(15,2) [not null, default: 0]
+shipping_cost decimal(15,2) [not null, default: 0]
 
-  total decimal(15,2) [not null]
+total decimal(15,2) [not null]
 
-  wallet_amount decimal(15,2) [not null]
+wallet_amount decimal(15,2) [not null]
 
-  status order_status [not null, default: 'pending']
+status order_status [not null, default: 'pending']
 
-  payment_status order_payment_status [not null, default: 'unpaid']
+payment_status order_payment_status [not null, default: 'unpaid']
 
-  customer_note text
+customer_note text
 
-  created_at timestamp
+created_at timestamp
 
-  updated_at timestamp
+updated_at timestamp
 
-  indexes {
-    order_code [unique]
-    user_id
-    address_id
-    voucher_id
-    status
-    payment_status
-    created_at
-  }
+indexes {
+order_code [unique]
+user_id
+address_id
+voucher_id
+status
+payment_status
+created_at
 }
-
+}
 
 // ======================================================
 // ORDER ITEMS
@@ -781,83 +751,79 @@ Table orders {
 //
 // Shipping field naming follows Biteship items[]:
 //
-// items[].name        <- name
+// items[].name <- name
 // items[].description <- description
-// items[].category    <- category
-// items[].sku         <- sku
-// items[].value       <- value
-// items[].weight      <- weight
-// items[].height      <- height
-// items[].length      <- length
-// items[].width       <- width
+// items[].category <- category
+// items[].sku <- sku
+// items[].value <- value
+// items[].weight <- weight
+// items[].height <- height
+// items[].length <- length
+// items[].width <- width
 //
 // items[].quantity:
 // - Rates before checkout: cart_items.quantity
 // - Order/Create Shipment: shipment_items.quantity
 
 Table order_items {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  order_id bigint [not null]
+order_id bigint [not null]
 
-  book_id bigint
+book_id bigint
 
+// --------------------------------------------------
+// BITESHIP ITEM SNAPSHOT
+// --------------------------------------------------
 
-  // --------------------------------------------------
-  // BITESHIP ITEM SNAPSHOT
-  // --------------------------------------------------
+name varchar(255) [not null]
 
-  name varchar(255) [not null]
+description text
 
-  description text
+category varchar(50) [not null, default: 'others']
 
-  category varchar(50) [not null, default: 'others']
+sku varchar(100)
 
-  sku varchar(100)
+value decimal(15,2) [not null]
 
-  value decimal(15,2) [not null]
+quantity integer [not null]
 
-  quantity integer [not null]
+weight integer [not null]
 
-  weight integer [not null]
+height decimal(8,2)
 
-  height decimal(8,2)
+length decimal(8,2)
 
-  length decimal(8,2)
+width decimal(8,2)
 
-  width decimal(8,2)
+// --------------------------------------------------
+// BOOK / ORDER SNAPSHOT
+// --------------------------------------------------
 
+isbn varchar(50)
 
-  // --------------------------------------------------
-  // BOOK / ORDER SNAPSHOT
-  // --------------------------------------------------
+author varchar(200)
 
-  isbn varchar(50)
+subtotal decimal(15,2) [not null]
 
-  author varchar(200)
+sale_type book_sale_type [not null]
 
-  subtotal decimal(15,2) [not null]
+preorder_estimated_date date
 
-  sale_type book_sale_type [not null]
+preorder_ready_at timestamp
 
-  preorder_estimated_date date
+created_at timestamp
 
-  preorder_ready_at timestamp
+updated_at timestamp
 
-
-  created_at timestamp
-
-  updated_at timestamp
-
-  indexes {
-    order_id
-    book_id
-    sku
-    sale_type
-    preorder_estimated_date
-  }
+indexes {
+order_id
+book_id
+sku
+sale_type
+preorder_estimated_date
 }
-
+}
 
 // ======================================================
 // ORDER SHIPPING ADDRESSES
@@ -870,54 +836,50 @@ Table order_items {
 // historical order destination.
 
 Table order_shipping_addresses {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  order_id bigint [not null, unique]
+order_id bigint [not null, unique]
 
-  source_address_id bigint
+source_address_id bigint
 
+destination_contact_name varchar(150) [not null]
 
-  destination_contact_name varchar(150) [not null]
+destination_contact_phone varchar(30) [not null]
 
-  destination_contact_phone varchar(30) [not null]
+destination_contact_email varchar(150)
 
-  destination_contact_email varchar(150)
+destination_address text [not null]
 
-  destination_address text [not null]
+destination_note text
 
-  destination_note text
+destination_postal_code varchar(10)
 
-  destination_postal_code varchar(10)
+destination_area_id varchar(150)
 
-  destination_area_id varchar(150)
+destination_location_id varchar(150)
 
-  destination_location_id varchar(150)
+destination_latitude decimal(10,7)
 
-  destination_latitude decimal(10,7)
+destination_longitude decimal(10,7)
 
-  destination_longitude decimal(10,7)
+province_name varchar(150)
 
+city_name varchar(150)
 
-  province_name varchar(150)
+district_name varchar(150)
 
-  city_name varchar(150)
+subdistrict_name varchar(150)
 
-  district_name varchar(150)
+created_at timestamp [not null]
 
-  subdistrict_name varchar(150)
-
-
-  created_at timestamp [not null]
-
-  indexes {
-    order_id [unique]
-    source_address_id
-    destination_postal_code
-    destination_area_id
-    destination_location_id
-  }
+indexes {
+order_id [unique]
+source_address_id
+destination_postal_code
+destination_area_id
+destination_location_id
 }
-
+}
 
 // ======================================================
 // VOUCHER USAGES
@@ -925,26 +887,25 @@ Table order_shipping_addresses {
 // Voucher audit and usage-limit tracking.
 
 Table voucher_usages {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  voucher_id bigint [not null]
+voucher_id bigint [not null]
 
-  user_id bigint [not null]
+user_id bigint [not null]
 
-  order_id bigint [not null, unique]
+order_id bigint [not null, unique]
 
-  discount_amount decimal(15,2) [not null]
+discount_amount decimal(15,2) [not null]
 
-  created_at timestamp [not null]
+created_at timestamp [not null]
 
-  indexes {
-    order_id [unique]
-    voucher_id
-    user_id
-    (voucher_id, user_id)
-  }
+indexes {
+order_id [unique]
+voucher_id
+user_id
+(voucher_id, user_id)
 }
-
+}
 
 // ======================================================
 // ORDER STATUS HISTORIES
@@ -952,26 +913,25 @@ Table voucher_usages {
 // Immutable timeline of order states.
 
 Table order_status_histories {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  order_id bigint [not null]
+order_id bigint [not null]
 
-  status order_status [not null]
+status order_status [not null]
 
-  changed_by bigint
+changed_by bigint
 
-  note text
+note text
 
-  created_at timestamp [not null]
+created_at timestamp [not null]
 
-  indexes {
-    order_id
-    status
-    changed_by
-    created_at
-  }
+indexes {
+order_id
+status
+changed_by
+created_at
 }
-
+}
 
 // ======================================================
 // SHIPMENTS
@@ -979,12 +939,12 @@ Table order_status_histories {
 // Intentionally kept compact.
 //
 // Biteship Create Order required values are sourced from:
-// - origin_*              -> store_settings
-// - destination_*         -> order_shipping_addresses
-// - courier_company       -> shipments
-// - courier_type          -> shipments
-// - delivery_type         -> shipments
-// - items[]               -> shipment_items + order_items
+// - origin_* -> store_settings
+// - destination_* -> order_shipping_addresses
+// - courier_company -> shipments
+// - courier_type -> shipments
+// - delivery_type -> shipments
+// - items[] -> shipment_items + order_items
 //
 // No COD fields because Buku Order payments use wallet.
 // Optional Biteship fields that are not used by the website
@@ -996,81 +956,75 @@ Table order_status_histories {
 // split fulfillment / ready-stock + preorder.
 
 Table shipments {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  order_id bigint [not null]
+order_id bigint [not null]
 
-  shipment_code varchar(50) [not null, unique]
+shipment_code varchar(50) [not null, unique]
 
+// --------------------------------------------------
+// REQUIRED CREATE ORDER COURIER DATA
+// --------------------------------------------------
 
-  // --------------------------------------------------
-  // REQUIRED CREATE ORDER COURIER DATA
-  // --------------------------------------------------
+courier_company varchar(100) [not null]
 
-  courier_company varchar(100) [not null]
+courier_type varchar(100) [not null]
 
-  courier_type varchar(100) [not null]
+delivery_type shipment_delivery_type [not null, default: 'now']
 
-  delivery_type shipment_delivery_type [not null, default: 'now']
+// --------------------------------------------------
+// SELECTED RATE - DATA ACTUALLY USED BY UI
+// --------------------------------------------------
 
+courier_service_name varchar(150)
 
-  // --------------------------------------------------
-  // SELECTED RATE - DATA ACTUALLY USED BY UI
-  // --------------------------------------------------
+price decimal(15,2) [not null]
 
-  courier_service_name varchar(150)
+duration varchar(100)
 
-  price decimal(15,2) [not null]
+// Full selected Rates API pricing object.
+// Keeps provider-specific details without creating
+// dozens of nullable columns.
+rate_response json
 
-  duration varchar(100)
+// --------------------------------------------------
+// BITESHIP CREATE ORDER RESPONSE / TRACKING
+// --------------------------------------------------
 
-  // Full selected Rates API pricing object.
-  // Keeps provider-specific details without creating
-  // dozens of nullable columns.
-  rate_response json
+biteship_order_id varchar(150)
 
+tracking_id varchar(150)
 
-  // --------------------------------------------------
-  // BITESHIP CREATE ORDER RESPONSE / TRACKING
-  // --------------------------------------------------
+waybill_id varchar(150)
 
-  biteship_order_id varchar(150)
+courier_link varchar(500)
 
-  tracking_id varchar(150)
+biteship_status varchar(100)
 
-  waybill_id varchar(150)
+// Raw Create Order response for audit/debugging.
+response_payload json
 
-  courier_link varchar(500)
+// --------------------------------------------------
+// INTERNAL NORMALIZED STATUS
+// --------------------------------------------------
 
-  biteship_status varchar(100)
+status shipment_status [not null, default: 'pending']
 
-  // Raw Create Order response for audit/debugging.
-  response_payload json
+created_at timestamp
 
+updated_at timestamp
 
-  // --------------------------------------------------
-  // INTERNAL NORMALIZED STATUS
-  // --------------------------------------------------
-
-  status shipment_status [not null, default: 'pending']
-
-
-  created_at timestamp
-
-  updated_at timestamp
-
-  indexes {
-    order_id
-    shipment_code [unique]
-    biteship_order_id
-    tracking_id
-    waybill_id
-    courier_company
-    courier_type
-    status
-  }
+indexes {
+order_id
+shipment_code [unique]
+biteship_order_id
+tracking_id
+waybill_id
+courier_company
+courier_type
+status
 }
-
+}
 
 // ======================================================
 // SHIPMENT ITEMS
@@ -1091,23 +1045,22 @@ Table shipments {
 // -> shipment_items.quantity
 
 Table shipment_items {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  shipment_id bigint [not null]
+shipment_id bigint [not null]
 
-  order_item_id bigint [not null]
+order_item_id bigint [not null]
 
-  quantity integer [not null]
+quantity integer [not null]
 
-  created_at timestamp
+created_at timestamp
 
-  indexes {
-    (shipment_id, order_item_id) [unique]
-    shipment_id
-    order_item_id
-  }
+indexes {
+(shipment_id, order_item_id) [unique]
+shipment_id
+order_item_id
 }
-
+}
 
 // ======================================================
 // SHIPMENT STATUS HISTORIES
@@ -1115,31 +1068,30 @@ Table shipment_items {
 // Immutable shipment tracking / webhook history.
 
 Table shipment_status_histories {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  shipment_id bigint [not null]
+shipment_id bigint [not null]
 
-  status shipment_status [not null]
+status shipment_status [not null]
 
-  provider_status varchar(100)
+provider_status varchar(100)
 
-  description text
+description text
 
-  occurred_at timestamp
+occurred_at timestamp
 
-  raw_payload json
+raw_payload json
 
-  created_at timestamp [not null]
+created_at timestamp [not null]
 
-  indexes {
-    shipment_id
-    status
-    provider_status
-    occurred_at
-    created_at
-  }
+indexes {
+shipment_id
+status
+provider_status
+occurred_at
+created_at
 }
-
+}
 
 // ======================================================
 // BOOK STOCK MOVEMENTS
@@ -1149,51 +1101,49 @@ Table shipment_status_histories {
 // This table is immutable inventory audit.
 //
 // Examples:
-// initial             +20
-// adjustment_in       +5
-// adjustment_out      -2
-// order               -3
-// cancellation        +3
-// preorder_fulfillment  depending on fulfillment policy
+// initial +20
+// adjustment_in +5
+// adjustment_out -2
+// order -3
+// cancellation +3
+// preorder_fulfillment depending on fulfillment policy
 
 Table book_stock_movements {
-  id bigint [pk, increment]
+id bigint [pk, increment]
 
-  book_id bigint [not null]
+book_id bigint [not null]
 
-  order_id bigint
+order_id bigint
 
-  order_item_id bigint
+order_item_id bigint
 
-  changed_by bigint
+changed_by bigint
 
-  type stock_movement_type [not null]
+type stock_movement_type [not null]
 
-  quantity integer [not null]
+quantity integer [not null]
 
-  stock_before integer [not null]
+stock_before integer [not null]
 
-  stock_after integer [not null]
+stock_after integer [not null]
 
-  note text
+note text
 
-  created_at timestamp [not null]
+created_at timestamp [not null]
 
-  indexes {
-    book_id
-    order_id
-    order_item_id
-    changed_by
-    type
-    created_at
-  }
+indexes {
+book_id
+order_id
+order_item_id
+changed_by
+type
+created_at
 }
-
+}
 
 // ======================================================
 // RELATIONSHIPS
 // ======================================================
-
 
 // ------------------------------------------------------
 // USERS
@@ -1221,13 +1171,11 @@ Ref: book_stock_movements.changed_by > users.id
 
 Ref: wallet_transactions.created_by > users.id
 
-
 // ------------------------------------------------------
 // TOPUP
 // ------------------------------------------------------
 
 Ref: wallet_transactions.topup_id > wallet_topups.id
-
 
 // ------------------------------------------------------
 // BOOKS / CATEGORIES
@@ -1239,7 +1187,6 @@ Ref: book_categories.book_id > books.id
 
 Ref: book_categories.category_id > categories.id
 
-
 // ------------------------------------------------------
 // CART
 // ------------------------------------------------------
@@ -1248,13 +1195,11 @@ Ref: cart_items.cart_id > carts.id
 
 Ref: cart_items.book_id > books.id
 
-
 // ------------------------------------------------------
 // WALLET
 // ------------------------------------------------------
 
 Ref: wallet_transactions.wallet_id > wallets.id
-
 
 // ------------------------------------------------------
 // ORDERS
@@ -1276,7 +1221,6 @@ Ref: wallet_transactions.order_id > orders.id
 
 Ref: order_status_histories.order_id > orders.id
 
-
 // ------------------------------------------------------
 // VOUCHERS
 // ------------------------------------------------------
@@ -1284,7 +1228,6 @@ Ref: order_status_histories.order_id > orders.id
 Ref: voucher_usages.voucher_id > vouchers.id
 
 Ref: voucher_usages.order_id > orders.id
-
 
 // ------------------------------------------------------
 // SHIPPING
@@ -1297,7 +1240,6 @@ Ref: shipment_items.shipment_id > shipments.id
 Ref: shipment_items.order_item_id > order_items.id
 
 Ref: shipment_status_histories.shipment_id > shipments.id
-
 
 // ------------------------------------------------------
 // STOCK

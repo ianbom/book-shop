@@ -1,6 +1,6 @@
 ---
 name: design
-description: "[OMX] Canonical repo-local DESIGN.md workflow for product, UI/UX, and frontend decision source of truth"
+description: '[OMX] Canonical repo-local DESIGN.md workflow for product, UI/UX, and frontend decision source of truth'
 ---
 
 # Design Skill
@@ -36,33 +36,61 @@ Ask concise questions only for gaps the repository cannot resolve: users/jobs, g
 Preserve useful content, remove contradictions, mark unknowns, and keep decisions actionable. The root file must contain these sections:
 
 # Design
+
 ## Source of truth
+
 Status (Draft | Active | Needs refresh), date, product surfaces, evidence reviewed.
+
 ## Brand
+
 Personality, trust signals, avoid.
+
 ## Product goals
+
 Goals, non-goals, success signals.
+
 ## Personas and jobs
+
 Primary personas, user jobs, contexts of use.
+
 ## Information architecture
+
 Navigation, routes/screens, content hierarchy.
+
 ## Design principles
+
 Principles and tradeoffs.
+
 ## Visual language
+
 Color, typography, spacing, shape/elevation, motion, imagery/iconography.
+
 ## Components
+
 Existing/new components, variants/states, token ownership.
+
 ## Accessibility
+
 Target standard, keyboard/focus, contrast, semantics, reduced motion/sensory concerns.
+
 ## Responsive behavior
+
 Breakpoints/devices, layout adaptations, touch/hover differences.
+
 ## Interaction states
+
 Loading, empty, error, success, disabled, offline/slow network where applicable.
+
 ## Content voice
+
 Tone, terminology, microcopy rules.
+
 ## Implementation constraints
+
 Framework/styling, tokens, performance, compatibility, test/screenshot expectations.
+
 ## Open questions
+
 `[ ]` question, owner, and impact.
 
 ### 4. Apply the contract

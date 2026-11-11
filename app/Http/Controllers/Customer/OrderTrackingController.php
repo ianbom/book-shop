@@ -53,7 +53,7 @@ class OrderTrackingController extends Controller
         }
 
         return $this->whatsApp->url($number, implode("\n", [
-            'Halo Admin Wonder Book,',
+            'Halo Admin Wonder Prince Library,',
             '',
             "Saya ingin menanyakan status pesanan dengan kode order: {$orderCode}.",
         ]));

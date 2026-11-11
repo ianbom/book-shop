@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\RequiredPasswordController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('change-password', [RequiredPasswordController::class, 'edit'])->name('password.change');
+    Route::put('change-password', [RequiredPasswordController::class, 'update'])->middleware('throttle:6,1')->name('password.change.update');
     Route::redirect('settings', '/settings/profile');
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');

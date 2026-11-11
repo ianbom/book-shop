@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin;
 
+use App\Services\Customer\OrderSettlementService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,11 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'order_code' => $this->order_code,
+            'source' => $this->source,
+            'pending_review' => (bool) $this->getAttribute('pending_review'),
+            'shipping_selected' => ! $this->isImported() || $this->shipping_selected_at !== null,
+            'archived_import' => $this->isArchivedImport(),
+            'settlement_summary' => $this->isImported() ? app(OrderSettlementService::class)->summary($this->resource) : null,
             'customer_name' => $this->user?->name,
             'customer_email' => $this->user?->email,
             'book_title' => $item?->name ?? 'Buku',

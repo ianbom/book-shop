@@ -96,7 +96,13 @@
 
     .admin-dashboard-shell {
         min-height: 100svh;
-        background: radial-gradient(circle at 70% 0%, rgb(231 241 255 / 0.7), transparent 28rem), var(--background);
+        background:
+            radial-gradient(
+                circle at 70% 0%,
+                rgb(231 241 255 / 0.7),
+                transparent 28rem
+            ),
+            var(--background);
     }
 
     .admin-topbar {
@@ -106,7 +112,13 @@
     }
 
     .admin-orders-book-placeholder {
-        background: linear-gradient(145deg, rgb(36 79 128 / 0.88), rgb(96 127 192 / 0.75)), var(--secondary);
+        background:
+            linear-gradient(
+                145deg,
+                rgb(36 79 128 / 0.88),
+                rgb(96 127 192 / 0.75)
+            ),
+            var(--secondary);
     }
 }
 

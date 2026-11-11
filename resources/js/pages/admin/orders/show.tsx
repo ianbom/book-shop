@@ -16,12 +16,14 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/admin/shared/page-header';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
+import OrderSettlement from '@/components/order-settlement';
+import type { Settlement } from '@/components/order-settlement';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { formatDate, rupiah } from '@/lib/format';
+import { exactRupiah, formatDate, formatMonthYear, rupiah } from '@/lib/format';
 import { getOrderProgress } from '@/lib/order-progress';
 import {
     biteshipStatusLabels,
@@ -56,6 +58,10 @@ type Item = {
     quantity: number;
     value: string;
     subtotal: string;
+    pre_order_code: string | null;
+    line_discount: string;
+    historical_dp: string;
+    historical_paid: string;
     weight: number;
 };
 type Shipment = {
@@ -80,6 +86,9 @@ type Shipment = {
     status_histories: History[];
 };
 type OrderDetail = {
+    source: 'website' | 'imported';
+    can_complete_imported_delivery: boolean;
+    settlement: Settlement | null;
     id: number;
     order_code: string;
     status: OrderStatus;
@@ -99,7 +108,7 @@ type OrderDetail = {
     };
     shipping_address: null | {
         recipient_name: string;
-        phone: string;
+        phone: string | null;
         email: string | null;
         address: string;
         note: string | null;
@@ -290,17 +299,23 @@ function OrderProgress({ order }: { order: OrderDetail }) {
 
 export default function OrderShow({ order }: { order: OrderDetail }) {
     const [active, setActive] = useState<Tab>('summary');
-    const nextStatuses = orderTransitions[order.status] ?? [];
+    const nextStatuses = (orderTransitions[order.status] ?? []).filter(
+        (status) =>
+            !order.settlement ||
+            (order.can_complete_imported_delivery && status === 'completed') ||
+            (!order.settlement.archived &&
+                order.payment_status === 'paid' &&
+                status !== 'cancelled'),
+    );
     const form = useForm<{ status: OrderStatus; note: string }>({
         status: nextStatuses[0] ?? order.status,
         note: '',
     });
+    const nextStatus = nextStatuses[0] ?? order.status;
+    const money = order.source === 'imported' ? exactRupiah : rupiah;
     useEffect(() => {
-        form.setData(
-            'status',
-            (orderTransitions[order.status] ?? [])[0] ?? order.status,
-        );
-    }, [order.status]);
+        form.setData('status', nextStatus);
+    }, [nextStatus]);
     const saveStatus = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (
@@ -335,6 +350,13 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                     }
                     actions={<StatusBadge value={order.status} />}
                 />
+                {order.settlement && (
+                    <OrderSettlement
+                        orderId={order.id}
+                        settlement={order.settlement}
+                        admin
+                    />
+                )}
                 <div
                     role="tablist"
                     aria-label="Data order"
@@ -463,7 +485,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                 <Panel title="Rincian biaya">
                                     <Line
                                         label="Subtotal"
-                                        value={rupiah(order.subtotal)}
+                                        value={money(order.subtotal)}
                                     />
                                     {order.voucher && (
                                         <Line
@@ -481,17 +503,27 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                     )}
                                     <Line
                                         label="Ongkos kirim"
-                                        value={rupiah(order.shipping_cost)}
+                                        value={
+                                            order.settlement &&
+                                            !order.settlement.summary
+                                                .shipping_selected
+                                                ? order.settlement.archived
+                                                    ? 'Historis tidak tersedia'
+                                                    : 'Belum dipilih'
+                                                : money(order.shipping_cost)
+                                        }
                                     />
                                     <Line
                                         label="Total order"
-                                        value={rupiah(order.total)}
+                                        value={money(order.total)}
                                         strong
                                     />
-                                    <Line
-                                        label="Dibayar dari saldo"
-                                        value={rupiah(order.wallet_amount)}
-                                    />
+                                    {!order.settlement && (
+                                        <Line
+                                            label="Dibayar dari saldo"
+                                            value={rupiah(order.wallet_amount)}
+                                        />
+                                    )}
                                     <Info
                                         label="Status pembayaran"
                                         value={
@@ -640,7 +672,10 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                                 {item.preorder_estimated_date && (
                                                     <p className="text-sm">
                                                         Estimasi preorder:{' '}
-                                                        {formatDate(
+                                                        {(order.source ===
+                                                            'imported'
+                                                            ? formatMonthYear
+                                                            : formatDate)(
                                                             item.preorder_estimated_date,
                                                         )}
                                                     </p>
@@ -654,12 +689,42 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                                     </p>
                                                 )}
                                             </div>
-                                            <div className="text-right">
+                                            <div className="space-y-1 text-right">
+                                                {item.pre_order_code && (
+                                                    <p>
+                                                        PO:{' '}
+                                                        {item.pre_order_code}
+                                                    </p>
+                                                )}
                                                 <p>
-                                                    {item.quantity} ×{' '}
-                                                    {rupiah(item.value)}
+                                                    Bruto: {item.quantity} ×{' '}
+                                                    {money(item.value)}
                                                 </p>
-                                                <b>{rupiah(item.subtotal)}</b>
+                                                {order.settlement && (
+                                                    <>
+                                                        <p>
+                                                            Diskon baris:{' '}
+                                                            {money(
+                                                                item.line_discount,
+                                                            )}
+                                                        </p>
+                                                        <p>
+                                                            DP (informasi):{' '}
+                                                            {money(
+                                                                item.historical_dp,
+                                                            )}
+                                                        </p>
+                                                        <p>
+                                                            Dibayar historis:{' '}
+                                                            {money(
+                                                                item.historical_paid,
+                                                            )}
+                                                        </p>
+                                                    </>
+                                                )}
+                                                <b>
+                                                    Net: {money(item.subtotal)}
+                                                </b>
                                             </div>
                                         </div>
                                     ))
@@ -682,13 +747,20 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                         />
                                     }
                                 />
-                                <Line
-                                    label="Jumlah dibayar dari saldo"
-                                    value={rupiah(order.wallet_amount)}
-                                />
+                                {order.settlement ? (
+                                    <Info
+                                        label="Metode"
+                                        value="Historis dan transfer bank; rincian pelunasan di atas."
+                                    />
+                                ) : (
+                                    <Line
+                                        label="Jumlah dibayar dari saldo"
+                                        value={rupiah(order.wallet_amount)}
+                                    />
+                                )}
                                 <Line
                                     label="Total pesanan"
-                                    value={rupiah(order.total)}
+                                    value={money(order.total)}
                                     strong
                                 />
                             </Panel>

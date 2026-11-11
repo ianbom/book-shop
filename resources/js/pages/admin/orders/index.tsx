@@ -1,6 +1,9 @@
 import { FormEvent } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
     BookOpen,
     CalendarDays,
     Eye,
@@ -20,13 +23,22 @@ import { formatDate, formatMonthYear, rupiah } from '@/lib/format';
 import admin from '@/routes/admin';
 import type { Order, OrderStatus, Paginated } from '@/types/admin';
 
+type Sort =
+    | 'order_code'
+    | 'customer_name'
+    | 'subtotal'
+    | 'shipping_cost'
+    | 'total'
+    | 'created_at'
+    | 'eta';
+
 type Props = {
     orders: Paginated<Order>;
     eta_months: string[];
     filters: Record<
-        'search' | 'status' | 'pre_order_code' | 'eta',
+        'search' | 'status' | 'pre_order_code' | 'eta' | 'review' | 'source',
         string | undefined
-    >;
+    > & { sort: Sort; direction: 'asc' | 'desc' };
 };
 
 const orderTabs: Array<{ label: string; value: OrderStatus | '' }> = [
@@ -39,8 +51,19 @@ const orderTabs: Array<{ label: string; value: OrderStatus | '' }> = [
 ];
 
 function paymentDetails(order: Order) {
-    const paid = order.payment_status === 'paid' ? order.total : '0';
-    const remaining = order.payment_status === 'paid' ? '0' : order.total;
+    const received = order.settlement_summary
+        ? BigInt(order.settlement_summary.historical_paid.replace('.', '')) +
+          BigInt(order.settlement_summary.approved_paid.replace('.', ''))
+        : null;
+    const paid =
+        received !== null
+            ? `${received / 100n}.${String(received % 100n).padStart(2, '0')}`
+            : order.payment_status === 'paid'
+              ? order.total
+              : '0';
+    const remaining =
+        order.settlement_summary?.outstanding ??
+        (order.payment_status === 'paid' ? '0' : order.total);
 
     return { paid, remaining };
 }
@@ -50,7 +73,12 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
         event.preventDefault();
         router.get(
             admin.orders.index(),
-            Object.fromEntries(new FormData(event.currentTarget).entries()),
+            {
+                ...filters,
+                ...Object.fromEntries(
+                    new FormData(event.currentTarget).entries(),
+                ),
+            },
             { preserveState: true, replace: true },
         );
     };
@@ -59,12 +87,54 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
         router.get(
             admin.orders.index(),
             {
-                search: filters.search ?? '',
+                ...filters,
                 status,
-                pre_order_code: filters.pre_order_code ?? '',
-                eta: filters.eta ?? '',
             },
             { preserveState: true, replace: true },
+        );
+    };
+
+    const sortHeader = (sort: Sort, label: string) => {
+        const active = filters.sort === sort;
+        const Icon = active
+            ? filters.direction === 'asc'
+                ? ArrowUp
+                : ArrowDown
+            : ArrowUpDown;
+        return (
+            <th
+                scope="col"
+                className="px-4 py-4"
+                aria-sort={
+                    active
+                        ? filters.direction === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                        : undefined
+                }
+            >
+                <button
+                    type="button"
+                    className="focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-sm whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none"
+                    onClick={() =>
+                        router.get(
+                            admin.orders.index(),
+                            {
+                                ...filters,
+                                sort,
+                                direction:
+                                    active && filters.direction === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                            },
+                            { preserveState: true, replace: true },
+                        )
+                    }
+                >
+                    {label}
+                    <Icon className="size-3.5" aria-hidden="true" />
+                </button>
+            </th>
         );
     };
 
@@ -81,8 +151,26 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                         <form
                             key={JSON.stringify(filters)}
                             onSubmit={submit}
-                            className="grid gap-4 xl:grid-cols-[0.9fr_0.9fr_1.35fr_1fr_auto_auto] xl:items-end"
+                            className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,1.35fr)_minmax(0,1fr)_auto] xl:items-end"
                         >
+                            <input
+                                type="hidden"
+                                name="source"
+                                value={filters.source ?? ''}
+                            />
+                            <label className="text-foreground grid gap-2 text-xs font-bold">
+                                <span>Review transfer</span>
+                                <select
+                                    name="review"
+                                    defaultValue={filters.review ?? ''}
+                                    className="border-input bg-background h-10 rounded-md border px-3 text-sm"
+                                >
+                                    <option value="">Semua pembayaran</option>
+                                    <option value="pending">
+                                        Menunggu review
+                                    </option>
+                                </select>
+                            </label>
                             <label className="text-foreground grid gap-2 text-xs font-bold">
                                 <span className="flex items-center gap-2">
                                     <Tag className="text-primary size-4" /> Kode
@@ -158,17 +246,24 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                     </option>
                                 </select>
                             </label>
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={() => router.get(admin.orders.index())}
-                                className="h-10 px-4"
-                            >
-                                <RotateCcw /> Reset
-                            </Button>
-                            <Button type="submit" className="h-10 px-5">
-                                <SlidersHorizontal /> Terapkan Filter
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() =>
+                                        router.get(admin.orders.index())
+                                    }
+                                    className="h-8 px-3 text-xs [&_svg]:size-3.5"
+                                >
+                                    <RotateCcw /> Reset
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="h-8 px-3 text-xs [&_svg]:size-3.5"
+                                >
+                                    <SlidersHorizontal /> Terapkan Filter
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>
@@ -228,34 +323,42 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                             <table className="w-full min-w-[1680px] text-left text-sm">
                                 <thead className="bg-muted/85 text-muted-foreground border-b text-xs font-semibold">
                                     <tr>
-                                        <th className="px-4 py-4">
-                                            Order / Campaign
+                                        <th
+                                            scope="col"
+                                            className="w-16 px-4 py-4"
+                                        >
+                                            No
                                         </th>
-                                        <th className="px-4 py-4">Pelanggan</th>
+                                        {sortHeader(
+                                            'order_code',
+                                            'Order / Campaign',
+                                        )}
+                                        {sortHeader(
+                                            'customer_name',
+                                            'Pelanggan',
+                                        )}
                                         <th className="px-4 py-4">Buku</th>
-                                        <th className="px-4 py-4">
-                                            Harga Produk
-                                        </th>
-                                        <th className="px-4 py-4">Ongkir</th>
-                                        <th className="px-4 py-4">Total</th>
+                                        {sortHeader('subtotal', 'Harga Produk')}
+                                        {sortHeader('shipping_cost', 'Ongkir')}
+                                        {sortHeader('total', 'Total')}
                                         <th className="px-4 py-4">
                                             Pembayaran
                                         </th>
-                                        <th className="px-4 py-4">Tanggal</th>
+                                        {sortHeader('created_at', 'Tanggal')}
                                         <th className="px-4 py-4">
                                             Status Pesanan
                                         </th>
                                         <th className="px-4 py-4">
                                             Status Pengiriman
                                         </th>
-                                        <th className="px-4 py-4">ETA</th>
+                                        {sortHeader('eta', 'ETA')}
                                         <th className="px-4 py-4 text-right">
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-border/80 divide-y bg-white">
-                                    {orders.data.map((order) => {
+                                    {orders.data.map((order, index) => {
                                         const payment = paymentDetails(order);
 
                                         return (
@@ -263,8 +366,18 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                                 key={order.id}
                                                 className="hover:bg-muted/45 transition-colors"
                                             >
+                                                <td className="px-4 py-3.5 tabular-nums">
+                                                    {(orders.meta.from ?? 1) +
+                                                        index}
+                                                </td>
                                                 <td className="px-4 py-3.5">
-                                                    <div className="flex items-center gap-3">
+                                                    <Link
+                                                        href={admin.orders.show(
+                                                            order.id,
+                                                        )}
+                                                        aria-label={`Lihat detail ${order.order_code}`}
+                                                        className="group focus-visible:ring-ring flex items-center gap-3 rounded-md focus-visible:ring-2 focus-visible:outline-none"
+                                                    >
                                                         {order.primary_image_url ? (
                                                             <img
                                                                 src={
@@ -282,12 +395,24 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                                             </div>
                                                         )}
                                                         <div className="min-w-0">
-                                                            <p className="text-foreground truncate font-bold">
+                                                            {order.source ===
+                                                                'imported' && (
+                                                                <p className="text-primary text-xs font-semibold">
+                                                                    Import
+                                                                    {order.archived_import
+                                                                        ? ' · Arsip'
+                                                                        : ''}
+                                                                    {order.pending_review
+                                                                        ? ' · Review transfer'
+                                                                        : ''}
+                                                                </p>
+                                                            )}
+                                                            <p className="text-foreground group-hover:text-primary truncate font-bold group-hover:underline">
                                                                 {
                                                                     order.book_title
                                                                 }
                                                             </p>
-                                                            <p className="text-muted-foreground mt-0.5 text-xs">
+                                                            <p className="text-muted-foreground mt-0.5 text-xs group-hover:underline">
                                                                 {
                                                                     order.order_code
                                                                 }
@@ -298,7 +423,7 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                                                 )}
                                                             </p>
                                                         </div>
-                                                    </div>
+                                                    </Link>
                                                 </td>
                                                 <td className="px-4 py-3.5">
                                                     <p className="text-foreground font-semibold">
@@ -317,9 +442,13 @@ export default function OrdersIndex({ orders, filters, eta_months }: Props) {
                                                     {rupiah(order.subtotal)}
                                                 </td>
                                                 <td className="text-foreground px-4 py-3.5 font-semibold">
-                                                    {rupiah(
-                                                        order.shipping_cost,
-                                                    )}
+                                                    {order.shipping_selected
+                                                        ? rupiah(
+                                                              order.shipping_cost,
+                                                          )
+                                                        : order.archived_import
+                                                          ? 'Historis tidak tersedia'
+                                                          : 'Belum dipilih'}
                                                 </td>
                                                 <td className="text-foreground px-4 py-3.5 font-bold">
                                                     {rupiah(order.total)}

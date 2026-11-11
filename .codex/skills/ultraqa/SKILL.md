@@ -1,6 +1,6 @@
 ---
 name: ultraqa
-description: "[OMX] Adversarial dynamic e2e QA workflow - generate hostile scenarios, test, verify, fix, report, and clean up"
+description: '[OMX] Adversarial dynamic e2e QA workflow - generate hostile scenarios, test, verify, fix, report, and clean up'
 ---
 
 # UltraQA Task Card

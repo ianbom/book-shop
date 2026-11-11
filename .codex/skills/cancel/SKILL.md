@@ -1,6 +1,6 @@
 ---
 name: cancel
-description: "[OMX] Cancel any active OMX mode (autopilot, ralph, ultrawork, ecomode, ultraqa, swarm, ultrapilot, pipeline, team)"
+description: '[OMX] Cancel any active OMX mode (autopilot, ralph, ultrawork, ecomode, ultraqa, swarm, ultrapilot, pipeline, team)'
 ---
 
 # Cancel Skill
@@ -14,10 +14,10 @@ Use `/cancel` (or `cancelomc` / `stopomc`) to stop an active OMX mode and perfor
 - Accepted forms are `/cancel` and `/cancel --force`.
 - Reject `--all`, unknown flags, repeated flags, and mixed flags before mutation.
 - Discover the current session/root with the state read surfaces before cleanup:
-  ```bash
-  omx state list-active --json
-  omx state get-status --mode <mode> --json
-  ```
+    ```bash
+    omx state list-active --json
+    omx state get-status --mode <mode> --json
+    ```
 - Confirm the current session/root and exact target before cleanup; stop when the required evidence is missing.
 
 ## Operational steps
@@ -30,9 +30,9 @@ Use `/cancel` (or `cancelomc` / `stopomc`) to stop an active OMX mode and perfor
 5. Clear standalone modes only after proving they are not linked to another active mode.
 6. For Team, inspect the runtime with `omx team status <team> --json`; use `omx team shutdown <team>` after the normal completion gate, or follow the explicit abort path.
 7. Clear only the selected mode/session state through the state API, for example:
-   ```bash
-   omx state clear --input '{"mode":"<mode>","session_id":"<session>"}' --json
-   ```
+    ```bash
+    omx state clear --input '{"mode":"<mode>","session_id":"<session>"}' --json
+    ```
 8. With `--force`, perform its documented native-stop cleanup. Report rollback or cleanup failures rather than claiming success.
 
 ## Exit and evidence

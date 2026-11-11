@@ -1,0 +1,212 @@
+- generic [ref=f1e2]:
+      - generic [ref=f1e3]:
+            - generic [ref=f1e7]:
+                  - list [ref=f1e9]:
+                        - listitem [ref=f1e10]:
+                              - link [ref=f1e11] [cursor=pointer]:
+                                    - /url: /admin
+                                    - img "Wonder Prince Library" [ref=f1e12]
+                  - generic [ref=f1e14]:
+                        - generic [ref=f1e15]: Menu Utama
+                        - list [ref=f1e16]:
+                              - listitem [ref=f1e17]:
+                                    - link "Dashboard" [ref=f1e18] [cursor=pointer]:
+                                          - /url: /admin
+                              - listitem [ref=f1e25]:
+                                    - generic [ref=f1e26]:
+                                          - generic [ref=f1e27]: Katalog
+                                          - link "Buku" [ref=f1e28] [cursor=pointer]:
+                                                - /url: /admin/books
+                                          - link "Kategori" [ref=f1e32] [cursor=pointer]:
+                                                - /url: /admin/categories
+                                          - link "Kode Preorder" [ref=f1e38] [cursor=pointer]:
+                                                - /url: /admin/pre-order-codes
+                              - listitem [ref=f1e43]:
+                                    - generic [ref=f1e44]:
+                                          - generic [ref=f1e45]: Order
+                                          - link "Pesanan" [ref=f1e46] [cursor=pointer]:
+                                                - /url: /admin/orders
+                                          - link "Import Pesanan" [ref=f1e51] [cursor=pointer]:
+                                                - /url: /admin/orders/import
+                                          - link "Review Transfer" [ref=f1e55] [cursor=pointer]:
+                                                - /url: /admin/orders?review=pending
+                              - listitem [ref=f1e59]:
+                                    - generic [ref=f1e60]:
+                                          - generic [ref=f1e61]: Pengiriman
+                                          - link "Shipment" [ref=f1e62] [cursor=pointer]:
+                                                - /url: /admin/shipments
+                              - listitem [ref=f1e69]:
+                                    - generic [ref=f1e70]:
+                                          - generic [ref=f1e71]: Pengguna
+                                          - link "Customer" [ref=f1e72] [cursor=pointer]:
+                                                - /url: /admin/customers
+                              - listitem [ref=f1e79]:
+                                    - generic [ref=f1e80]:
+                                          - generic [ref=f1e81]: Wallet
+                                          - link "Permintaan Top-up" [ref=f1e82] [cursor=pointer]:
+                                                - /url: /admin/top-ups
+                                          - link "Transaksi Wallet" [ref=f1e86] [cursor=pointer]:
+                                                - /url: /admin/wallet-transactions
+                              - listitem [ref=f1e91]:
+                                    - generic [ref=f1e92]:
+                                          - generic [ref=f1e93]: Promosi
+                                          - link "Voucher" [ref=f1e94] [cursor=pointer]:
+                                                - /url: /admin/vouchers
+                              - listitem [ref=f1e99]:
+                                    - generic [ref=f1e100]:
+                                          - generic [ref=f1e101]: Inventaris
+                                          - link "Manajemen Stok" [ref=f1e102] [cursor=pointer]:
+                                                - /url: /admin/inventory
+                                          - link "Riwayat Stok" [ref=f1e114] [cursor=pointer]:
+                                                - /url: /admin/inventory/history
+                              - listitem [ref=f1e120]:
+                                    - link "Pengaturan" [ref=f1e121] [cursor=pointer]:
+                                          - /url: /admin/settings
+                  - img "Good books, brighter days, happier kids" [ref=f1e127]
+            - main [ref=f1e128]:
+                  - generic [ref=f1e129]:
+                        - searchbox "Cari pesanan" [ref=f1e131]
+                        - button "Menu profil Browser Admin" [ref=f1e133]:
+                              - generic [ref=f1e134]: B
+                              - generic [ref=f1e136]:
+                                    - generic [ref=f1e137]: Halo, Browser
+                                    - generic [ref=f1e138]: Administrator
+                  - generic [ref=f1e141]:
+                        - generic [ref=f1e142]:
+                              - generic [ref=f1e143]:
+                                    - generic [ref=f1e144]:
+                                          - heading "Import pesanan lawas" [level=1] [ref=f1e145]
+                                          - paragraph [ref=f1e146]: Periksa Excel sebelum menyimpan. Import tidak mengubah wallet atau stok. Ongkir dipilih customer saat pelunasan.
+                                    - link "Kembali ke pesanan" [ref=f1e147] [cursor=pointer]:
+                                          - /url: /admin/orders
+                              - region [ref=f1e148]:
+                                    - heading "Unggah XLSX" [level=2] [ref=f1e149]
+                                    - paragraph [ref=f1e150]: Maksimal 5 MB dan 1000 baris pada Sheet1. ETA teks YYYY-MM, berat gram, nominal tanpa pemisah ribuan. Tulis nol secara eksplisit. DP hanya informasi; pengurang tagihan adalah pembayaran historis.
+                                    - link "Unduh template, petunjuk, dan contoh" [ref=f1e151] [cursor=pointer]:
+                                          - /url: /admin/orders/import/template
+                                    - generic [ref=f1e152]:
+                                          - generic [ref=f1e153]:
+                                                - text: File Excel (wajib)
+                                                - button "File Excel (wajib)" [ref=f1e154]
+                                                - alert
+                                          - button "Buka draf pemeriksaan" [ref=f1e161]
+                              - generic [ref=f1e162]:
+                                    - 'heading "Draf: legacy-browser-orders.xlsx" [level=2] [ref=f1e163]'
+                                    - paragraph [ref=f1e164]: Berlaku sampai 30/10/2026, 12.47.48. Draf bukan arsip permanen. Kelompok tersimpan tidak dapat diubah.
+                              - region [ref=f1e165]:
+                                    - generic [ref=f1e166]:
+                                          - heading "Kelompok pesanan" [level=2] [ref=f1e167]
+                                          - button "Simpan semua pesanan valid (0)" [disabled]
+                                    - article [ref=f1e169]:
+                                          - generic [ref=f1e170]:
+                                                - heading "LAWAS-001 (2 baris)" [level=3] [ref=f1e422]:
+                                                      - text: LAWAS-001
+                                                      - generic [ref=f1e172]: (2 baris)
+                                                - link "Tersimpan · lihat pesanan" [ref=f1e425] [cursor=pointer]:
+                                                      - /url: /admin/orders/1
+                                          - generic [ref=f1e174]:
+                                                - generic [ref=f1e175]:
+                                                      - term [ref=f1e176]: Total buku
+                                                      - definition [ref=f1e177]: Rp 155.000
+                                                - generic [ref=f1e178]:
+                                                      - term [ref=f1e179]: DP (informasi)
+                                                      - definition [ref=f1e180]: Rp 70.000
+                                                - generic [ref=f1e181]:
+                                                      - term [ref=f1e182]: Pembayaran historis
+                                                      - definition [ref=f1e183]: Rp 90.000
+                                                - generic [ref=f1e184]:
+                                                      - term [ref=f1e185]: Sisa buku
+                                                      - definition [ref=f1e186]: Rp 65.000
+                                                - generic [ref=f1e187]:
+                                                      - term [ref=f1e188]: Berat gabungan
+                                                      - definition [ref=f1e189]: 1.100 gram
+                                                - generic [ref=f1e190]:
+                                                      - term [ref=f1e191]: Ongkir
+                                                      - definition [ref=f1e192]: Belum dipilih
+                                          - status [ref=f1e426]: Pesanan tersimpan.
+                              - region [ref=f1e193]:
+                                    - heading "Baris sumber" [level=2] [ref=f1e194]
+                                    - table [ref=f1e196]:
+                                          - caption [ref=f1e197]: Data sumber Excel dan rencana pembuatan master. Geser tabel untuk melihat seluruh kolom.
+                                          - rowgroup [ref=f1e198]:
+                                                - row [ref=f1e199]:
+                                                      - columnheader "Baris / tindakan" [ref=f1e200]
+                                                      - columnheader "kode order" [ref=f1e201]
+                                                      - columnheader "email customer" [ref=f1e202]
+                                                      - columnheader "nama customer" [ref=f1e203]
+                                                      - columnheader "nama buku" [ref=f1e204]
+                                                      - columnheader "kode PO" [ref=f1e205]
+                                                      - columnheader "kategori buku" [ref=f1e206]
+                                                      - columnheader "qty" [ref=f1e207]
+                                                      - columnheader "harga satuan" [ref=f1e208]
+                                                      - columnheader "discount" [ref=f1e209]
+                                                      - columnheader "total dp" [ref=f1e210]
+                                                      - columnheader "total sudah dibayar" [ref=f1e211]
+                                                      - columnheader "harga total" [ref=f1e212]
+                                                      - columnheader "eta" [ref=f1e213]
+                                                      - columnheader "berat perbuku" [ref=f1e214]
+                                                      - columnheader "kode pos" [ref=f1e215]
+                                                      - columnheader "alamat" [ref=f1e216]
+                                                      - columnheader "status pesanan" [ref=f1e217]
+                                                      - columnheader "berat perbuku (gram)" [ref=f1e218]
+                                                      - columnheader "Pemeriksaan" [ref=f1e219]
+                                          - rowgroup [ref=f1e220]:
+                                                - row [ref=f1e427]:
+                                                      - rowheader [ref=f1e428]:
+                                                            - paragraph [ref=f1e223]: '2'
+                                                            - text: Tersimpan
+                                                      - cell "LAWAS-001" [ref=f1e424]
+                                                      - cell "customer@browser.example" [ref=f1e226]
+                                                      - cell "Browser Customer" [ref=f1e227]
+                                                      - cell "Buku Pertama" [ref=f1e228]
+                                                      - cell "PO-01" [ref=f1e229]
+                                                      - cell "Novel" [ref=f1e230]
+                                                      - cell "2" [ref=f1e231]
+                                                      - cell "60000" [ref=f1e232]
+                                                      - cell "10000" [ref=f1e233]
+                                                      - cell "50000" [ref=f1e234]
+                                                      - cell "80000" [ref=f1e235]
+                                                      - cell "110000" [ref=f1e236]
+                                                      - cell "2026-12" [ref=f1e237]
+                                                      - cell "—" [ref=f1e238]
+                                                      - cell "01234" [ref=f1e239]
+                                                      - cell "Alamat Test 12" [ref=f1e240]
+                                                      - cell "waiting_preorder" [ref=f1e241]
+                                                      - cell "300" [ref=f1e242]
+                                                      - cell [ref=f1e429]
+                                                - row [ref=f1e430]:
+                                                      - rowheader [ref=f1e431]:
+                                                            - paragraph [ref=f1e250]: '3'
+                                                            - text: Tersimpan
+                                                      - cell "LAWAS-001" [ref=f1e252]
+                                                      - cell "customer@browser.example" [ref=f1e253]
+                                                      - cell "Browser Customer" [ref=f1e254]
+                                                      - cell "Buku Kedua" [ref=f1e255]
+                                                      - cell "PO-02" [ref=f1e256]
+                                                      - cell "Novel" [ref=f1e257]
+                                                      - cell "1" [ref=f1e258]
+                                                      - cell "50000" [ref=f1e259]
+                                                      - cell "5000" [ref=f1e260]
+                                                      - cell "20000" [ref=f1e261]
+                                                      - cell "10000" [ref=f1e262]
+                                                      - cell "45000" [ref=f1e263]
+                                                      - cell "2027-01" [ref=f1e264]
+                                                      - cell "—" [ref=f1e265]
+                                                      - cell "01234" [ref=f1e266]
+                                                      - cell "Alamat Test 12" [ref=f1e267]
+                                                      - cell "waiting_preorder" [ref=f1e268]
+                                                      - cell "500" [ref=f1e269]
+                                                      - cell [ref=f1e432]
+                                    - navigation "Halaman baris import" [ref=f1e275]:
+                                          - link "Sebelumnya" [disabled] [ref=f1e276] [cursor=pointer]:
+                                                - /url: /admin/orders/import/1dd91ee8-d212-479c-b67c-ec2981c05740?page=1
+                                          - generic [ref=f1e277]: 1 / 1
+                                          - link "Berikutnya" [disabled] [ref=f1e278] [cursor=pointer]:
+                                                - /url: /admin/orders/import/1dd91ee8-d212-479c-b67c-ec2981c05740?page=1
+                        - generic [ref=f1e155]:
+                              - generic [ref=f1e156]: © 2026 Wonder Book. All rights reserved.
+                              - generic [ref=f1e157]:
+                                    - generic [ref=f1e158]: Syarat & Ketentuan
+                                    - generic [ref=f1e159]: FAQ
+                                    - generic [ref=f1e160]: Hubungi Kami
+      - region "Notifications alt+T"

@@ -1,0 +1,248 @@
+- generic:
+      - generic:
+            - generic [aria-hidden]:
+                  - generic:
+                        - generic:
+                              - generic:
+                                    - generic:
+                                          - list:
+                                                - listitem:
+                                                      - link:
+                                                            - /url: /admin
+                                    - generic:
+                                          - generic:
+                                                - generic: Menu Utama
+                                                - list:
+                                                      - listitem:
+                                                            - link:
+                                                                  - /url: /admin
+                                                                  - generic: Dashboard
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Katalog
+                                                                  - link:
+                                                                        - /url: /admin/books
+                                                                        - generic: Buku
+                                                                  - link:
+                                                                        - /url: /admin/categories
+                                                                        - generic: Kategori
+                                                                  - link:
+                                                                        - /url: /admin/pre-order-codes
+                                                                        - generic: Kode Preorder
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Order
+                                                                  - link:
+                                                                        - /url: /admin/orders
+                                                                        - generic: Pesanan
+                                                                  - link:
+                                                                        - /url: /admin/orders/import
+                                                                        - generic: Import Pesanan
+                                                                  - link:
+                                                                        - /url: /admin/orders?review=pending
+                                                                        - generic: Review Transfer
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Pengiriman
+                                                                  - link:
+                                                                        - /url: /admin/shipments
+                                                                        - generic: Shipment
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Pengguna
+                                                                  - link:
+                                                                        - /url: /admin/customers
+                                                                        - generic: Customer
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Wallet
+                                                                  - link:
+                                                                        - /url: /admin/top-ups
+                                                                        - generic: Permintaan Top-up
+                                                                  - link:
+                                                                        - /url: /admin/wallet-transactions
+                                                                        - generic: Transaksi Wallet
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Promosi
+                                                                  - link:
+                                                                        - /url: /admin/vouchers
+                                                                        - generic: Voucher
+                                                      - listitem:
+                                                            - generic:
+                                                                  - generic: Inventaris
+                                                                  - link:
+                                                                        - /url: /admin/inventory
+                                                                        - generic: Manajemen Stok
+                                                                  - link:
+                                                                        - /url: /admin/inventory/history
+                                                                        - generic: Riwayat Stok
+                                                      - listitem:
+                                                            - link:
+                                                                  - /url: /admin/settings
+                                                                  - generic: Pengaturan
+                  - main:
+                        - generic:
+                              - generic:
+                                    - searchbox
+                              - generic:
+                                    - button [expanded]:
+                                          - generic: B
+                                          - generic:
+                                                - generic: Halo, Browser
+                                                - generic: Administrator
+                        - generic:
+                              - generic:
+                                    - generic:
+                                          - generic:
+                                                - heading [level=1]: Import pesanan lawas
+                                                - paragraph: Periksa Excel sebelum menyimpan. Import tidak mengubah wallet atau stok. Ongkir dipilih customer saat pelunasan.
+                                          - link:
+                                                - /url: /admin/orders
+                                                - text: Kembali ke pesanan
+                                    - region:
+                                          - heading [level=2]: Unggah XLSX
+                                          - paragraph: Maksimal 5 MB dan 1000 baris pada Sheet1. ETA teks YYYY-MM, berat gram, nominal tanpa pemisah ribuan. Tulis nol secara eksplisit. DP hanya informasi; pengurang tagihan adalah pembayaran historis.
+                                          - link:
+                                                - /url: /admin/orders/import/template
+                                                - text: Unduh template, petunjuk, dan contoh
+                                          - generic:
+                                                - generic:
+                                                      - text: File Excel (wajib)
+                                                      - button
+                                                - button: Buka draf pemeriksaan
+                                    - generic:
+                                          - heading [level=2]: 'Draf: legacy-browser-orders.xlsx'
+                                          - paragraph: Berlaku sampai 30/10/2026, 12.47.48. Draf bukan arsip permanen. Kelompok tersimpan tidak dapat diubah.
+                                    - region:
+                                          - generic:
+                                                - heading [level=2]: Kelompok pesanan
+                                                - button [disabled]: Simpan semua pesanan valid (0)
+                                          - article:
+                                                - generic:
+                                                      - heading [level=3]:
+                                                            - text: LAWAS-001
+                                                            - generic: (2 baris)
+                                                      - link:
+                                                            - /url: /admin/orders/1
+                                                            - text: Tersimpan · lihat pesanan
+                                                - generic:
+                                                      - generic:
+                                                            - term: Total buku
+                                                            - definition: Rp 155.000
+                                                      - generic:
+                                                            - term: DP (informasi)
+                                                            - definition: Rp 70.000
+                                                      - generic:
+                                                            - term: Pembayaran historis
+                                                            - definition: Rp 90.000
+                                                      - generic:
+                                                            - term: Sisa buku
+                                                            - definition: Rp 65.000
+                                                      - generic:
+                                                            - term: Berat gabungan
+                                                            - definition: 1.100 gram
+                                                      - generic:
+                                                            - term: Ongkir
+                                                            - definition: Belum dipilih
+                                                - status: Pesanan tersimpan.
+                                    - region:
+                                          - heading [level=2]: Baris sumber
+                                          - generic:
+                                                - table:
+                                                      - caption: Data sumber Excel dan rencana pembuatan master. Geser tabel untuk melihat seluruh kolom.
+                                                      - rowgroup:
+                                                            - row:
+                                                                  - columnheader: Baris / tindakan
+                                                                  - columnheader: kode order
+                                                                  - columnheader: email customer
+                                                                  - columnheader: nama customer
+                                                                  - columnheader: nama buku
+                                                                  - columnheader: kode PO
+                                                                  - columnheader: kategori buku
+                                                                  - columnheader: qty
+                                                                  - columnheader: harga satuan
+                                                                  - columnheader: discount
+                                                                  - columnheader: total dp
+                                                                  - columnheader: total sudah dibayar
+                                                                  - columnheader: harga total
+                                                                  - columnheader: eta
+                                                                  - columnheader: berat perbuku
+                                                                  - columnheader: kode pos
+                                                                  - columnheader: alamat
+                                                                  - columnheader: status pesanan
+                                                                  - columnheader: berat perbuku (gram)
+                                                                  - columnheader: Pemeriksaan
+                                                      - rowgroup:
+                                                            - row:
+                                                                  - rowheader:
+                                                                        - paragraph: '2'
+                                                                        - text: Tersimpan
+                                                                  - cell: LAWAS-001
+                                                                  - cell: customer@browser.example
+                                                                  - cell: Browser Customer
+                                                                  - cell: Buku Pertama
+                                                                  - cell: PO-01
+                                                                  - cell: Novel
+                                                                  - cell: '2'
+                                                                  - cell: '60000'
+                                                                  - cell: '10000'
+                                                                  - cell: '50000'
+                                                                  - cell: '80000'
+                                                                  - cell: '110000'
+                                                                  - cell: 2026-12
+                                                                  - cell: —
+                                                                  - cell: '01234'
+                                                                  - cell: Alamat Test 12
+                                                                  - cell: waiting_preorder
+                                                                  - cell: '300'
+                                                                  - cell
+                                                            - row:
+                                                                  - rowheader:
+                                                                        - paragraph: '3'
+                                                                        - text: Tersimpan
+                                                                  - cell: LAWAS-001
+                                                                  - cell: customer@browser.example
+                                                                  - cell: Browser Customer
+                                                                  - cell: Buku Kedua
+                                                                  - cell: PO-02
+                                                                  - cell: Novel
+                                                                  - cell: '1'
+                                                                  - cell: '50000'
+                                                                  - cell: '5000'
+                                                                  - cell: '20000'
+                                                                  - cell: '10000'
+                                                                  - cell: '45000'
+                                                                  - cell: 2027-01
+                                                                  - cell: —
+                                                                  - cell: '01234'
+                                                                  - cell: Alamat Test 12
+                                                                  - cell: waiting_preorder
+                                                                  - cell: '500'
+                                                                  - cell
+                                          - navigation:
+                                                - link [disabled]:
+                                                      - /url: /admin/orders/import/1dd91ee8-d212-479c-b67c-ec2981c05740?page=1
+                                                      - text: Sebelumnya
+                                                - generic: 1 / 1
+                                                - link [disabled]:
+                                                      - /url: /admin/orders/import/1dd91ee8-d212-479c-b67c-ec2981c05740?page=1
+                                                      - text: Berikutnya
+                              - generic:
+                                    - generic: © 2026 Wonder Book. All rights reserved.
+                                    - generic:
+                                          - generic: Syarat & Ketentuan
+                                          - generic: FAQ
+                                          - generic: Hubungi Kami
+            - region "Notifications alt+T"
+      - menu "Menu profil Browser Admin" [active] [ref=f1e433]:
+            - generic [ref=f1e435]:
+                  - generic [ref=f1e436]: BA
+                  - generic [ref=f1e438]:
+                        - generic [ref=f1e439]: Browser Admin
+                        - generic [ref=f1e440]: admin@browser.example
+            - separator [ref=f1e441]
+            - group [ref=f1e442]:
+                  - menuitem "Settings" [ref=f1e443] [cursor=pointer]
+            - separator [ref=f1e444]
+            - menuitem "Log out" [ref=f1e445] [cursor=pointer]

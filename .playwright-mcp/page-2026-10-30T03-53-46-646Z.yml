@@ -1,0 +1,32 @@
+- generic [ref=f3e2]:
+      - generic [ref=f3e3]:
+            - generic [ref=f3e6]:
+                  - paragraph [ref=f3e7]: Temukan cerita berikutnya
+                  - paragraph [ref=f3e8]: Cerita baru selalu menunggu untuk ditemukan.
+            - generic [ref=f3e9]:
+                  - link "Wonder Book" [ref=f3e10] [cursor=pointer]:
+                        - /url: /
+                  - generic [ref=f3e13]:
+                        - generic [ref=f3e14]:
+                              - heading "Ganti password awal" [level=1] [ref=f3e15]
+                              - paragraph [ref=f3e16]: Amankan akun sebelum melanjutkan
+                        - generic [ref=f3e18]:
+                              - paragraph [ref=f3e19]: Ganti password awal sebelum mengakses akun. Gunakan password baru yang berbeda.
+                              - generic [ref=f3e20]:
+                                    - generic [ref=f3e21]: Password saat ini
+                                    - generic [ref=f3e22]:
+                                          - textbox "Password saat ini" [active] [ref=f3e23]
+                                          - button "Show password" [ref=f3e24]
+                              - generic [ref=f3e28]:
+                                    - generic [ref=f3e29]: Password baru
+                                    - generic [ref=f3e30]:
+                                          - textbox "Password baru" [ref=f3e31]
+                                          - button "Show password" [ref=f3e32]
+                              - generic [ref=f3e36]:
+                                    - generic [ref=f3e37]: Konfirmasi password baru
+                                    - generic [ref=f3e38]:
+                                          - textbox "Konfirmasi password baru" [ref=f3e39]
+                                          - button "Show password" [ref=f3e40]
+                              - button "Simpan password baru" [ref=f3e44]
+                        - button "Keluar" [ref=f3e46]
+      - region "Notifications alt+T"

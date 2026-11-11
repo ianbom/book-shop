@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\Customer\OrderSettlementService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -23,6 +24,13 @@ class OrderStatusService
     {
         return DB::transaction(function () use ($order, $nextStatus, $note, $admin): Order {
             $order = Order::lockForUpdate()->findOrFail($order->id);
+            $completeImportedDelivery = $nextStatus === OrderStatus::Completed && $this->canCompleteImportedDelivery($order);
+            if (! $completeImportedDelivery && $order->isImported() && ($order->isArchivedImport() || $nextStatus === OrderStatus::Cancelled)) {
+                throw ValidationException::withMessages(['status' => 'Arsip dan pembatalan pesanan import tidak dapat diubah.']);
+            }
+            if (! $completeImportedDelivery) {
+                app(OrderSettlementService::class)->assertFulfillable($order);
+            }
             $currentStatus = $order->status;
 
             if ($currentStatus === $nextStatus) {
@@ -67,6 +75,17 @@ class OrderStatusService
 
             return $order->refresh();
         });
+    }
+
+    public function canCompleteImportedDelivery(Order $order): bool
+    {
+        return $order->isImported()
+            && ($order->import_metadata['original_status'] ?? null) === 'delivered'
+            && $order->status === OrderStatus::Shipping
+            && $order->payment_status === PaymentStatus::Paid
+            && filled($order->shippingAddress?->destination_address)
+            && preg_match('/\A[0-9]{5}\z/', $order->shippingAddress?->destination_postal_code ?? '') === 1
+            && app(OrderSettlementService::class)->summary($order)['outstanding'] === '0.00';
     }
 
     private function refundWalletPayment(Order $order, User $admin): void

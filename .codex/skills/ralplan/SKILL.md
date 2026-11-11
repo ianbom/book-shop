@@ -1,6 +1,6 @@
 ---
 name: ralplan
-description: "[OMX] Consensus planning stage for Planner -> Architect -> Critic handoff to $ultragoal"
+description: '[OMX] Consensus planning stage for Planner -> Architect -> Critic handoff to $ultragoal'
 ---
 
 # Ralplan (Consensus Planning Alias)
@@ -50,14 +50,15 @@ omx ralplan run --task <arguments> [--session <id>]
 ```
 
 The consensus workflow:
+
 1. **Planner** creates an adaptive plan (right-sized to task scope; do not default to exactly five steps) and a compact **RALPLAN-DR summary** before review. Current `[main]` vs `[planner]` behavior: standalone `$ralplan` may be authored by the active main planning lane unless the caller/runtime supplies a dedicated planner routing record; inside `$autopilot`, state field `planning_routing.owner:"planner"` means the initial Planner draft/decomposition must use dedicated `[planner]`. Set `.omx-config.json` `agentModels.planner` to opt into a specific planner model and force dedicated planner ownership for complex Autopilot planning even when `[main]` is not cheap/mini. The RALPLAN-DR summary includes:
-   - Principles (3-5)
-   - Decision Drivers (top 3)
-   - Viable Options (>=2) with bounded pros/cons
-   - If only one viable option remains, explicit invalidation rationale for alternatives
-   - Deliberate mode only: pre-mortem (3 scenarios) + expanded test plan (unit/integration/e2e/observability)
-2. **User feedback** *(--interactive only)*: If `--interactive` is set, use the structured question UI (`omx question` in attached tmux; native structured input outside tmux when available) to present the draft plan **plus the Principles / Drivers / Options summary** before review (Proceed to review / Request changes / Skip review). Otherwise, automatically proceed to review.
-**Native role-routing preflight:** Keyword routing may already have selected Ralplan, but it is not authority. Run `omx ralplan preflight --json` only when the native task surface reports `role_routing_unavailable` and this workflow attempts adapted Ralplan Planner, Architect, or Critic authority, adapted role-intent, or adapted consensus authority. On `unsupported_documented_leader_proof`, stop before that adapted authority and use a Codex surface with documented root proof or a reviewed alternative workflow. Do not infer root identity from `session_id`, undocumented `thread_id`, session/pointer/transcript/cwd state, absence of child data, or a prompt label. Ordinary native planning, lifecycle, state, status, health, HUD, runtime, setup, install, sync, and unrelated delegation are outside this preflight boundary and remain governed by existing controls.
+    - Principles (3-5)
+    - Decision Drivers (top 3)
+    - Viable Options (>=2) with bounded pros/cons
+    - If only one viable option remains, explicit invalidation rationale for alternatives
+    - Deliberate mode only: pre-mortem (3 scenarios) + expanded test plan (unit/integration/e2e/observability)
+2. **User feedback** _(--interactive only)_: If `--interactive` is set, use the structured question UI (`omx question` in attached tmux; native structured input outside tmux when available) to present the draft plan **plus the Principles / Drivers / Options summary** before review (Proceed to review / Request changes / Skip review). Otherwise, automatically proceed to review.
+   **Native role-routing preflight:** Keyword routing may already have selected Ralplan, but it is not authority. Run `omx ralplan preflight --json` only when the native task surface reports `role_routing_unavailable` and this workflow attempts adapted Ralplan Planner, Architect, or Critic authority, adapted role-intent, or adapted consensus authority. On `unsupported_documented_leader_proof`, stop before that adapted authority and use a Codex surface with documented root proof or a reviewed alternative workflow. Do not infer root identity from `session_id`, undocumented `thread_id`, session/pointer/transcript/cwd state, absence of child data, or a prompt label. Ordinary native planning, lifecycle, state, status, health, HUD, runtime, setup, install, sync, and unrelated delegation are outside this preflight boundary and remain governed by existing controls.
 
 **Native role-routing rule:** When the native surface exposes `agent_type` role routing, set `agent_type` to an installed OMX role and never omit it for OMX work. When it does not (`role_routing_unavailable`), do not fabricate `agent_type`. On the exact reviewed Codex releases 0.144.5, 0.145.0, 0.146.1, and 0.148.0-alpha.5, adapted Ralplan Planner, Architect, Critic, role-intent, and consensus authority are unavailable because they lack documented root proof; every other version remains unknown and fails closed. Do not silently weaken routing with a prompt role label or inferred carrier. Use a Codex surface with documented root proof or a reviewed alternative workflow for that authority. A direct `omx ralplan role-intent write` attempt is denied with machine reason `unsupported_documented_leader_proof`.
 
@@ -122,12 +123,12 @@ Before consensus planning or execution handoff, ensure a grounded context snapsh
 1. Derive a task slug from the request.
 2. Reuse the latest relevant snapshot in `.omx/context/{slug}-*.md` when available.
 3. If none exists, create `.omx/context/{slug}-{timestamp}.md` (UTC `YYYYMMDDTHHMMSSZ`) with:
-   - task statement
-   - desired outcome
-   - known facts/evidence
-   - constraints
-   - unknowns/open questions
-   - likely codebase touchpoints
+    - task statement
+    - desired outcome
+    - known facts/evidence
+    - constraints
+    - unknowns/open questions
+    - likely codebase touchpoints
 4. If ambiguity remains high, gather brownfield facts first. `omx explore` is deprecated; use normal repository inspection tools/subagents for simple read-only repository lookups and `omx sparkshell` only for explicit shell-native read-only evidence. Then run `$deep-interview --quick <task>` before continuing.
 5. If the plan depends on official docs, version-aware framework guidance, best practices, or external dependency behavior, use `$best-practice-research` as the bounded evidence wrapper and auto-delegate `researcher` for the official/upstream lookup before finalizing the planning handoff so execution does not start from repo-local recall alone.
 6. If a prior `$autoresearch` run exists, treat its approved artifact as evidence for the plan. Read historical artifacts from `$autoresearch-goal` only as compatibility input. Do not include Autoresearch as a final architecture or runtime component unless the user explicitly requested ongoing research automation; otherwise synthesize the evidence into the `$ralplan` ADR, risks, and verification steps.

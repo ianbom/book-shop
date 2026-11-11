@@ -1,8 +1,8 @@
 ---
-name: "hud"
-description: "[OMX] Show or configure the OMX HUD (two-layer statusline)"
-role: "display"
-scope: ".omx/**"
+name: 'hud'
+description: '[OMX] Show or configure the OMX HUD (two-layer statusline)'
+role: 'display'
+scope: '.omx/**'
 ---
 
 # HUD Skill
@@ -15,28 +15,31 @@ The OMX HUD uses a two-layer architecture:
 
 ## Quick Commands
 
-| Command | Description |
-|---------|-------------|
-| `omx hud` | Show current HUD (modes, turns, activity) |
-| `omx hud --watch` | Live-updating display (polls every 1s) |
-| `omx hud --json` | Raw state output for scripting |
-| `omx hud --preset=minimal` | Minimal display |
-| `omx hud --preset=focused` | Default display |
-| `omx hud --preset=full` | All elements |
+| Command                    | Description                               |
+| -------------------------- | ----------------------------------------- |
+| `omx hud`                  | Show current HUD (modes, turns, activity) |
+| `omx hud --watch`          | Live-updating display (polls every 1s)    |
+| `omx hud --json`           | Raw state output for scripting            |
+| `omx hud --preset=minimal` | Minimal display                           |
+| `omx hud --preset=focused` | Default display                           |
+| `omx hud --preset=full`    | All elements                              |
 
 ## Presets
 
 ### minimal
+
 ```
 [OMX] ralph:3/10 | turns:42
 ```
 
 ### focused (default)
+
 ```
 [OMX] ralph:3/10 | ultrawork | team:3 workers | turns:42 | last:5s ago
 ```
 
 ### full
+
 ```
 [OMX] ralph:3/10 | ultrawork | autopilot:execution | team:3 workers | pipeline:exec | turns:42 | last:5s ago | total-turns:156
 ```
@@ -44,6 +47,7 @@ The OMX HUD uses a two-layer architecture:
 ## Setup
 
 `omx setup` automatically configures both layers:
+
 - Adds `[tui] status_line` to `~/.codex/config.toml` (Layer 1)
 - Writes `.omx/hud-config.json` with default preset (Layer 2)
 - Default preset is `focused`; if HUD/statusline changes do not appear, restart Codex CLI once.
@@ -51,6 +55,7 @@ The OMX HUD uses a two-layer architecture:
 ## Layer 1: Codex Built-in StatusLine
 
 Configured in `~/.codex/config.toml`:
+
 ```toml
 [tui]
 status_line = ["model-with-reasoning", "git-branch", "context-remaining"]
@@ -62,6 +67,7 @@ Available built-in items (Codex CLI v0.101.0+):
 ## Layer 2: OMX Orchestration HUD
 
 The `omx hud` command reads these state files:
+
 - `.omx/state/ralph-state.json` - Ralph loop iteration
 - `.omx/state/ultrawork-state.json` - Ultrawork mode
 - `.omx/state/autopilot-state.json` - Autopilot phase
@@ -74,9 +80,10 @@ The `omx hud` command reads these state files:
 ## Configuration
 
 HUD config stored at `.omx/hud-config.json`:
+
 ```json
 {
-  "preset": "focused"
+    "preset": "focused"
 }
 ```
 
@@ -89,10 +96,12 @@ HUD config stored at `.omx/hud-config.json`:
 ## Troubleshooting
 
 If the TUI statusline is not showing:
+
 1. Ensure Codex CLI v0.101.0+ is installed
 2. Run `omx setup` to configure `[tui]` section
 3. Restart Codex CLI
 
 If `omx hud` shows "No active modes":
+
 - This is expected when no workflows are running
 - Start an explicitly requested supported workflow (`$autopilot` or `$ultragoal`) and check again

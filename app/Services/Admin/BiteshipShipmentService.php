@@ -18,6 +18,9 @@ class BiteshipShipmentService
     {
         return DB::transaction(function () use ($shipment): Shipment {
             $order = Order::query()->lockForUpdate()->findOrFail($shipment->order_id);
+            if ($order->isArchivedImport()) {
+                throw ValidationException::withMessages(['shipping' => 'Pengiriman arsip import tidak dapat diubah.']);
+            }
             $shipment = Shipment::query()->lockForUpdate()->findOrFail($shipment->id);
             if (blank($shipment->biteship_order_id)) {
                 throw ValidationException::withMessages(['shipping' => 'Shipment belum terhubung ke Biteship.']);
@@ -59,6 +62,9 @@ class BiteshipShipmentService
     /** @param array<string, mixed> $data */
     public function apply(Shipment $shipment, array $data): void
     {
+        if ($shipment->order()->firstOrFail()->isArchivedImport()) {
+            throw ValidationException::withMessages(['shipping' => 'Pengiriman arsip import tidak dapat diubah.']);
+        }
         $providerStatus = $data['status'] ?? null;
         if (! is_string($providerStatus) || trim($providerStatus) === '' || strlen($providerStatus) > 100) {
             throw ValidationException::withMessages(['shipping' => 'Status pada respons Biteship tidak valid.']);

@@ -14,6 +14,7 @@ use App\Models\PreOrderCode;
 use App\Services\Admin\BookService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,6 +24,14 @@ class BookController extends Controller
 
     public function index(Request $request): Response
     {
+        $request->validate([
+            'sort' => ['nullable', Rule::in(['title', 'author', 'price', 'stock', 'created_at'])],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
+        ]);
+        $filters = array_merge($request->only(['search', 'category', 'status']), [
+            'sort' => $request->input('sort') ?: 'created_at',
+            'direction' => $request->input('direction') ?: 'desc',
+        ]);
         $active = match ($request->string('status')->toString()) {
             'active' => true,
             'inactive' => false,
@@ -34,14 +43,15 @@ class BookController extends Controller
             ->search($request->string('search')->toString())
             ->active($active)
             ->when($request->integer('category'), fn ($query, int $category) => $query->whereHas('categories', fn ($query) => $query->whereKey($category)))
-            ->latest()
+            ->orderBy($filters['sort'], $filters['direction'])
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('admin/books/index', [
             'books' => BookResource::collection($books),
             'categories' => CategoryResource::collection(Category::query()->orderBy('name')->get()),
-            'filters' => $request->only(['search', 'category', 'status']),
+            'filters' => $filters,
         ]);
     }
 

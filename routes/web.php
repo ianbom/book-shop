@@ -8,7 +8,8 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\PaymentProofController;
+use App\Http\Controllers\Admin\OrderImportController;
+use App\Http\Controllers\Admin\OrderPaymentReviewController;
 use App\Http\Controllers\Admin\PreOrderCodeController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ShipmentController;
@@ -22,12 +23,14 @@ use App\Http\Controllers\Customer\Dashboard\AddressController as CustomerDashboa
 use App\Http\Controllers\Customer\Dashboard\CartController as CustomerDashboardCartController;
 use App\Http\Controllers\Customer\Dashboard\CheckoutController;
 use App\Http\Controllers\Customer\Dashboard\OrderController as CustomerDashboardOrderController;
+use App\Http\Controllers\Customer\Dashboard\OrderSettlementController;
 use App\Http\Controllers\Customer\Dashboard\ProfileController as CustomerDashboardProfileController;
 use App\Http\Controllers\Customer\Dashboard\VoucherController as CustomerDashboardVoucherController;
 use App\Http\Controllers\Customer\Dashboard\WalletController as CustomerDashboardWalletController;
 use App\Http\Controllers\Customer\Dashboard\WalletTopupController as CustomerDashboardWalletTopupController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\OrderTrackingController;
+use App\Http\Controllers\OrderPaymentProofController;
 use App\Http\Middleware\EnsureAdminRole;
 use App\Http\Middleware\EnsureCustomerRole;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('cart/items/{cartItem}', [CartItemController::class, 'update'])->middleware(EnsureCustomerRole::class)->name('cart.items.update');
     Route::delete('cart/items/{cartItem}', [CartItemController::class, 'destroy'])->middleware(EnsureCustomerRole::class)->name('cart.items.destroy');
     Route::redirect('dashboard', '/admin')->name('dashboard');
+    Route::get('order-payments/{submission}/proof', OrderPaymentProofController::class)->name('order-payments.proof');
 
     Route::prefix('customer/dashboard')->as('customer.dashboard.')->middleware(EnsureCustomerRole::class)->group(function () {
         Route::get('profile', CustomerDashboardProfileController::class)->name('profile');
@@ -56,6 +60,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('orders', CustomerDashboardOrderController::class)->name('orders.index');
         Route::patch('orders/{order}/cancel', [CustomerDashboardOrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('orders/{order}', [CustomerDashboardOrderController::class, 'show'])->name('orders.show');
+        Route::get('orders/{order}/settlement/rates', [OrderSettlementController::class, 'rates'])->middleware('throttle:20,1')->name('orders.settlement.rates');
+        Route::post('orders/{order}/settlement/shipping', [OrderSettlementController::class, 'shipping'])->middleware('throttle:20,1')->name('orders.settlement.shipping');
+        Route::post('orders/{order}/settlement/submissions', [OrderSettlementController::class, 'store'])->middleware('throttle:10,1')->name('orders.settlement.submissions');
         Route::get('wallets', CustomerDashboardWalletController::class)->name('wallets.index');
         Route::post('wallets/top-ups', CustomerDashboardWalletTopupController::class)->name('wallets.topups.store');
         Route::get('wallets/top-ups/{walletTopup}/proof', [CustomerDashboardWalletTopupController::class, 'proof'])->name('wallets.topups.proof');
@@ -94,6 +101,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('pre-order-codes/{preOrderCode}', [PreOrderCodeController::class, 'destroy'])->name('pre-order-codes.destroy');
         Route::get('pre-order-codes/{preOrderCode}/books', [PreOrderCodeController::class, 'books'])->name('pre-order-codes.books');
 
+        Route::get('orders/import', [OrderImportController::class, 'index'])->name('orders.import.index');
+        Route::get('orders/import/template', [OrderImportController::class, 'template'])->name('orders.import.template');
+        Route::post('orders/import', [OrderImportController::class, 'store'])->middleware('throttle:10,1')->name('orders.import.store');
+        Route::get('orders/import/{draft}', [OrderImportController::class, 'show'])->name('orders.import.show');
+        Route::patch('orders/import/{draft}/rows/{row}', [OrderImportController::class, 'update'])->name('orders.import.rows.update');
+        Route::post('orders/import/{draft}/commit', [OrderImportController::class, 'commit'])->name('orders.import.commit');
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
@@ -110,8 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('orders/{order}/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus'])->name('orders.shipments.status');
         Route::post('orders/{order}/shipments/{shipment}/sync', [ShipmentController::class, 'sync'])->middleware('throttle:10,1')->name('orders.shipments.sync');
         Route::patch('orders/{order}/shipping-cost', [OrderController::class, 'updateShippingCost'])->name('orders.shipping-cost');
-        Route::post('orders/{order}/payment-proofs', [PaymentProofController::class, 'store'])->name('orders.payment-proofs.store');
-        Route::delete('orders/{order}/payment-proofs/{paymentProof}', [PaymentProofController::class, 'destroy'])->name('orders.payment-proofs.destroy');
+        Route::patch('order-payments/{submission}', OrderPaymentReviewController::class)->middleware('throttle:30,1')->name('order-payments.review');
 
         Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
         Route::post('inventory/adjustments', [InventoryController::class, 'store'])->name('inventory.adjustments.store');

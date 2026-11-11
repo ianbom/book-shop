@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['order_id', 'book_id', 'name', 'description', 'category', 'sku', 'value', 'quantity', 'weight', 'height', 'length', 'width', 'isbn', 'author', 'subtotal', 'sale_type', 'preorder_estimated_date', 'preorder_ready_at'])]
+#[Fillable(['order_id', 'book_id', 'name', 'description', 'category', 'sku', 'value', 'quantity', 'weight', 'height', 'length', 'width', 'isbn', 'author', 'subtotal', 'sale_type', 'preorder_estimated_date', 'preorder_ready_at', 'pre_order_code', 'line_discount', 'historical_dp', 'historical_paid', 'import_row_key', 'import_row_number'])]
 class OrderItem extends Model
 {
     protected function casts(): array
@@ -21,6 +21,10 @@ class OrderItem extends Model
             'length' => 'decimal:2',
             'width' => 'decimal:2',
             'subtotal' => 'decimal:2',
+            'line_discount' => 'decimal:2',
+            'historical_dp' => 'decimal:2',
+            'historical_paid' => 'decimal:2',
+            'import_row_number' => 'integer',
             'sale_type' => BookSaleType::class,
             'preorder_estimated_date' => 'date',
             'preorder_ready_at' => 'datetime',

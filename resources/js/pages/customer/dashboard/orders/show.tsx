@@ -3,7 +3,6 @@ import {
     ArrowLeft,
     BookOpen,
     CalendarDays,
-    Check,
     CreditCard,
     MapPin,
     Package,
@@ -13,7 +12,13 @@ import {
 } from 'lucide-react';
 import { AdminListLayout } from '@/components/admin/shared/admin-list-layout';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
-import { formatDate, rupiah } from '@/lib/format';
+import OrderSettlement from '@/components/order-settlement';
+import type {
+    Settlement,
+    SettlementAddress,
+    SettlementBank,
+} from '@/components/order-settlement';
+import { exactRupiah, formatDate, formatMonthYear, rupiah } from '@/lib/format';
 import type { OrderStatus, PaymentStatus, ShipmentStatus } from '@/types/admin';
 
 type Item = {
@@ -23,6 +28,10 @@ type Item = {
     quantity: number;
     value: string;
     subtotal: string;
+    pre_order_code: string | null;
+    line_discount: string;
+    historical_dp: string;
+    historical_paid: string;
     preorder_estimated_date: string | null;
     primary_image: { url: string; alt_text: string | null } | null;
 };
@@ -47,6 +56,8 @@ type Shipment = {
     status_histories: Event[];
 };
 type Order = {
+    source: 'website' | 'imported';
+    settlement: Settlement | null;
     id: number;
     order_code: string;
     status: OrderStatus;
@@ -61,7 +72,7 @@ type Order = {
     items: Item[];
     shipping_address: null | {
         recipient_name: string;
-        phone: string;
+        phone: string | null;
         address: string;
         postal_code: string | null;
         province: string | null;
@@ -89,28 +100,6 @@ const orderLabels: Record<OrderStatus, string> = {
     completed: 'Selesai',
     cancelled: 'Pesanan dibatalkan',
 };
-const shipmentLabels: Record<ShipmentStatus, string> = {
-    pending: 'Menunggu pengiriman',
-    booked: 'Pengiriman dibuat',
-    pickup: 'Penjemputan paket',
-    in_transit: 'Dalam perjalanan',
-    delivered: 'Paket diterima',
-    cancelled: 'Pengiriman dibatalkan',
-    failed: 'Pengiriman gagal',
-    confirmed: 'Dikonfirmasi',
-    scheduled: 'Terjadwal',
-    allocated: 'Kurir ditugaskan',
-    picking_up: 'Kurir menuju penjemputan',
-    picked: 'Paket telah dijemput',
-    on_hold: 'Pengiriman tertahan',
-    dropping_off: 'Kurir menuju penerima',
-    return_in_transit: 'Dalam perjalanan retur',
-    returned: 'Dikembalikan ke pengirim',
-    rejected: 'Pengiriman ditolak',
-    disposed: 'Paket dimusnahkan',
-    courier_not_found: 'Kurir tidak ditemukan',
-};
-
 function SectionHeading({
     icon: Icon,
     children,
@@ -126,56 +115,15 @@ function SectionHeading({
     );
 }
 
-function Timeline({
-    events,
-    labels,
+export default function OrderShow({
+    order,
+    settlement_addresses,
+    settlement_banks,
 }: {
-    events: Event[];
-    labels: Record<string, string>;
+    order: Order;
+    settlement_addresses: SettlementAddress[];
+    settlement_banks: SettlementBank[];
 }) {
-    if (!events.length) {
-        return (
-            <p className="text-muted-foreground pt-4 text-sm">
-                Belum ada riwayat status.
-            </p>
-        );
-    }
-
-    return (
-        <ol className="mt-5 space-y-0">
-            {events.map((event, index) => (
-                <li key={index} className="relative flex gap-4 pb-6 last:pb-0">
-                    {index < events.length - 1 && (
-                        <span
-                            className="bg-primary/30 absolute top-6 bottom-0 left-3 w-px"
-                            aria-hidden="true"
-                        />
-                    )}
-                    <span className="bg-primary text-primary-foreground z-10 flex size-6 shrink-0 items-center justify-center rounded-full">
-                        <Check className="size-3.5" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0 text-sm">
-                        <p className="text-foreground font-semibold">
-                            {labels[event.status] ??
-                                event.provider_status ??
-                                event.status}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                            {formatDate(event.occurred_at ?? event.created_at)}
-                        </p>
-                        {(event.note || event.description) && (
-                            <p className="text-muted-foreground mt-1 text-xs break-words">
-                                {event.note || event.description}
-                            </p>
-                        )}
-                    </div>
-                </li>
-            ))}
-        </ol>
-    );
-}
-
-export default function OrderShow({ order }: { order: Order }) {
     const itemCount = order.items.reduce(
         (total, item) => total + item.quantity,
         0,
@@ -183,8 +131,16 @@ export default function OrderShow({ order }: { order: Order }) {
     const payment = order.wallet_transactions.find(
         (transaction) => transaction.direction === 'debit',
     );
-    const shipment = order.shipments[0];
     const address = order.shipping_address;
+    const money = order.source === 'imported' ? exactRupiah : rupiah;
+    const history = order.status_histories.some(
+        (event) => event.status === order.status,
+    )
+        ? order.status_histories
+        : [
+              ...order.status_histories,
+              { status: order.status, created_at: null },
+          ];
 
     return (
         <>
@@ -228,23 +184,14 @@ export default function OrderShow({ order }: { order: Order }) {
                         </div>
                     </div>
                     <div className="space-y-1 xl:border-l xl:pl-5">
-                        <StatusBadge value={order.status} />
+                        <span className="font-semibold">
+                            {orderLabels[order.status]}
+                        </span>
                         <p className="text-muted-foreground text-xs">
                             Status pesanan saat ini
                         </p>
                     </div>
                     <div className="flex flex-wrap gap-2 xl:border-l xl:pl-5">
-                        {shipment?.courier_link && (
-                            <a
-                                href={shipment.courier_link}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="border-primary text-primary hover:bg-primary/5 focus-visible:outline-primary inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
-                            >
-                                <Truck className="size-4" aria-hidden="true" />{' '}
-                                Lacak Pengiriman
-                            </a>
-                        )}
                         <Link
                             href="/customer/dashboard/orders"
                             className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-primary inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -258,17 +205,29 @@ export default function OrderShow({ order }: { order: Order }) {
                 <div className="@container min-w-0">
                     <div className="grid min-w-0 items-start gap-4 @min-[900px]:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
                         <div className="min-w-0 space-y-4">
-                            <section className="bg-card rounded-xl border p-4 sm:p-5">
+                            <section className="bg-card @container/product rounded-xl border p-4 sm:p-5">
                                 <SectionHeading icon={Package}>
                                     Produk yang Dibeli
                                 </SectionHeading>
                                 {order.items.length ? (
                                     <div className="mt-4">
-                                        <div className="bg-muted/60 text-muted-foreground hidden grid-cols-[minmax(0,1fr)_110px_70px_110px] gap-3 rounded-md px-3 py-2 text-xs sm:grid">
+                                        <div
+                                            className={`bg-muted/60 text-muted-foreground hidden gap-3 rounded-md px-3 py-2 text-xs @min-[760px]/product:grid ${order.settlement ? 'grid-cols-[minmax(0,1fr)_110px_110px_110px_60px_110px]' : 'grid-cols-[minmax(0,1fr)_110px_70px_110px]'}`}
+                                        >
                                             <span>Produk</span>
                                             <span className="text-right">
                                                 Harga Satuan
                                             </span>
+                                            {order.settlement && (
+                                                <>
+                                                    <span className="text-right">
+                                                        Diskon baris
+                                                    </span>
+                                                    <span className="text-right">
+                                                        Dibayar historis
+                                                    </span>
+                                                </>
+                                            )}
                                             <span className="text-center">
                                                 Jumlah
                                             </span>
@@ -279,7 +238,7 @@ export default function OrderShow({ order }: { order: Order }) {
                                         {order.items.map((item, index) => (
                                             <div
                                                 key={index}
-                                                className="grid gap-2 border-b py-4 last:border-0 sm:grid-cols-[minmax(0,1fr)_110px_70px_110px] sm:items-center sm:gap-3 sm:px-3"
+                                                className={`grid gap-2 border-b py-4 last:border-0 @min-[760px]/product:items-center @min-[760px]/product:gap-3 @min-[760px]/product:px-3 ${order.settlement ? '@min-[760px]/product:grid-cols-[minmax(0,1fr)_110px_110px_110px_60px_110px]' : '@min-[760px]/product:grid-cols-[minmax(0,1fr)_110px_70px_110px]'}`}
                                             >
                                                 <div className="flex min-w-0 items-center gap-3">
                                                     {item.primary_image ? (
@@ -320,34 +279,65 @@ export default function OrderShow({ order }: { order: Order }) {
                                                                 {item.author}
                                                             </p>
                                                         )}
+                                                        {item.pre_order_code && (
+                                                            <p className="text-muted-foreground text-xs">
+                                                                PO:{' '}
+                                                                {
+                                                                    item.pre_order_code
+                                                                }
+                                                            </p>
+                                                        )}
                                                         {item.preorder_estimated_date && (
                                                             <p className="text-muted-foreground text-xs">
                                                                 Estimasi
                                                                 preorder:{' '}
-                                                                {formatDate(
+                                                                {(order.source ===
+                                                                    'imported'
+                                                                    ? formatMonthYear
+                                                                    : formatDate)(
                                                                     item.preorder_estimated_date,
                                                                 )}
                                                             </p>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-between text-sm sm:block sm:text-right">
-                                                    <span className="text-muted-foreground sm:hidden">
+                                                <div className="flex justify-between text-sm @min-[760px]/product:block @min-[760px]/product:text-right">
+                                                    <span className="text-muted-foreground @min-[760px]/product:hidden">
                                                         Harga
                                                     </span>
-                                                    {rupiah(item.value)}
+                                                    {money(item.value)}
                                                 </div>
-                                                <div className="flex justify-between text-sm sm:text-center">
-                                                    <span className="text-muted-foreground sm:hidden">
+                                                {order.settlement && (
+                                                    <>
+                                                        <div className="flex justify-between text-sm @min-[760px]/product:block @min-[760px]/product:text-right">
+                                                            <span className="text-muted-foreground @min-[760px]/product:hidden">
+                                                                Diskon baris
+                                                            </span>
+                                                            {money(
+                                                                item.line_discount,
+                                                            )}
+                                                        </div>
+                                                        <div className="flex justify-between text-sm @min-[760px]/product:block @min-[760px]/product:text-right">
+                                                            <span className="text-muted-foreground @min-[760px]/product:hidden">
+                                                                Dibayar historis
+                                                            </span>
+                                                            {money(
+                                                                item.historical_paid,
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                )}
+                                                <div className="flex justify-between text-sm @min-[760px]/product:text-center">
+                                                    <span className="text-muted-foreground @min-[760px]/product:hidden">
                                                         Jumlah
                                                     </span>
                                                     {item.quantity}
                                                 </div>
-                                                <div className="flex justify-between text-sm font-semibold sm:block sm:text-right">
-                                                    <span className="text-muted-foreground font-normal sm:hidden">
+                                                <div className="flex justify-between text-sm font-semibold @min-[760px]/product:block @min-[760px]/product:text-right">
+                                                    <span className="text-muted-foreground font-normal @min-[760px]/product:hidden">
                                                         Subtotal
                                                     </span>
-                                                    {rupiah(item.subtotal)}
+                                                    {money(item.subtotal)}
                                                 </div>
                                             </div>
                                         ))}
@@ -359,58 +349,104 @@ export default function OrderShow({ order }: { order: Order }) {
                                 )}
                             </section>
 
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <section className="bg-card rounded-xl border p-4 sm:p-5">
-                                    <SectionHeading icon={ShoppingCart}>
-                                        Status Pesanan
-                                    </SectionHeading>
-                                    <Timeline
-                                        events={order.status_histories}
-                                        labels={orderLabels}
-                                    />
-                                </section>
-                                <section className="bg-card rounded-xl border p-4 sm:p-5">
+                            <div>
+                                <section className="bg-card @container/shipping rounded-xl border p-4 sm:p-5">
                                     <SectionHeading icon={Truck}>
                                         Status Pengiriman
                                     </SectionHeading>
-                                    {order.shipments.length ? (
-                                        order.shipments.map((entry, index) => (
-                                            <div
-                                                key={index}
-                                                className="border-b py-4 last:border-0 last:pb-0"
-                                            >
-                                                <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-                                                    {entry.courier_company ||
-                                                        'Pengiriman'}{' '}
-                                                    ·{' '}
-                                                    {entry.courier_service_name ||
-                                                        entry.courier_type ||
-                                                        'Layanan belum tersedia'}
-                                                    <StatusBadge
-                                                        value={entry.status}
+                                    <div className="mt-4 grid gap-5 @min-[480px]/shipping:grid-cols-2">
+                                        <ol aria-label="Alur status pesanan">
+                                            {history.map((event, index) => (
+                                                <li
+                                                    key={event.status}
+                                                    className="relative flex gap-3 pb-4 text-sm last:pb-0"
+                                                >
+                                                    {index <
+                                                        history.length - 1 && (
+                                                        <span
+                                                            className="bg-border absolute top-2.5 bottom-[-10px] left-[3.5px] w-px"
+                                                            aria-hidden="true"
+                                                        />
+                                                    )}
+                                                    <span
+                                                        className="bg-primary relative mt-1.5 size-2 shrink-0 rounded-full"
+                                                        aria-hidden="true"
                                                     />
-                                                </div>
-                                                {(entry.waybill_id ||
-                                                    entry.tracking_id) && (
-                                                    <p className="text-muted-foreground mt-1 text-xs">
-                                                        Resi:{' '}
-                                                        {entry.waybill_id ||
-                                                            entry.tracking_id}
-                                                    </p>
-                                                )}
-                                                <Timeline
-                                                    events={
-                                                        entry.status_histories
-                                                    }
-                                                    labels={shipmentLabels}
-                                                />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-muted-foreground pt-4 text-sm">
-                                            Belum ada data pengiriman.
-                                        </p>
-                                    )}
+                                                    <div>
+                                                        <p className="font-semibold">
+                                                            {orderLabels[
+                                                                event.status as OrderStatus
+                                                            ] ?? event.status}
+                                                        </p>
+                                                        {event.created_at && (
+                                                            <p className="text-muted-foreground text-xs">
+                                                                {formatDate(
+                                                                    event.created_at,
+                                                                )}
+                                                            </p>
+                                                        )}
+                                                        {event.status ===
+                                                            order.status && (
+                                                            <p className="text-muted-foreground text-xs">
+                                                                Status saat ini
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ol>
+                                        <div className="min-w-0">
+                                            {order.shipments.length ? (
+                                                order.shipments.map(
+                                                    (entry, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="border-b py-4 first:pt-0 last:border-0 last:pb-0"
+                                                        >
+                                                            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                                                                {entry.courier_company ||
+                                                                    'Pengiriman'}{' '}
+                                                                ·{' '}
+                                                                {entry.courier_service_name ||
+                                                                    entry.courier_type ||
+                                                                    'Layanan belum tersedia'}
+                                                                <StatusBadge
+                                                                    value={
+                                                                        entry.status
+                                                                    }
+                                                                />
+                                                            </div>
+                                                            {(entry.waybill_id ||
+                                                                entry.tracking_id) && (
+                                                                <p className="text-muted-foreground mt-1 text-xs break-all">
+                                                                    Resi:{' '}
+                                                                    {entry.waybill_id ||
+                                                                        entry.tracking_id}
+                                                                </p>
+                                                            )}
+                                                            {entry.courier_link && (
+                                                                <a
+                                                                    href={
+                                                                        entry.courier_link
+                                                                    }
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="text-primary mt-2 inline-block text-sm underline"
+                                                                >
+                                                                    Lacak
+                                                                    pengiriman
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    ),
+                                                )
+                                            ) : (
+                                                <p className="text-muted-foreground text-sm">
+                                                    Belum ada data pengiriman.
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
                                 </section>
                             </div>
                         </div>
@@ -426,13 +462,48 @@ export default function OrderShow({ order }: { order: Order }) {
                                             Subtotal Buku ({itemCount} item)
                                         </dt>
                                         <dd className="font-semibold">
-                                            {rupiah(order.subtotal)}
+                                            {money(
+                                                order.settlement?.summary
+                                                    .subtotal ?? order.subtotal,
+                                            )}
                                         </dd>
                                     </div>
+                                    {order.settlement && (
+                                        <>
+                                            <div className="flex justify-between gap-3">
+                                                <dt>Sudah dibayar historis</dt>
+                                                <dd className="font-semibold">
+                                                    {money(
+                                                        order.settlement.summary
+                                                            .historical_paid,
+                                                    )}
+                                                </dd>
+                                            </div>
+                                            <div className="flex justify-between gap-3">
+                                                <dt>Transfer disetujui</dt>
+                                                <dd className="font-semibold">
+                                                    {money(
+                                                        order.settlement.summary
+                                                            .approved_paid,
+                                                    )}
+                                                </dd>
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="flex justify-between gap-3">
                                         <dt>Ongkos Kirim</dt>
                                         <dd className="font-semibold">
-                                            {rupiah(order.shipping_cost)}
+                                            {order.settlement &&
+                                            !order.settlement.summary
+                                                .shipping_selected
+                                                ? order.settlement.archived
+                                                    ? 'Historis tidak tersedia'
+                                                    : 'Belum dipilih'
+                                                : money(
+                                                      order.settlement?.summary
+                                                          .shipping_cost ??
+                                                          order.shipping_cost,
+                                                  )}
                                         </dd>
                                     </div>
                                     {Number(order.voucher_discount) > 0 && (
@@ -452,22 +523,29 @@ export default function OrderShow({ order }: { order: Order }) {
                                         </div>
                                     )}
                                     <div className="bg-primary/10 text-primary flex items-center justify-between gap-3 rounded-lg px-3 py-3 font-bold">
-                                        <dt>Total Pembayaran</dt>
+                                        <dt>
+                                            {order.settlement
+                                                ? 'Sisa pelunasan'
+                                                : 'Total Pembayaran'}
+                                        </dt>
                                         <dd className="text-xl">
-                                            {rupiah(order.total)}
+                                            {money(
+                                                order.settlement?.summary
+                                                    .outstanding ?? order.total,
+                                            )}
+                                            {order.settlement &&
+                                                !order.settlement.summary
+                                                    .shipping_selected && (
+                                                    <span className="block text-xs font-normal">
+                                                        {order.settlement
+                                                            .archived
+                                                            ? 'Ongkir historis tidak tersedia'
+                                                            : 'Belum termasuk ongkir'}
+                                                    </span>
+                                                )}
                                         </dd>
                                     </div>
                                 </dl>
-                                <div
-                                    className={`mt-3 rounded-lg p-3 text-sm ${order.payment_status === 'paid' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}
-                                >
-                                    <StatusBadge value={order.payment_status} />
-                                    <span className="ml-2">
-                                        {order.payment_status === 'paid'
-                                            ? 'Pembayaran berhasil dilakukan.'
-                                            : `Status pembayaran: ${order.payment_status.replaceAll('_', ' ')}.`}
-                                    </span>
-                                </div>
                             </section>
 
                             <section className="bg-card rounded-xl border p-4 sm:p-5">
@@ -479,12 +557,15 @@ export default function OrderShow({ order }: { order: Order }) {
                                         />
                                         Alamat Pengiriman
                                     </h2>
-                                    <Link
-                                        href="/customer/dashboard/profile"
-                                        className="text-primary text-xs font-medium hover:underline"
-                                    >
-                                        Kelola Alamat
-                                    </Link>
+                                    {!order.settlement?.summary
+                                        .shipping_selected && (
+                                        <Link
+                                            href="/customer/dashboard/profile"
+                                            className="text-primary text-xs font-medium hover:underline"
+                                        >
+                                            Kelola Alamat
+                                        </Link>
+                                    )}
                                 </div>
                                 {address ? (
                                     <div className="mt-4 space-y-1 text-sm">
@@ -532,7 +613,9 @@ export default function OrderShow({ order }: { order: Order }) {
                                             Metode Pembayaran
                                         </dt>
                                         <dd className="text-right font-medium">
-                                            Saldo Buku Order
+                                            {order.settlement
+                                                ? 'Historis dan transfer bank'
+                                                : 'Saldo Buku Order'}
                                         </dd>
                                     </div>
                                     <div className="flex justify-between gap-3">
@@ -545,14 +628,16 @@ export default function OrderShow({ order }: { order: Order }) {
                                             />
                                         </dd>
                                     </div>
-                                    <div className="flex justify-between gap-3">
-                                        <dt className="text-muted-foreground">
-                                            Dibayar dari Saldo
-                                        </dt>
-                                        <dd className="font-medium">
-                                            {rupiah(order.wallet_amount)}
-                                        </dd>
-                                    </div>
+                                    {!order.settlement && (
+                                        <div className="flex justify-between gap-3">
+                                            <dt className="text-muted-foreground">
+                                                Dibayar dari Saldo
+                                            </dt>
+                                            <dd className="font-medium">
+                                                {rupiah(order.wallet_amount)}
+                                            </dd>
+                                        </div>
+                                    )}
                                     {payment?.created_at && (
                                         <div className="flex justify-between gap-3">
                                             <dt className="text-muted-foreground">
@@ -564,6 +649,14 @@ export default function OrderShow({ order }: { order: Order }) {
                                         </div>
                                     )}
                                 </dl>
+                                {order.settlement && (
+                                    <OrderSettlement
+                                        orderId={order.id}
+                                        settlement={order.settlement}
+                                        addresses={settlement_addresses}
+                                        banks={settlement_banks}
+                                    />
+                                )}
                                 {order.wallet_transactions.length > 0 && (
                                     <div className="text-muted-foreground mt-4 border-t pt-3 text-xs">
                                         <p className="text-foreground mb-2 font-semibold">

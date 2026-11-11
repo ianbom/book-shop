@@ -91,7 +91,7 @@ export default function BooksIndex({
                                 className="text-warning size-4"
                                 aria-hidden="true"
                             />
-                            Wonderbook
+                            Wonder Prince Library
                         </p>
                         <h1 className="font-heading text-foreground mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
                             Katalog Buku

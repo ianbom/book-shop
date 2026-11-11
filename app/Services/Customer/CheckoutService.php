@@ -143,6 +143,7 @@ class CheckoutService
                     'isbn' => $book->isbn, 'author' => $book->author,
                     'subtotal' => $this->money((int) round((float) $book->price * 100) * $item->quantity),
                     'sale_type' => $book->sale_type, 'preorder_estimated_date' => $book->preorder_estimated_date,
+                    'pre_order_code' => $book->preOrderCode?->code,
                 ]);
                 $shipment->items()->create(['order_item_id' => $orderItem->id, 'quantity' => $item->quantity]);
                 $before = $book->stock;

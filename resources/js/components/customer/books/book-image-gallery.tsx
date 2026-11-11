@@ -28,7 +28,7 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
     return (
         <div className="flex w-full flex-col items-center">
             <div
-                className="bg-card relative grid aspect-[3/4] max-h-[220px] w-full max-w-[180px] place-items-center overflow-hidden border border-border shadow-xs sm:max-h-[300px] sm:max-w-[240px] md:max-h-[380px] md:max-w-none md:shadow-sm"
+                className="bg-card border-border relative grid aspect-[3/4] max-h-[220px] w-full max-w-[180px] place-items-center overflow-hidden border shadow-xs sm:max-h-[300px] sm:max-w-[240px] md:max-h-[380px] md:max-w-none md:shadow-sm"
                 onTouchStart={(event) => {
                     touchStart.current = event.touches[0]?.clientX ?? null;
                 }}
@@ -47,7 +47,7 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
                 <img
                     src={image.url}
                     alt={image.alt_text ?? `Cover buku ${book.title}`}
-                    className="size-full object-contain p-2 sm:p-4 drop-shadow-md"
+                    className="size-full object-contain p-2 drop-shadow-md sm:p-4"
                 />
                 {images.length > 1 && (
                     <>
@@ -86,7 +86,7 @@ export function BookImageGallery({ book }: { book: CustomerBook }) {
                             onClick={() => setActiveIndex(index)}
                             className={`h-12 w-9 shrink-0 overflow-hidden border sm:h-16 sm:w-12 ${
                                 index === activeIndex
-                                    ? 'border-primary ring-1 ring-primary'
+                                    ? 'border-primary ring-primary ring-1'
                                     : 'border-border opacity-70 hover:opacity-100'
                             }`}
                             aria-label={`Pilih gambar ${index + 1}`}
