@@ -12,7 +12,7 @@ const highlights = [
     {
         title: 'Bacaan Terkurasi',
         description:
-            'Bacaan berkualitas yang dikurasi oleh tim Wonder Book untukmu.',
+            'Bacaan berkualitas yang dikurasi oleh tim Wonder Prince Library untukmu.',
         image: '/images/customer/home/highlight-reading.jpg',
         icon: Sparkles,
     },

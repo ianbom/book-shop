@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import { exactRupiah, exactRupiahCents, formatMonthYear } from '../resources/js/lib/format.ts';
+import {
+    exactRupiah,
+    exactRupiahCents,
+    formatMonthYear,
+} from '../resources/js/lib/format.ts';
 
 assert.equal(exactRupiahCents(8500001), 'Rp85.000,01');
 assert.equal(exactRupiahCents(999999999999999), 'Rp9.999.999.999.999,99');

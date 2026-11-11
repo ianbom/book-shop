@@ -1,32 +1,32 @@
 - generic [ref=f2e2]:
-  - generic [ref=f2e3]:
-    - generic [ref=f2e6]:
-      - paragraph [ref=f2e7]: Temukan cerita berikutnya
-      - paragraph [ref=f2e8]: Cerita baru selalu menunggu untuk ditemukan.
-    - generic [ref=f2e9]:
-      - link "Wonder Book" [ref=f2e10] [cursor=pointer]:
-        - /url: /
-      - generic [ref=f2e13]:
-        - generic [ref=f2e14]:
-          - heading "Ganti password awal" [level=1] [ref=f2e38]
-          - paragraph [ref=f2e16]: Amankan akun sebelum melanjutkan
-        - generic [ref=f2e40]:
-          - paragraph [ref=f2e41]: Ganti password awal sebelum mengakses akun. Gunakan password baru yang berbeda.
-          - generic [ref=f2e42]:
-            - generic [ref=f2e43]: Password saat ini
-            - generic [ref=f2e44]:
-              - textbox "Password saat ini" [ref=f2e45]: customer123
-              - button "Show password" [ref=f2e46]
-          - generic [ref=f2e50]:
-            - generic [ref=f2e51]: Password baru
-            - generic [ref=f2e52]:
-              - textbox "Password baru" [ref=f2e53]: BrowserCustomer2026!
-              - button "Show password" [ref=f2e54]
-          - generic [ref=f2e58]:
-            - generic [ref=f2e59]: Konfirmasi password baru
-            - generic [ref=f2e60]:
-              - textbox "Konfirmasi password baru" [active] [ref=f2e61]: BrowserCustomer2026!
-              - button "Show password" [ref=f2e62]
-          - button "Simpan password baru" [ref=f2e66]
-        - button "Keluar" [ref=f2e68]
-  - region "Notifications alt+T"
+      - generic [ref=f2e3]:
+            - generic [ref=f2e6]:
+                  - paragraph [ref=f2e7]: Temukan cerita berikutnya
+                  - paragraph [ref=f2e8]: Cerita baru selalu menunggu untuk ditemukan.
+            - generic [ref=f2e9]:
+                  - link "Wonder Book" [ref=f2e10] [cursor=pointer]:
+                        - /url: /
+                  - generic [ref=f2e13]:
+                        - generic [ref=f2e14]:
+                              - heading "Ganti password awal" [level=1] [ref=f2e38]
+                              - paragraph [ref=f2e16]: Amankan akun sebelum melanjutkan
+                        - generic [ref=f2e40]:
+                              - paragraph [ref=f2e41]: Ganti password awal sebelum mengakses akun. Gunakan password baru yang berbeda.
+                              - generic [ref=f2e42]:
+                                    - generic [ref=f2e43]: Password saat ini
+                                    - generic [ref=f2e44]:
+                                          - textbox "Password saat ini" [ref=f2e45]: customer123
+                                          - button "Show password" [ref=f2e46]
+                              - generic [ref=f2e50]:
+                                    - generic [ref=f2e51]: Password baru
+                                    - generic [ref=f2e52]:
+                                          - textbox "Password baru" [ref=f2e53]: BrowserCustomer2026!
+                                          - button "Show password" [ref=f2e54]
+                              - generic [ref=f2e58]:
+                                    - generic [ref=f2e59]: Konfirmasi password baru
+                                    - generic [ref=f2e60]:
+                                          - textbox "Konfirmasi password baru" [active] [ref=f2e61]: BrowserCustomer2026!
+                                          - button "Show password" [ref=f2e62]
+                              - button "Simpan password baru" [ref=f2e66]
+                        - button "Keluar" [ref=f2e68]
+      - region "Notifications alt+T"

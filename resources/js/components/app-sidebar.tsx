@@ -174,7 +174,7 @@ export function AppSidebar({ role }: { role?: 'admin' | 'customer' }) {
                                 <img
                                     src="/dashboard-image/header-sidebar.png"
                                     alt="Wonder Prince Library"
-                                    className="h-28 w-full object-contain group-data-[collapsible=icon]:size-10"
+                                    className="h-20 w-full object-contain group-data-[collapsible=icon]:size-10"
                                 />
                             </Link>
                         </SidebarMenuButton>

@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,11 +18,17 @@ class PreOrderCodeController extends Controller
 {
     public function index(Request $request): Response
     {
-        $filters = $request->validate(['search' => ['nullable', 'string', 'max:100']]);
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'sort' => ['nullable', Rule::in(['code', 'books_count', 'created_at'])],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
+        ]);
+        $filters['sort'] = $filters['sort'] ?? 'code';
+        $filters['direction'] = $filters['direction'] ?? 'asc';
         $search = $filters['search'] ?? '';
         $codes = PreOrderCode::query()->withCount('books')
             ->when($search !== '', fn ($query) => $query->where('code', 'like', "%{$search}%"))
-            ->orderBy('code')->paginate(20)->withQueryString();
+            ->orderBy($filters['sort'], $filters['direction'])->orderBy('id')->paginate(20)->withQueryString();
 
         return Inertia::render('admin/pre-order-codes/index', [
             'preOrderCodes' => PreOrderCodeResource::collection($codes),

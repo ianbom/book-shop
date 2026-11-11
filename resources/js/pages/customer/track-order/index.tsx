@@ -15,7 +15,7 @@ export default function TrackOrderIndex() {
                             aria-hidden="true"
                         />
                         <p className="text-muted-foreground mt-6 text-xs font-semibold tracking-[0.2em] uppercase">
-                            Wonder Book
+                            Wonder Prince Library
                         </p>
                         <h1 className="font-heading text-foreground mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
                             Lacak Pesananmu

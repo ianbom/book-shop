@@ -1,38 +1,38 @@
 - region "Pelunasan pesanan import" [ref=f7e153]:
-  - generic [ref=f7e154]:
-    - heading "Pesanan import · Pelunasan transfer" [level=2] [ref=f7e155]
-    - paragraph [ref=f7e156]: DP hanya informasi, bukan pengurang tagihan. Transfer diperiksa admin sebelum pesanan dapat diproses.
-  - generic [ref=f7e157]:
-    - generic [ref=f7e158]:
-      - term [ref=f7e159]: Total net buku
-      - definition [ref=f7e160]: Rp155.000,00
-    - generic [ref=f7e161]:
-      - term [ref=f7e162]: DP historis (informasi)
-      - definition [ref=f7e163]: Rp70.000,00
-    - generic [ref=f7e164]:
-      - term [ref=f7e165]: Sudah dibayar historis
-      - definition [ref=f7e166]: Rp90.000,00
-    - generic [ref=f7e167]:
-      - term [ref=f7e168]: Transfer disetujui
-      - definition [ref=f7e169]: Rp0,00
-    - generic [ref=f7e170]:
-      - term [ref=f7e171]: Sisa buku
-      - definition [ref=f7e172]: Rp65.000,00
-    - generic [ref=f7e173]:
-      - term [ref=f7e174]: Berat total
-      - definition [ref=f7e175]: 1100 gram
-    - generic [ref=f7e176]:
-      - term [ref=f7e177]: Ongkos kirim
-      - definition [ref=f7e178]: Rp20.000,00
-    - generic [ref=f7e179]:
-      - term [ref=f7e180]: Sisa pelunasan
-      - definition [ref=f7e181]: Rp85.000,00
-  - generic [ref=f7e183]:
-    - heading "Riwayat bukti transfer" [level=3] [ref=f7e184]
-    - generic [ref=f7e185]:
-      - paragraph [ref=f7e186]: Ditolak · Rp85.000,00
-      - paragraph [ref=f7e187]: Bank Contoh · 001234 · Toko Test
-      - paragraph [ref=f7e188]: Diajukan 30 Okt 2026, 10.56 · Diperiksa 30 Okt 2026, 10.59
-      - paragraph [ref=f7e302]: "Alasan: Bukti test kurang jelas; unggah ulang."
-      - 'link "Lihat / unduh bukti #1" [ref=f7e189] [cursor=pointer]':
-        - /url: http://127.0.0.1:8127/order-payments/1/proof
+      - generic [ref=f7e154]:
+            - heading "Pesanan import · Pelunasan transfer" [level=2] [ref=f7e155]
+            - paragraph [ref=f7e156]: DP hanya informasi, bukan pengurang tagihan. Transfer diperiksa admin sebelum pesanan dapat diproses.
+      - generic [ref=f7e157]:
+            - generic [ref=f7e158]:
+                  - term [ref=f7e159]: Total net buku
+                  - definition [ref=f7e160]: Rp155.000,00
+            - generic [ref=f7e161]:
+                  - term [ref=f7e162]: DP historis (informasi)
+                  - definition [ref=f7e163]: Rp70.000,00
+            - generic [ref=f7e164]:
+                  - term [ref=f7e165]: Sudah dibayar historis
+                  - definition [ref=f7e166]: Rp90.000,00
+            - generic [ref=f7e167]:
+                  - term [ref=f7e168]: Transfer disetujui
+                  - definition [ref=f7e169]: Rp0,00
+            - generic [ref=f7e170]:
+                  - term [ref=f7e171]: Sisa buku
+                  - definition [ref=f7e172]: Rp65.000,00
+            - generic [ref=f7e173]:
+                  - term [ref=f7e174]: Berat total
+                  - definition [ref=f7e175]: 1100 gram
+            - generic [ref=f7e176]:
+                  - term [ref=f7e177]: Ongkos kirim
+                  - definition [ref=f7e178]: Rp20.000,00
+            - generic [ref=f7e179]:
+                  - term [ref=f7e180]: Sisa pelunasan
+                  - definition [ref=f7e181]: Rp85.000,00
+      - generic [ref=f7e183]:
+            - heading "Riwayat bukti transfer" [level=3] [ref=f7e184]
+            - generic [ref=f7e185]:
+                  - paragraph [ref=f7e186]: Ditolak · Rp85.000,00
+                  - paragraph [ref=f7e187]: Bank Contoh · 001234 · Toko Test
+                  - paragraph [ref=f7e188]: Diajukan 30 Okt 2026, 10.56 · Diperiksa 30 Okt 2026, 10.59
+                  - paragraph [ref=f7e302]: 'Alasan: Bukti test kurang jelas; unggah ulang.'
+                  - 'link "Lihat / unduh bukti #1" [ref=f7e189] [cursor=pointer]':
+                        - /url: http://127.0.0.1:8127/order-payments/1/proof

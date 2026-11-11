@@ -14,11 +14,13 @@ use App\Http\Resources\Admin\OrderDetailResource;
 use App\Http\Resources\Admin\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\User;
 use App\Services\Admin\OrderStatusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,9 +36,14 @@ class OrderController extends Controller
             'eta' => ['nullable', 'date_format:Y-m'],
             'review' => ['nullable', 'in:pending'],
             'source' => ['nullable', 'in:website,imported'],
+            'sort' => ['nullable', Rule::in(['order_code', 'customer_name', 'subtotal', 'shipping_cost', 'total', 'created_at', 'eta'])],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
         ]);
 
-        $filters = $request->only(['search', 'status', 'pre_order_code', 'eta', 'review', 'source']);
+        $filters = array_merge($request->only(['search', 'status', 'pre_order_code', 'eta', 'review', 'source']), [
+            'sort' => $request->input('sort') ?: 'created_at',
+            'direction' => $request->input('direction') ?: 'desc',
+        ]);
         $eta = $request->filled('eta') ? Carbon::createFromFormat('!Y-m', $filters['eta']) : null;
         $status = OrderStatus::tryFrom($request->string('status')->toString());
         $orders = Order::query()
@@ -61,9 +68,24 @@ class OrderController extends Controller
                 ->groupBy('order_id')
                 ->havingRaw('MIN(preorder_estimated_date) BETWEEN ? AND ?', [
                     $month->toDateString(), $month->copy()->endOfMonth()->toDateString(),
-                ])))
-            ->latest()
-            ->paginate(15)
+                ])));
+
+        if ($filters['sort'] === 'customer_name') {
+            $orders->addSelect(['sort_customer_name' => User::withTrashed()
+                ->selectRaw("NULLIF(TRIM(name), '')")->whereColumn('users.id', 'orders.user_id')->limit(1)])
+                ->orderByRaw('sort_customer_name IS NULL')
+                ->orderBy('sort_customer_name', $filters['direction']);
+        } elseif ($filters['sort'] === 'eta') {
+            $orders->orderByRaw('preorder_estimated_date IS NULL')
+                ->orderBy('preorder_estimated_date', $filters['direction']);
+        } else {
+            if ($filters['sort'] === 'shipping_cost') {
+                $orders->orderByRaw("CASE WHEN source = 'imported' AND shipping_selected_at IS NULL THEN 1 ELSE 0 END");
+            }
+            $orders->orderBy($filters['sort'], $filters['direction']);
+        }
+
+        $orders = $orders->orderBy('orders.id')->paginate(15)
             ->appends($filters);
 
         return Inertia::render('admin/orders/index', [

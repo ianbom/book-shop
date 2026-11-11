@@ -40,24 +40,29 @@ Prefer direct paths and independent corroboration over contextual clues. Never p
 Answer the asked question first and use this shape:
 
 ### Question
+
 Restated question, briefly.
 
 ### Ranked synthesis
-| Rank | Explanation | Confidence | Basis |
-|------|-------------|------------|-------|
-| 1 | ... | High / Medium / Low | strongest supporting evidence |
-| 2 | ... | High / Medium / Low | why it trails |
-| 3 | ... | High / Medium / Low | why it remains possible |
+
+| Rank | Explanation | Confidence          | Basis                         |
+| ---- | ----------- | ------------------- | ----------------------------- |
+| 1    | ...         | High / Medium / Low | strongest supporting evidence |
+| 2    | ...         | High / Medium / Low | why it trails                 |
+| 3    | ...         | High / Medium / Low | why it remains possible       |
 
 ### Evidence
+
 - `path/to/file:line-line` — direct observation.
 - `path/to/file:line-line` — corroborating observation.
 
 ### Inference
+
 - What the evidence most strongly implies.
 - Why weaker alternatives were down-ranked.
 
 ### Unknowns / limits
+
 - What the repository does not establish.
 - The next discriminating read-only probe, when useful.
 

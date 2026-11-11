@@ -18,14 +18,14 @@ Aturan ini menggantikan ketentuan status dan pengiriman import yang bertentangan
 
 Admin membutuhkan cara memasukkan pesanan lawas dari Excel beserta customer, buku, kategori, kode preorder (PO), ETA, dan riwayat pembayaran. Customer kemudian dapat melihat pesanan tersebut, memilih pengiriman, dan melunasi sisa tagihan dengan mengunggah bukti transfer langsung pada pesanan.
 
-| Aspek | Pesanan baru dari website | Pesanan lawas hasil import |
-| --- | --- | --- |
-| Pembuatan | Keranjang dan checkout | Excel, pemeriksaan draf, penyimpanan admin |
-| Pembayaran | Saldo wallet, seperti sekarang | Pembayaran historis dan pelunasan transfer yang disetujui admin |
-| Pemilihan ongkir | Saat checkout | Setelah import, ketika customer menyiapkan pelunasan |
-| Pengurangan stok | Mengikuti checkout yang sudah ada | Tidak mengurangi stok saat import |
-| Jenis item | Ready stock atau preorder sesuai aturan checkout | Seluruh item bertipe preorder |
-| Voucher | Mengikuti fitur website | Diskon baris dari Excel; bukan pemakaian voucher baru |
+| Aspek            | Pesanan baru dari website                        | Pesanan lawas hasil import                                      |
+| ---------------- | ------------------------------------------------ | --------------------------------------------------------------- |
+| Pembuatan        | Keranjang dan checkout                           | Excel, pemeriksaan draf, penyimpanan admin                      |
+| Pembayaran       | Saldo wallet, seperti sekarang                   | Pembayaran historis dan pelunasan transfer yang disetujui admin |
+| Pemilihan ongkir | Saat checkout                                    | Setelah import, ketika customer menyiapkan pelunasan            |
+| Pengurangan stok | Mengikuti checkout yang sudah ada                | Tidak mengurangi stok saat import                               |
+| Jenis item       | Ready stock atau preorder sesuai aturan checkout | Seluruh item bertipe preorder                                   |
+| Voucher          | Mengikuti fitur website                          | Diskon baris dari Excel; bukan pemakaian voucher baru           |
 
 Fitur ini tidak mengganti checkout wallet, tidak menjadikan transfer sebagai pilihan pembayaran pesanan website, dan tidak mengubah pesanan lama secara massal. Aturan pemisahan ready stock dan kode PO pada checkout website tetap berlaku. Import bukan checkout keranjang; jangan menerapkan pembatasan kelompok checkout kepada data historis tanpa keputusan bisnis tambahan.
 
@@ -49,25 +49,25 @@ Fitur ini tidak mengganti checkout wallet, tidak menjadikan transfer sebagai pil
 
 Acuan saat dokumen dibuat adalah `template-order.xlsx`, sheet `Sheet1`, dengan satu baris header dan belum ada contoh data. File sementara Excel `~$template-order.xlsx` bukan template dan tidak boleh diproses.
 
-| Header yang tersedia | Arti dan tujuan penyimpanan |
-| --- | --- |
-| `kode order` | Identitas dan kunci pengelompokan pesanan |
-| `email customer` | Pencocokan akun pemilik pesanan |
-| `nama customer` | Nama akun baru dan informasi draf |
-| `nama buku` | Pencocokan master dan snapshot nama item |
-| `kode PO` | Referensi PO serta snapshot kode pada item |
-| `kategori buku` | Referensi kategori master buku |
-| `qty` | Jumlah buku pada baris |
-| `harga satuan` | Harga historis per buku, bukan otomatis harga master terkini |
-| `discount` | Potongan nominal untuk keseluruhan baris, bukan persentase |
-| `total dp` | Informasi DP historis per baris |
-| `total sudah dibayar` | Pembayaran historis aktual per baris |
-| `harga total` | Hasil harga satuan dikali qty dikurangi discount |
-| `eta` | Estimasi preorder milik item historis |
-| `kode pos` | Kode pos tujuan, diperlakukan sebagai teks |
-| `alamat` | Alamat historis untuk diperiksa customer |
-| `status pesanan` | Status historis yang perlu dipetakan ke status aplikasi |
-| `berat perbuku (gram)` | Berat satu buku dalam gram, wajib bilangan bulat positif |
+| Header yang tersedia   | Arti dan tujuan penyimpanan                                  |
+| ---------------------- | ------------------------------------------------------------ |
+| `kode order`           | Identitas dan kunci pengelompokan pesanan                    |
+| `email customer`       | Pencocokan akun pemilik pesanan                              |
+| `nama customer`        | Nama akun baru dan informasi draf                            |
+| `nama buku`            | Pencocokan master dan snapshot nama item                     |
+| `kode PO`              | Referensi PO serta snapshot kode pada item                   |
+| `kategori buku`        | Referensi kategori master buku                               |
+| `qty`                  | Jumlah buku pada baris                                       |
+| `harga satuan`         | Harga historis per buku, bukan otomatis harga master terkini |
+| `discount`             | Potongan nominal untuk keseluruhan baris, bukan persentase   |
+| `total dp`             | Informasi DP historis per baris                              |
+| `total sudah dibayar`  | Pembayaran historis aktual per baris                         |
+| `harga total`          | Hasil harga satuan dikali qty dikurangi discount             |
+| `eta`                  | Estimasi preorder milik item historis                        |
+| `kode pos`             | Kode pos tujuan, diperlakukan sebagai teks                   |
+| `alamat`               | Alamat historis untuk diperiksa customer                     |
+| `status pesanan`       | Status historis yang perlu dipetakan ke status aplikasi      |
+| `berat perbuku (gram)` | Berat satu buku dalam gram, wajib bilangan bulat positif     |
 
 Template belum memiliki nomor telepon, SKU, ISBN, penulis, dan dimensi. Empat atribut buku terakhir boleh null. Nomor telepon serta kelengkapan alamat yang diperlukan pengiriman harus dilengkapi customer sebelum meminta tarif atau mengajukan pembayaran.
 
@@ -158,16 +158,16 @@ sisa_tagihan = total_tagihan - pembayaran_historis - pembayaran_transfer_disetuj
 DP tidak muncul sebagai pengurang. Diskon Excel tidak dipotong lagi sebagai voucher. Pembayaran historis tidak dibuat sebagai top-up maupun debit wallet. Gunakan representasi nominal eksak mengikuti presisi database, bukan floating-point untuk perhitungan keuangan.
 
 | Total buku | Total DP | Sudah dibayar | Sisa buku sebelum ongkir |
-| --- | --- | --- | --- |
-| Rp120.000 | Rp50.000 | Rp0 | Rp120.000 |
-| Rp120.000 | Rp50.000 | Rp80.000 | Rp40.000 |
+| ---------- | -------- | ------------- | ------------------------ |
+| Rp120.000  | Rp50.000 | Rp0           | Rp120.000                |
+| Rp120.000  | Rp50.000 | Rp80.000      | Rp40.000                 |
 
 Contoh dua baris dengan kode `LAWAS-001`:
 
-| Baris | Harga satuan | Qty | Discount | Total baris | DP | Sudah dibayar | Berat per buku |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Rp60.000 | 2 | Rp10.000 | Rp110.000 | Rp50.000 | Rp80.000 | 300 gram |
-| 2 | Rp50.000 | 1 | Rp5.000 | Rp45.000 | Rp20.000 | Rp10.000 | 500 gram |
+| Baris | Harga satuan | Qty | Discount | Total baris | DP       | Sudah dibayar | Berat per buku |
+| ----- | ------------ | --- | -------- | ----------- | -------- | ------------- | -------------- |
+| 1     | Rp60.000     | 2   | Rp10.000 | Rp110.000   | Rp50.000 | Rp80.000      | 300 gram       |
+| 2     | Rp50.000     | 1   | Rp5.000  | Rp45.000    | Rp20.000 | Rp10.000      | 500 gram       |
 
 Hasil: satu pesanan, tiga eksemplar, total buku Rp155.000, DP Rp70.000, pembayaran historis Rp90.000, sisa buku Rp65.000, dan berat 1.100 gram. Jika ongkir terpilih Rp20.000, customer melunasi Rp85.000. Persetujuan pembayaran tersebut menghasilkan total pembayaran Rp175.000 dan sisa nol.
 
@@ -214,16 +214,16 @@ Jika buku sudah lunas secara historis tetapi ongkir belum dipilih, masih diperlu
 
 Berikut rancangan kebutuhan data, bukan pernyataan bahwa kolomnya sudah dibuat. Nama final mengikuti konvensi proyek; jangan menduplikasi atribut yang sudah tersedia.
 
-| Area | Kondisi saat ini / kebutuhan perubahan |
-| --- | --- |
-| `orders` | Sudah memiliki kode unik, user, subtotal, voucher discount, shipping cost, total, wallet amount, serta status. Tambahkan pembedaan asal/metode pembayaran, identitas import idempoten, ringkasan historis atau sumber agregasinya, serta status pemilihan pengiriman. `wallet_amount` import tidak diisi nilai transfer historis. |
-| `order_items` | Sudah memiliki snapshot nama, harga, qty, berat, dimensi, ISBN, penulis, sale type, subtotal, dan ETA. Tambahkan snapshot kode PO, diskon baris, DP historis, pembayaran historis, dan identitas baris sumber yang belum tersedia. |
-| `users` | Tambahkan penanda wajib ganti password; pertahankan role dan kredensial akun lama. |
-| `books` | Audit nullable penulis/SKU/ISBN/dimensi pada schema dan validasi. Tipe preorder ditetapkan untuk master baru hasil import; master existing tidak diubah menjadi preorder secara diam-diam. |
-| Referensi | Gunakan kategori, kode PO, pivot kategori buku, dan normalisasi unik yang sudah ada. |
-| Pembayaran langsung | Perlu record pengajuan berelasi ke order dengan pengunggah, nominal, lokasi bukti, status review, reviewer, waktu review, alasan, serta identitas idempoten. Riwayat historis Excel dan pembayaran baru tetap dapat dibedakan. |
-| Pengiriman | Gunakan snapshot alamat dan data layanan yang sudah ada; pastikan tarif untuk pesanan import belum berarti shipment sudah dipesan. |
-| Audit | Catat admin import, asal baris/kelompok, perubahan status, dan keputusan pembayaran. |
+| Area                | Kondisi saat ini / kebutuhan perubahan                                                                                                                                                                                                                                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `orders`            | Sudah memiliki kode unik, user, subtotal, voucher discount, shipping cost, total, wallet amount, serta status. Tambahkan pembedaan asal/metode pembayaran, identitas import idempoten, ringkasan historis atau sumber agregasinya, serta status pemilihan pengiriman. `wallet_amount` import tidak diisi nilai transfer historis. |
+| `order_items`       | Sudah memiliki snapshot nama, harga, qty, berat, dimensi, ISBN, penulis, sale type, subtotal, dan ETA. Tambahkan snapshot kode PO, diskon baris, DP historis, pembayaran historis, dan identitas baris sumber yang belum tersedia.                                                                                                |
+| `users`             | Tambahkan penanda wajib ganti password; pertahankan role dan kredensial akun lama.                                                                                                                                                                                                                                                |
+| `books`             | Audit nullable penulis/SKU/ISBN/dimensi pada schema dan validasi. Tipe preorder ditetapkan untuk master baru hasil import; master existing tidak diubah menjadi preorder secara diam-diam.                                                                                                                                        |
+| Referensi           | Gunakan kategori, kode PO, pivot kategori buku, dan normalisasi unik yang sudah ada.                                                                                                                                                                                                                                              |
+| Pembayaran langsung | Perlu record pengajuan berelasi ke order dengan pengunggah, nominal, lokasi bukti, status review, reviewer, waktu review, alasan, serta identitas idempoten. Riwayat historis Excel dan pembayaran baru tetap dapat dibedakan.                                                                                                    |
+| Pengiriman          | Gunakan snapshot alamat dan data layanan yang sudah ada; pastikan tarif untuk pesanan import belum berarti shipment sudah dipesan.                                                                                                                                                                                                |
+| Audit               | Catat admin import, asal baris/kelompok, perubahan status, dan keputusan pembayaran.                                                                                                                                                                                                                                              |
 
 Total historis di order, jika disimpan sebagai ringkasan, wajib konsisten dengan item. Pembayaran approved memiliki satu sumber kebenaran; jangan menjumlahkan riwayat yang sama melalui dua tabel atau dua jenis agregat.
 
@@ -279,24 +279,24 @@ Audit pula perubahan ongkir admin, status pembayaran manual, booking shipment, p
 
 ## 12. Skenario Pengujian dan Kriteria Penerimaan
 
-| Area | Skenario yang harus terbukti |
-| --- | --- |
-| Upload | Header/tipe/ukuran salah ditolak; workbook valid membuka review tanpa membuat data bisnis. |
-| Draf | Semua field sumber dapat dikoreksi; error, grouping, total, dan berat dihitung ulang di server; admin lain tidak dapat mengakses draf. |
-| Grouping | Kode sama dalam file membentuk satu order; email/alamat/status bertentangan memblokir kelompok. |
-| Konflik database | Kode existing tidak ditimpa; mengganti kode menghilangkan konflik; dua commit serentak tidak membuat duplikat. |
-| Penyimpanan | Simpan satu berarti seluruh item kelompok; simpan semua melaporkan hasil setiap kelompok; retry tidak menggandakan hasil. |
-| Referensi | Perbedaan kapital memakai referensi sama; kecocokan ambigu dan referensi terarsip memerlukan keputusan eksplisit. |
-| Master/snapshot | Judul sama menggunakan satu master; PO/ETA pertama berlaku pada master baru; master existing dan snapshot order lain tidak berubah. |
-| Nullable | SKU, ISBN, penulis, dimensi kosong diterima di alur yang disesuaikan tanpa nilai fiktif. |
-| Nominal | Dua contoh DP dan contoh dua baris pada bagian 6 benar; diskon hanya sekali; mismatch harga total diblokir; nominal menggunakan presisi eksak. |
-| Akun | Email existing digunakan kembali tanpa reset; akun baru ter-hash dan wajib ganti password; endpoint order terblokir sebelum penggantian. |
-| Stok | Import, pelunasan, dan pembatalan import tidak menciptakan stok keluar/masuk tanpa transaksi stok asal. |
-| Ongkir | Satu order memakai berat gabungan snapshot; cart tidak memengaruhi tarif; belum dipilih bukan gratis; tarif browser palsu ditolak. |
-| Pembayaran | Pelunasan parsial ditolak; pending/rejected tidak menambah paid; approval tepat sekali; bukti tidak dapat diakses customer lain. |
-| Konsistensi | Perubahan tagihan saat pending ditolak; bukti approved tidak dapat dihapus untuk menghilangkan pembayaran. |
-| Regresi | Checkout website tetap memotong wallet/stok sebagaimana semula, menjaga voucher, batas kode PO, dan refund berbasis ledger. |
-| UI | Review, modal koreksi, detail pesanan, unggah bukti, dan approval dapat dipakai pada desktop/mobile dengan keyboard. |
+| Area             | Skenario yang harus terbukti                                                                                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Upload           | Header/tipe/ukuran salah ditolak; workbook valid membuka review tanpa membuat data bisnis.                                                     |
+| Draf             | Semua field sumber dapat dikoreksi; error, grouping, total, dan berat dihitung ulang di server; admin lain tidak dapat mengakses draf.         |
+| Grouping         | Kode sama dalam file membentuk satu order; email/alamat/status bertentangan memblokir kelompok.                                                |
+| Konflik database | Kode existing tidak ditimpa; mengganti kode menghilangkan konflik; dua commit serentak tidak membuat duplikat.                                 |
+| Penyimpanan      | Simpan satu berarti seluruh item kelompok; simpan semua melaporkan hasil setiap kelompok; retry tidak menggandakan hasil.                      |
+| Referensi        | Perbedaan kapital memakai referensi sama; kecocokan ambigu dan referensi terarsip memerlukan keputusan eksplisit.                              |
+| Master/snapshot  | Judul sama menggunakan satu master; PO/ETA pertama berlaku pada master baru; master existing dan snapshot order lain tidak berubah.            |
+| Nullable         | SKU, ISBN, penulis, dimensi kosong diterima di alur yang disesuaikan tanpa nilai fiktif.                                                       |
+| Nominal          | Dua contoh DP dan contoh dua baris pada bagian 6 benar; diskon hanya sekali; mismatch harga total diblokir; nominal menggunakan presisi eksak. |
+| Akun             | Email existing digunakan kembali tanpa reset; akun baru ter-hash dan wajib ganti password; endpoint order terblokir sebelum penggantian.       |
+| Stok             | Import, pelunasan, dan pembatalan import tidak menciptakan stok keluar/masuk tanpa transaksi stok asal.                                        |
+| Ongkir           | Satu order memakai berat gabungan snapshot; cart tidak memengaruhi tarif; belum dipilih bukan gratis; tarif browser palsu ditolak.             |
+| Pembayaran       | Pelunasan parsial ditolak; pending/rejected tidak menambah paid; approval tepat sekali; bukti tidak dapat diakses customer lain.               |
+| Konsistensi      | Perubahan tagihan saat pending ditolak; bukti approved tidak dapat dihapus untuk menghilangkan pembayaran.                                     |
+| Regresi          | Checkout website tetap memotong wallet/stok sebagaimana semula, menjaga voucher, batas kode PO, dan refund berbasis ledger.                    |
+| UI               | Review, modal koreksi, detail pesanan, unggah bukti, dan approval dapat dipakai pada desktop/mobile dengan keyboard.                           |
 
 Pengujian memakai database terisolasi dan mock tarif/pengiriman. Tidak mengirim pembayaran, email massal, atau booking nyata. Jalankan test terfokus, typecheck, lint/static analysis, build terisolasi, dan pemeriksaan browser sebelum menyatakan implementasi selesai. Kegagalan bawaan codebase dilaporkan terpisah, bukan diperbaiki di luar scope.
 

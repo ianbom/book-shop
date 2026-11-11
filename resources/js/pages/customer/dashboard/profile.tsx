@@ -53,7 +53,7 @@ export default function Profile({
             <Head title="Profil Saya" />
             <header className="mb-7">
                 <p className="text-primary text-xs font-bold tracking-[0.16em] uppercase">
-                    WonderBookLibrary · Akun
+                    Wonder Prince Library · Akun
                 </p>
                 <h1 className="font-heading text-foreground mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
                     Profil Saya

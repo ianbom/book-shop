@@ -1,0 +1,99 @@
+.order-import-page,
+.order-import-dialog {
+    --background: #f6f8fb;
+    --foreground: #172b4d;
+    --card: #ffffff;
+    --card-foreground: #172b4d;
+    --popover: #ffffff;
+    --popover-foreground: #172b4d;
+    --primary: #244f80;
+    --primary-foreground: #ffffff;
+    --secondary: #eaf0f7;
+    --secondary-foreground: #244f80;
+    --muted: #f6f8fb;
+    --muted-foreground: #5b6b82;
+    --accent: #eaf0f7;
+    --accent-foreground: #244f80;
+    --destructive: #b42318;
+    --destructive-foreground: #ffffff;
+    --destructive-background: #fef3f2;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #244f80;
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --font-heading: 'Manrope', sans-serif;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    color: var(--foreground);
+}
+
+:is(.order-import-page, .order-import-dialog) [data-slot='button'] {
+    min-height: 40px;
+    box-shadow: none;
+}
+
+:is(.order-import-page, .order-import-dialog) [data-slot='button'].border {
+    background: #ffffff;
+    border-color: #7f8ea3;
+    color: var(--primary);
+}
+
+:is(.order-import-page, .order-import-dialog)
+    [data-slot='button']:is(:disabled, [aria-disabled='true']) {
+    background: #e8edf3;
+    border-color: transparent;
+    color: #66758a;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.order-import-dialog input,
+.order-import-dialog textarea,
+.order-import-dialog select {
+    min-height: 40px;
+    background: #ffffff;
+    border-color: #7f8ea3;
+    border-radius: 8px;
+}
+
+.order-import-dialog [aria-invalid='true'] {
+    border-color: var(--destructive);
+}
+
+body:has(.order-import-page) [data-slot='dialog-overlay'] {
+    background: rgb(23 43 77 / 35%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .order-import-page *,
+    .order-import-dialog {
+        animation-duration: 0s;
+        transition-duration: 0s;
+    }
+}
+
+.order-import-page {
+    background: var(--background);
+}
+
+.order-import-dialog {
+    background: #ffffff;
+}

@@ -1,6 +1,6 @@
 ---
 name: omx-setup
-description: "[OMX] Setup and configure oh-my-codex using current CLI behavior"
+description: '[OMX] Setup and configure oh-my-codex using current CLI behavior'
 ---
 
 # OMX Setup
@@ -17,6 +17,7 @@ omx agents-init [path] [--dry-run] [--force] [--verbose]
 Use `agents-init` for lightweight AGENTS.md scaffolding only, not a full install.
 
 Supported setup options:
+
 - `--force`: overwrite/reinstall managed artifacts; transient, not persisted or replayed.
 - `--merge-agents`, `--no-merge-agents`, `--clear-merge-agents-policy`: exact bare selectors (no values/equals). Repeated identical selectors are idempotent; conflicting selectors fail before mutations. Set persists an explicit policy per invoking project root; clear removes it and cannot combine with a set. Merge refreshes managed sections; no-merge only suppresses that branch and is not a preserve mode.
 - `--dry-run`, `--verbose`: preview actions or show per-file/per-step detail.

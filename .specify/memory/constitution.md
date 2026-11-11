@@ -6,17 +6,20 @@ Added sections: Repository Constraints; Development Workflow
 Removed sections: None
 Follow-up TODOs: Confirm original ratification date
 -->
+
 # Book Shop Constitution
 
 ## Core Principles
 
 ### I. Preserve Existing Architecture and Behavior
+
 Implement features within the existing Laravel, Inertia, and React application structure. Preserve
 existing routes, interfaces, and behavior unless explicitly changed. Reuse established controllers,
 services, models, resources, components, hooks, and utilities. Avoid unrelated refactors to retain
 compatibility with the existing application.
 
 ### II. Follow Established Backend and Frontend Patterns
+
 Keep routes in `routes/`, HTTP controllers and Form Requests under `app/Http/`, business operations
 in `app/Services/`, entities in `app/Models/`, and serialized props in `app/Http/Resources/`.
 Render pages through Inertia. Keep React TypeScript pages, components, layouts, hooks, shared
@@ -27,6 +30,7 @@ PHP classes use StudlyCase and concern-based namespaces; class suffixes reflect 
 directory/file pattern, React components use PascalCase, and route names use dotted segments.
 
 ### III. Validate Inputs and Preserve Data Integrity
+
 Validate untrusted request data with Laravel Form Requests and use validated data for writes.
 Use existing Eloquent relationships, enums, and database constraints. Make schema changes through
 Laravel migrations. Keep related writes atomic with transactions where consistency is needed;
@@ -34,12 +38,14 @@ retain established inventory/order locking and integrity safeguards. These rules
 input and partial or conflicting state changes.
 
 ### IV. Preserve Authentication and Error Contracts
+
 Retain Fortify authentication and existing route middleware, including `auth` and `verified` where
 applied. Do not assume an unobserved role or policy system; preserve existing access behavior
 unless authorization changes are requested. Use Laravel validation and HTTP exceptions, Inertia
 validation errors, and established flash/toast patterns rather than parallel error mechanisms.
 
 ### V. Verify Changes and Keep Dependencies Minimal
+
 Add or update focused tests in the existing `tests/Feature/` or `tests/Unit/` structure for changed
 behavior; reuse factories and `RefreshDatabase` where appropriate. Existing tests must continue
 to pass. Run relevant configured lint, static-analysis, TypeScript, and test checks. Prefer

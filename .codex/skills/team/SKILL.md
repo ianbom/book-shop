@@ -1,6 +1,6 @@
 ---
 name: team
-description: "[OMX] N coordinated agents on shared task list using tmux-based orchestration"
+description: '[OMX] N coordinated agents on shared task list using tmux-based orchestration'
 ---
 
 # Team Skill
@@ -25,11 +25,11 @@ Use only for an explicit `$team` request or `omx team ...` launch that benefits 
 3. Runtime creates `.omx/state/team/<name>/config.json`, `manifest.v2.json`, `tasks/task-<id>.json`, worker identities/inboxes, mailbox files, and a dispatch queue. Workers receive `OMX_TEAM_WORKER`, `OMX_TEAM_STATE_ROOT`, and `OMX_TEAM_LEADER_CWD`.
 4. Deliver assignments through durable inbox/task state and the CLI API. The worker card defines ACK, claim, transition, mailbox, and idle-status commands.
 5. Prefer these machine-readable operations:
-   ```bash
-   omx team api send-message --input '{"team_name":"<name>","from_worker":"leader-fixed","to_worker":"worker-1","body":"<short trigger>"}' --json
-   omx team api read-task --input '{"team_name":"<name>","task_id":"<id>"}' --json
-   omx team api transition-task-status --input '{"team_name":"<name>","task_id":"<id>","from":"in_progress","to":"completed","claim_token":"<token>"}' --json
-   ```
+    ```bash
+    omx team api send-message --input '{"team_name":"<name>","from_worker":"leader-fixed","to_worker":"worker-1","body":"<short trigger>"}' --json
+    omx team api read-task --input '{"team_name":"<name>","task_id":"<id>"}' --json
+    omx team api transition-task-status --input '{"team_name":"<name>","task_id":"<id>","from":"in_progress","to":"completed","claim_token":"<token>"}' --json
+    ```
 6. Monitor with `omx team status <name> --json` or `omx team await <name> --timeout-ms 30000 --json`; inspect mailbox/state files when a worker is blocked or stale.
 7. Keep the team running until `pending=0`, `in_progress=0`, and `failed=0` (or an explicitly acknowledged failure path). Run `omx team shutdown <name>` only then, unless the user explicitly aborts.
 8. Verify shutdown evidence and state cleanup. Do not claim completion while workers are still writing.
@@ -37,9 +37,11 @@ Use only for an explicit `$team` request or `omx team ...` launch that benefits 
 ## Team and Ultragoal
 
 When a leader-owned `.omx/ultragoal/goals.json` exists, workers return task evidence only. The leader checkpoints with a fresh Codex `get_goal` snapshot:
+
 ```bash
 omx ultragoal checkpoint --goal-id <id> --status complete --evidence "<Team evidence>" --codex-goal-json <fresh-get-goal-json-or-path>
 ```
+
 Team launch remains an explicit separate action; it does not create hidden Codex goals.
 
 ## Dispatch and recovery

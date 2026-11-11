@@ -108,5 +108,6 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Selamat datang kembali',
-    description: 'Masuk untuk melanjutkan cerita bersama Wonder Book.',
+    description:
+        'Masuk untuk melanjutkan cerita bersama Wonder Prince Library.',
 };

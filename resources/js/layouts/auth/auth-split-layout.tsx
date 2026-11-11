@@ -33,7 +33,7 @@ export default function AuthSplitLayout({
                 >
                     <AppLogoIcon className="size-8 fill-current" />
                     <span className="font-heading text-xl font-semibold">
-                        Wonder Book
+                        Wonder Prince Library
                     </span>
                 </Link>
                 <div className="flex flex-1 items-center justify-center py-10">

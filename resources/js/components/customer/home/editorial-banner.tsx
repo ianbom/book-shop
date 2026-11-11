@@ -17,9 +17,9 @@ export function EditorialBanner() {
                     </h2>
                     <p className="text-primary-foreground/80 mt-4 max-w-md text-sm leading-6">
                         Buku adalah jendela menuju pengetahuan, inspirasi, dan
-                        perubahan. Di Wonder Book, kami hadir untuk membawakan
-                        bacaan terbaik yang akan menemani setiap langkah
-                        perjalananmu.
+                        perubahan. Di Wonder Prince Library, kami hadir untuk
+                        membawakan bacaan terbaik yang akan menemani setiap
+                        langkah perjalananmu.
                     </p>
                     <a
                         href="#tentang"

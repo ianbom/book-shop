@@ -10,7 +10,9 @@ export const exactRupiah = (value: string): string => {
 };
 export const exactRupiahCents = (value: number): string => {
     const cents = BigInt(value);
-    return exactRupiah(`${cents / 100n}.${(cents % 100n).toString().padStart(2, '0')}`);
+    return exactRupiah(
+        `${cents / 100n}.${(cents % 100n).toString().padStart(2, '0')}`,
+    );
 };
 export const formatDate = (value: string | null | undefined): string =>
     value

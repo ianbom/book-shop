@@ -1,226 +1,226 @@
 - generic [ref=f9e2]:
-  - generic [ref=f9e3]:
-    - generic [ref=f9e7]:
-      - list [ref=f9e9]:
-        - listitem [ref=f9e10]:
-          - link [ref=f9e11] [cursor=pointer]:
-            - /url: /
-            - img "Wonder Prince Library" [ref=f9e12]
-      - generic [ref=f9e14]:
-        - generic [ref=f9e15]: Menu Utama
-        - list [ref=f9e16]:
-          - listitem [ref=f9e17]:
-            - link "Profil" [ref=f9e18] [cursor=pointer]:
-              - /url: /customer/dashboard/profile
-          - listitem [ref=f9e23]:
-            - link "Keranjang" [ref=f9e24] [cursor=pointer]:
-              - /url: /customer/dashboard/carts
-          - listitem [ref=f9e30]:
-            - link "Pesanan" [ref=f9e31] [cursor=pointer]:
-              - /url: /customer/dashboard/orders
-          - listitem [ref=f9e36]:
-            - link "Saldo" [ref=f9e37] [cursor=pointer]:
-              - /url: /customer/dashboard/wallets
-          - listitem [ref=f9e42]:
-            - link "Voucher" [ref=f9e43] [cursor=pointer]:
-              - /url: /customer/dashboard/vouchers
-      - img "Good books, brighter days, happier kids" [ref=f9e49]
-    - main [ref=f9e50]:
-      - generic [ref=f9e51]:
-        - search "Cari buku di katalog" [ref=f9e52]:
-          - searchbox "Cari judul buku" [ref=f9e54]
-          - button "Cari" [ref=f9e55]
-        - button "Menu profil Browser Customer" [ref=f9e57]:
-          - generic [ref=f9e58]: Rp 0
-          - generic [ref=f9e59]: B
-          - generic [ref=f9e61]:
-            - generic [ref=f9e62]: Halo, Browser
-            - generic [ref=f9e63]: Customer
-      - generic [ref=f9e66]:
-        - main [ref=f9e67]:
-          - navigation "Breadcrumb" [ref=f9e68]:
-            - link "Dashboard" [ref=f9e69] [cursor=pointer]:
-              - /url: /customer/dashboard/orders
-            - generic [ref=f9e75]: Detail Pesanan
-          - generic [ref=f9e77]:
-            - generic [ref=f9e84]:
-              - paragraph [ref=f9e85]: Pesanan Saya
-              - heading "Detail Pesanan" [level=1] [ref=f9e86]
-            - paragraph [ref=f9e87]: Lihat detail lengkap pesanan, status, dan informasi pengiriman.
-          - generic [ref=f9e88]:
-            - generic [ref=f9e93]:
-              - paragraph [ref=f9e94]: Kode Pesanan
-              - paragraph [ref=f9e95]: LAWAS-001
-            - generic [ref=f9e99]:
-              - paragraph [ref=f9e100]: Tanggal Pesanan
-              - paragraph [ref=f9e101]: 30 Okt 2026, 10.49
-            - generic [ref=f9e102]:
-              - generic [ref=f9e103]: Menunggu Preorder
-              - paragraph [ref=f9e104]: Status pesanan saat ini
-            - link "Kembali ke Daftar Pesanan" [ref=f9e106] [cursor=pointer]:
-              - /url: /customer/dashboard/orders
-          - region "Pelunasan pesanan import" [ref=f9e109]:
-            - generic [ref=f9e110]:
-              - heading "Pesanan import · Pelunasan transfer" [level=2] [ref=f9e111]
-              - paragraph [ref=f9e112]: DP hanya informasi, bukan pengurang tagihan. Transfer diperiksa admin sebelum pesanan dapat diproses.
-            - generic [ref=f9e113]:
-              - generic [ref=f9e114]:
-                - term [ref=f9e115]: Total net buku
-                - definition [ref=f9e116]: Rp155.000,00
-              - generic [ref=f9e117]:
-                - term [ref=f9e118]: DP historis (informasi)
-                - definition [ref=f9e119]: Rp70.000,00
-              - generic [ref=f9e120]:
-                - term [ref=f9e121]: Sudah dibayar historis
-                - definition [ref=f9e122]: Rp90.000,00
-              - generic [ref=f9e123]:
-                - term [ref=f9e124]: Transfer disetujui
-                - definition [ref=f9e125]: Rp0,00
-              - generic [ref=f9e126]:
-                - term [ref=f9e127]: Sisa buku
-                - definition [ref=f9e128]: Rp65.000,00
-              - generic [ref=f9e129]:
-                - term [ref=f9e130]: Berat total
-                - definition [ref=f9e131]: 1100 gram
-              - generic [ref=f9e132]:
-                - term [ref=f9e133]: Ongkos kirim
-                - definition [ref=f9e134]: Rp20.000,00
-              - generic [ref=f9e135]:
-                - term [ref=f9e136]: Sisa pelunasan
-                - definition [ref=f9e137]: Rp85.000,00
-            - generic [ref=f9e138]:
-              - generic [ref=f9e139]:
-                - generic [ref=f9e140]: Alamat tujuan
-                - combobox "Alamat tujuan" [ref=f9e141]:
-                  - option "Pilih alamat" [selected]
-                  - option "Rumah Test · Browser Customer · Alamat sintetis browser test 01234"
-                - link "Tambah / lengkapi alamat dan nomor telepon" [ref=f9e142] [cursor=pointer]:
-                  - /url: /customer/dashboard/profile
-                - button "Cari tarif pengiriman" [disabled]
-                - status
-              - generic [ref=f9e143]:
-                - paragraph [ref=f9e144]:
-                  - text: Transfer tepat
-                  - strong [ref=f9e145]: Rp85.000,00
-                  - text: ke rekening yang dipilih. Unggah bukti setelah transfer. Jangan membayar sebelum ongkir terpilih.
-                - generic [ref=f9e146]: Rekening tujuan transfer
-                - combobox "Rekening tujuan transfer" [ref=f9e147]:
-                  - option "Pilih rekening" [selected]
-                  - option "Bank Contoh · 001234 · Toko Test"
-                - generic [ref=f9e148]: Bukti transfer (JPG, PNG, PDF; maksimal 5 MB)
-                - button "Bukti transfer (JPG, PNG, PDF; maksimal 5 MB)" [ref=f9e149]
-                - button "Ajukan bukti pelunasan" [ref=f9e150]
-            - generic [ref=f9e151]:
-              - heading "Riwayat bukti transfer" [level=3] [ref=f9e152]
-              - generic [ref=f9e153]:
-                - paragraph [ref=f9e154]: Ditolak · Rp85.000,00
-                - paragraph [ref=f9e155]: Bank Contoh · 001234 · Toko Test
-                - paragraph [ref=f9e156]: Diajukan 30 Okt 2026, 10.56 · Diperiksa 30 Okt 2026, 10.59
-                - paragraph [ref=f9e157]: "Alasan: Bukti test kurang jelas; unggah ulang."
-                - 'link "Lihat / unduh bukti #1" [ref=f9e158] [cursor=pointer]':
-                  - /url: http://127.0.0.1:8127/order-payments/1/proof
-          - generic [ref=f9e160]:
-            - generic [ref=f9e161]:
-              - generic [ref=f9e162]:
-                - heading "Produk yang Dibeli" [level=2] [ref=f9e163]
-                - generic [ref=f9e168]:
-                  - generic [ref=f9e169]:
-                    - generic [ref=f9e170]: Produk
-                    - generic [ref=f9e171]: Harga Satuan
-                    - generic [ref=f9e172]: Jumlah
-                    - generic [ref=f9e173]: Subtotal
-                  - generic [ref=f9e174]:
-                    - generic [ref=f9e179]:
-                      - paragraph [ref=f9e180]: Buku Pertama
-                      - paragraph [ref=f9e181]: "PO: PO-01"
-                      - generic [ref=f9e182]:
-                        - paragraph [ref=f9e183]: "Bruto: 2 × Rp60.000,00"
-                        - paragraph [ref=f9e184]: "Diskon baris: Rp10.000,00"
-                        - paragraph [ref=f9e185]: "DP (informasi): Rp50.000,00"
-                        - paragraph [ref=f9e186]: "Dibayar historis: Rp80.000,00"
-                      - paragraph [ref=f9e187]: "Estimasi preorder: Desember 2026"
-                    - generic [ref=f9e188]: Rp60.000,00
-                    - generic [ref=f9e189]: "2"
-                    - generic [ref=f9e190]: Rp110.000,00
-                  - generic [ref=f9e191]:
-                    - generic [ref=f9e196]:
-                      - paragraph [ref=f9e197]: Buku Kedua
-                      - paragraph [ref=f9e198]: "PO: PO-02"
-                      - generic [ref=f9e199]:
-                        - paragraph [ref=f9e200]: "Bruto: 1 × Rp50.000,00"
-                        - paragraph [ref=f9e201]: "Diskon baris: Rp5.000,00"
-                        - paragraph [ref=f9e202]: "DP (informasi): Rp20.000,00"
-                        - paragraph [ref=f9e203]: "Dibayar historis: Rp10.000,00"
-                      - paragraph [ref=f9e204]: "Estimasi preorder: Januari 2027"
-                    - generic [ref=f9e205]: Rp50.000,00
-                    - generic [ref=f9e206]: "1"
-                    - generic [ref=f9e207]: Rp45.000,00
-              - generic [ref=f9e208]:
-                - generic [ref=f9e209]:
-                  - heading "Status Pesanan" [level=2] [ref=f9e210]
-                  - list [ref=f9e215]:
-                    - listitem [ref=f9e216]:
-                      - generic [ref=f9e221]:
-                        - paragraph [ref=f9e222]: Menunggu preorder
-                        - paragraph [ref=f9e223]: 30 Okt 2026, 10.49
-                    - listitem [ref=f9e224]:
-                      - generic [ref=f9e228]:
-                        - paragraph [ref=f9e229]: Menunggu preorder
-                        - paragraph [ref=f9e230]: 30 Okt 2026, 10.59
-                - generic [ref=f9e231]:
-                  - heading "Status Pengiriman" [level=2] [ref=f9e232]
-                  - generic [ref=f9e238]:
-                    - generic [ref=f9e239]:
-                      - text: jne · Regular
-                      - generic [ref=f9e240]: Pending
-                    - list [ref=f9e241]:
-                      - listitem [ref=f9e242]:
-                        - generic [ref=f9e246]:
-                          - paragraph [ref=f9e247]: Menunggu pengiriman
-                          - paragraph [ref=f9e248]: 30 Okt 2026, 10.56
-                          - paragraph [ref=f9e249]: Pengiriman dipilih customer; belum dibooking.
-            - generic [ref=f9e250]:
-              - generic [ref=f9e251]:
-                - heading "Ringkasan Pesanan" [level=2] [ref=f9e252]
-                - generic [ref=f9e257]:
-                  - generic [ref=f9e258]:
-                    - term [ref=f9e259]: Subtotal Buku (3 item)
-                    - definition [ref=f9e260]: Rp155.000,00
-                  - generic [ref=f9e261]:
-                    - term [ref=f9e262]: Ongkos Kirim
-                    - definition [ref=f9e263]: Rp20.000,00
-                  - generic [ref=f9e264]:
-                    - term [ref=f9e265]: Total buku dan ongkir diketahui
-                    - definition [ref=f9e266]: Rp175.000,00
-                - generic [ref=f9e267]:
-                  - generic [ref=f9e268]: Belum Dibayar
-                  - text: "Status pembayaran: unpaid."
-              - generic [ref=f9e269]:
-                - generic [ref=f9e270]:
-                  - heading "Alamat Pengiriman" [level=2] [ref=f9e271]
-                  - link "Kelola Alamat" [ref=f9e275] [cursor=pointer]:
-                    - /url: /customer/dashboard/profile
-                - generic [ref=f9e276]:
-                  - paragraph [ref=f9e277]: Browser Customer
-                  - paragraph [ref=f9e278]: "+6281234567890"
-                  - paragraph [ref=f9e279]: Alamat sintetis browser test, Desa Test, 01234
-              - generic [ref=f9e280]:
-                - heading "Data Pembayaran" [level=2] [ref=f9e281]
-                - generic [ref=f9e284]:
-                  - generic [ref=f9e285]:
-                    - term [ref=f9e286]: Metode Pembayaran
-                    - definition [ref=f9e287]: Historis dan transfer bank
-                  - generic [ref=f9e288]:
-                    - term [ref=f9e289]: Status Pembayaran
-                    - definition [ref=f9e290]:
-                      - generic [ref=f9e291]: Belum Dibayar
-                  - generic [ref=f9e292]:
-                    - term [ref=f9e293]: Transfer disetujui
-                    - definition [ref=f9e294]: Rp0,00
-        - generic [ref=f9e295]:
-          - generic [ref=f9e296]: © 2026 Wonder Book. All rights reserved.
-          - generic [ref=f9e297]:
-            - generic [ref=f9e298]: Syarat & Ketentuan
-            - generic [ref=f9e299]: FAQ
-            - generic [ref=f9e300]: Hubungi Kami
-  - region "Notifications alt+T"
+      - generic [ref=f9e3]:
+            - generic [ref=f9e7]:
+                  - list [ref=f9e9]:
+                        - listitem [ref=f9e10]:
+                              - link [ref=f9e11] [cursor=pointer]:
+                                    - /url: /
+                                    - img "Wonder Prince Library" [ref=f9e12]
+                  - generic [ref=f9e14]:
+                        - generic [ref=f9e15]: Menu Utama
+                        - list [ref=f9e16]:
+                              - listitem [ref=f9e17]:
+                                    - link "Profil" [ref=f9e18] [cursor=pointer]:
+                                          - /url: /customer/dashboard/profile
+                              - listitem [ref=f9e23]:
+                                    - link "Keranjang" [ref=f9e24] [cursor=pointer]:
+                                          - /url: /customer/dashboard/carts
+                              - listitem [ref=f9e30]:
+                                    - link "Pesanan" [ref=f9e31] [cursor=pointer]:
+                                          - /url: /customer/dashboard/orders
+                              - listitem [ref=f9e36]:
+                                    - link "Saldo" [ref=f9e37] [cursor=pointer]:
+                                          - /url: /customer/dashboard/wallets
+                              - listitem [ref=f9e42]:
+                                    - link "Voucher" [ref=f9e43] [cursor=pointer]:
+                                          - /url: /customer/dashboard/vouchers
+                  - img "Good books, brighter days, happier kids" [ref=f9e49]
+            - main [ref=f9e50]:
+                  - generic [ref=f9e51]:
+                        - search "Cari buku di katalog" [ref=f9e52]:
+                              - searchbox "Cari judul buku" [ref=f9e54]
+                              - button "Cari" [ref=f9e55]
+                        - button "Menu profil Browser Customer" [ref=f9e57]:
+                              - generic [ref=f9e58]: Rp 0
+                              - generic [ref=f9e59]: B
+                              - generic [ref=f9e61]:
+                                    - generic [ref=f9e62]: Halo, Browser
+                                    - generic [ref=f9e63]: Customer
+                  - generic [ref=f9e66]:
+                        - main [ref=f9e67]:
+                              - navigation "Breadcrumb" [ref=f9e68]:
+                                    - link "Dashboard" [ref=f9e69] [cursor=pointer]:
+                                          - /url: /customer/dashboard/orders
+                                    - generic [ref=f9e75]: Detail Pesanan
+                              - generic [ref=f9e77]:
+                                    - generic [ref=f9e84]:
+                                          - paragraph [ref=f9e85]: Pesanan Saya
+                                          - heading "Detail Pesanan" [level=1] [ref=f9e86]
+                                    - paragraph [ref=f9e87]: Lihat detail lengkap pesanan, status, dan informasi pengiriman.
+                              - generic [ref=f9e88]:
+                                    - generic [ref=f9e93]:
+                                          - paragraph [ref=f9e94]: Kode Pesanan
+                                          - paragraph [ref=f9e95]: LAWAS-001
+                                    - generic [ref=f9e99]:
+                                          - paragraph [ref=f9e100]: Tanggal Pesanan
+                                          - paragraph [ref=f9e101]: 30 Okt 2026, 10.49
+                                    - generic [ref=f9e102]:
+                                          - generic [ref=f9e103]: Menunggu Preorder
+                                          - paragraph [ref=f9e104]: Status pesanan saat ini
+                                    - link "Kembali ke Daftar Pesanan" [ref=f9e106] [cursor=pointer]:
+                                          - /url: /customer/dashboard/orders
+                              - region "Pelunasan pesanan import" [ref=f9e109]:
+                                    - generic [ref=f9e110]:
+                                          - heading "Pesanan import · Pelunasan transfer" [level=2] [ref=f9e111]
+                                          - paragraph [ref=f9e112]: DP hanya informasi, bukan pengurang tagihan. Transfer diperiksa admin sebelum pesanan dapat diproses.
+                                    - generic [ref=f9e113]:
+                                          - generic [ref=f9e114]:
+                                                - term [ref=f9e115]: Total net buku
+                                                - definition [ref=f9e116]: Rp155.000,00
+                                          - generic [ref=f9e117]:
+                                                - term [ref=f9e118]: DP historis (informasi)
+                                                - definition [ref=f9e119]: Rp70.000,00
+                                          - generic [ref=f9e120]:
+                                                - term [ref=f9e121]: Sudah dibayar historis
+                                                - definition [ref=f9e122]: Rp90.000,00
+                                          - generic [ref=f9e123]:
+                                                - term [ref=f9e124]: Transfer disetujui
+                                                - definition [ref=f9e125]: Rp0,00
+                                          - generic [ref=f9e126]:
+                                                - term [ref=f9e127]: Sisa buku
+                                                - definition [ref=f9e128]: Rp65.000,00
+                                          - generic [ref=f9e129]:
+                                                - term [ref=f9e130]: Berat total
+                                                - definition [ref=f9e131]: 1100 gram
+                                          - generic [ref=f9e132]:
+                                                - term [ref=f9e133]: Ongkos kirim
+                                                - definition [ref=f9e134]: Rp20.000,00
+                                          - generic [ref=f9e135]:
+                                                - term [ref=f9e136]: Sisa pelunasan
+                                                - definition [ref=f9e137]: Rp85.000,00
+                                    - generic [ref=f9e138]:
+                                          - generic [ref=f9e139]:
+                                                - generic [ref=f9e140]: Alamat tujuan
+                                                - combobox "Alamat tujuan" [ref=f9e141]:
+                                                      - option "Pilih alamat" [selected]
+                                                      - option "Rumah Test · Browser Customer · Alamat sintetis browser test 01234"
+                                                - link "Tambah / lengkapi alamat dan nomor telepon" [ref=f9e142] [cursor=pointer]:
+                                                      - /url: /customer/dashboard/profile
+                                                - button "Cari tarif pengiriman" [disabled]
+                                                - status
+                                          - generic [ref=f9e143]:
+                                                - paragraph [ref=f9e144]:
+                                                      - text: Transfer tepat
+                                                      - strong [ref=f9e145]: Rp85.000,00
+                                                      - text: ke rekening yang dipilih. Unggah bukti setelah transfer. Jangan membayar sebelum ongkir terpilih.
+                                                - generic [ref=f9e146]: Rekening tujuan transfer
+                                                - combobox "Rekening tujuan transfer" [ref=f9e147]:
+                                                      - option "Pilih rekening" [selected]
+                                                      - option "Bank Contoh · 001234 · Toko Test"
+                                                - generic [ref=f9e148]: Bukti transfer (JPG, PNG, PDF; maksimal 5 MB)
+                                                - button "Bukti transfer (JPG, PNG, PDF; maksimal 5 MB)" [ref=f9e149]
+                                                - button "Ajukan bukti pelunasan" [ref=f9e150]
+                                    - generic [ref=f9e151]:
+                                          - heading "Riwayat bukti transfer" [level=3] [ref=f9e152]
+                                          - generic [ref=f9e153]:
+                                                - paragraph [ref=f9e154]: Ditolak · Rp85.000,00
+                                                - paragraph [ref=f9e155]: Bank Contoh · 001234 · Toko Test
+                                                - paragraph [ref=f9e156]: Diajukan 30 Okt 2026, 10.56 · Diperiksa 30 Okt 2026, 10.59
+                                                - paragraph [ref=f9e157]: 'Alasan: Bukti test kurang jelas; unggah ulang.'
+                                                - 'link "Lihat / unduh bukti #1" [ref=f9e158] [cursor=pointer]':
+                                                      - /url: http://127.0.0.1:8127/order-payments/1/proof
+                              - generic [ref=f9e160]:
+                                    - generic [ref=f9e161]:
+                                          - generic [ref=f9e162]:
+                                                - heading "Produk yang Dibeli" [level=2] [ref=f9e163]
+                                                - generic [ref=f9e168]:
+                                                      - generic [ref=f9e169]:
+                                                            - generic [ref=f9e170]: Produk
+                                                            - generic [ref=f9e171]: Harga Satuan
+                                                            - generic [ref=f9e172]: Jumlah
+                                                            - generic [ref=f9e173]: Subtotal
+                                                      - generic [ref=f9e174]:
+                                                            - generic [ref=f9e179]:
+                                                                  - paragraph [ref=f9e180]: Buku Pertama
+                                                                  - paragraph [ref=f9e181]: 'PO: PO-01'
+                                                                  - generic [ref=f9e182]:
+                                                                        - paragraph [ref=f9e183]: 'Bruto: 2 × Rp60.000,00'
+                                                                        - paragraph [ref=f9e184]: 'Diskon baris: Rp10.000,00'
+                                                                        - paragraph [ref=f9e185]: 'DP (informasi): Rp50.000,00'
+                                                                        - paragraph [ref=f9e186]: 'Dibayar historis: Rp80.000,00'
+                                                                  - paragraph [ref=f9e187]: 'Estimasi preorder: Desember 2026'
+                                                            - generic [ref=f9e188]: Rp60.000,00
+                                                            - generic [ref=f9e189]: '2'
+                                                            - generic [ref=f9e190]: Rp110.000,00
+                                                      - generic [ref=f9e191]:
+                                                            - generic [ref=f9e196]:
+                                                                  - paragraph [ref=f9e197]: Buku Kedua
+                                                                  - paragraph [ref=f9e198]: 'PO: PO-02'
+                                                                  - generic [ref=f9e199]:
+                                                                        - paragraph [ref=f9e200]: 'Bruto: 1 × Rp50.000,00'
+                                                                        - paragraph [ref=f9e201]: 'Diskon baris: Rp5.000,00'
+                                                                        - paragraph [ref=f9e202]: 'DP (informasi): Rp20.000,00'
+                                                                        - paragraph [ref=f9e203]: 'Dibayar historis: Rp10.000,00'
+                                                                  - paragraph [ref=f9e204]: 'Estimasi preorder: Januari 2027'
+                                                            - generic [ref=f9e205]: Rp50.000,00
+                                                            - generic [ref=f9e206]: '1'
+                                                            - generic [ref=f9e207]: Rp45.000,00
+                                          - generic [ref=f9e208]:
+                                                - generic [ref=f9e209]:
+                                                      - heading "Status Pesanan" [level=2] [ref=f9e210]
+                                                      - list [ref=f9e215]:
+                                                            - listitem [ref=f9e216]:
+                                                                  - generic [ref=f9e221]:
+                                                                        - paragraph [ref=f9e222]: Menunggu preorder
+                                                                        - paragraph [ref=f9e223]: 30 Okt 2026, 10.49
+                                                            - listitem [ref=f9e224]:
+                                                                  - generic [ref=f9e228]:
+                                                                        - paragraph [ref=f9e229]: Menunggu preorder
+                                                                        - paragraph [ref=f9e230]: 30 Okt 2026, 10.59
+                                                - generic [ref=f9e231]:
+                                                      - heading "Status Pengiriman" [level=2] [ref=f9e232]
+                                                      - generic [ref=f9e238]:
+                                                            - generic [ref=f9e239]:
+                                                                  - text: jne · Regular
+                                                                  - generic [ref=f9e240]: Pending
+                                                            - list [ref=f9e241]:
+                                                                  - listitem [ref=f9e242]:
+                                                                        - generic [ref=f9e246]:
+                                                                              - paragraph [ref=f9e247]: Menunggu pengiriman
+                                                                              - paragraph [ref=f9e248]: 30 Okt 2026, 10.56
+                                                                              - paragraph [ref=f9e249]: Pengiriman dipilih customer; belum dibooking.
+                                    - generic [ref=f9e250]:
+                                          - generic [ref=f9e251]:
+                                                - heading "Ringkasan Pesanan" [level=2] [ref=f9e252]
+                                                - generic [ref=f9e257]:
+                                                      - generic [ref=f9e258]:
+                                                            - term [ref=f9e259]: Subtotal Buku (3 item)
+                                                            - definition [ref=f9e260]: Rp155.000,00
+                                                      - generic [ref=f9e261]:
+                                                            - term [ref=f9e262]: Ongkos Kirim
+                                                            - definition [ref=f9e263]: Rp20.000,00
+                                                      - generic [ref=f9e264]:
+                                                            - term [ref=f9e265]: Total buku dan ongkir diketahui
+                                                            - definition [ref=f9e266]: Rp175.000,00
+                                                - generic [ref=f9e267]:
+                                                      - generic [ref=f9e268]: Belum Dibayar
+                                                      - text: 'Status pembayaran: unpaid.'
+                                          - generic [ref=f9e269]:
+                                                - generic [ref=f9e270]:
+                                                      - heading "Alamat Pengiriman" [level=2] [ref=f9e271]
+                                                      - link "Kelola Alamat" [ref=f9e275] [cursor=pointer]:
+                                                            - /url: /customer/dashboard/profile
+                                                - generic [ref=f9e276]:
+                                                      - paragraph [ref=f9e277]: Browser Customer
+                                                      - paragraph [ref=f9e278]: '+6281234567890'
+                                                      - paragraph [ref=f9e279]: Alamat sintetis browser test, Desa Test, 01234
+                                          - generic [ref=f9e280]:
+                                                - heading "Data Pembayaran" [level=2] [ref=f9e281]
+                                                - generic [ref=f9e284]:
+                                                      - generic [ref=f9e285]:
+                                                            - term [ref=f9e286]: Metode Pembayaran
+                                                            - definition [ref=f9e287]: Historis dan transfer bank
+                                                      - generic [ref=f9e288]:
+                                                            - term [ref=f9e289]: Status Pembayaran
+                                                            - definition [ref=f9e290]:
+                                                                  - generic [ref=f9e291]: Belum Dibayar
+                                                      - generic [ref=f9e292]:
+                                                            - term [ref=f9e293]: Transfer disetujui
+                                                            - definition [ref=f9e294]: Rp0,00
+                        - generic [ref=f9e295]:
+                              - generic [ref=f9e296]: © 2026 Wonder Book. All rights reserved.
+                              - generic [ref=f9e297]:
+                                    - generic [ref=f9e298]: Syarat & Ketentuan
+                                    - generic [ref=f9e299]: FAQ
+                                    - generic [ref=f9e300]: Hubungi Kami
+      - region "Notifications alt+T"

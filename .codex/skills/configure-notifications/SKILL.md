@@ -1,25 +1,25 @@
 ---
 name: configure-notifications
-description: "[OMX] Configure OMX notifications - unified entry point for all platforms"
+description: '[OMX] Configure OMX notifications - unified entry point for all platforms'
 triggers:
-  - "configure notifications"
-  - "setup notifications"
-  - "notification settings"
-  - "configure discord"
-  - "configure telegram"
-  - "configure slack"
-  - "configure openclaw"
-  - "setup discord"
-  - "setup telegram"
-  - "setup slack"
-  - "setup openclaw"
-  - "discord notifications"
-  - "telegram notifications"
-  - "slack notifications"
-  - "openclaw notifications"
-  - "discord webhook"
-  - "telegram bot"
-  - "slack webhook"
+    - 'configure notifications'
+    - 'setup notifications'
+    - 'notification settings'
+    - 'configure discord'
+    - 'configure telegram'
+    - 'configure slack'
+    - 'configure openclaw'
+    - 'setup discord'
+    - 'setup telegram'
+    - 'setup slack'
+    - 'setup openclaw'
+    - 'discord notifications'
+    - 'telegram notifications'
+    - 'slack notifications'
+    - 'openclaw notifications'
+    - 'discord webhook'
+    - 'telegram bot'
+    - 'slack webhook'
 ---
 
 # Configure OMX Notifications

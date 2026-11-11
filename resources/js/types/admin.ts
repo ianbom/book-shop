@@ -30,6 +30,7 @@ export type PreOrderCode = {
     id: number;
     code: string;
     books_count?: number;
+    created_at?: string | null;
 };
 export type BookImage = {
     id: number;

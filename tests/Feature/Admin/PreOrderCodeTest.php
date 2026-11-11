@@ -57,6 +57,49 @@ class PreOrderCodeTest extends TestCase
             ->where('preOrderCodes.data.0.books_count', 2)->where('filters.search', 'MATCH'));
     }
 
+    public function test_index_sorts_codes_book_counts_and_creation_dates_in_both_directions(): void
+    {
+        $this->admin();
+        $codes = [];
+        foreach (['C', 'A', 'B'] as $index => $letter) {
+            $code = PreOrderCode::create(['code' => 'PO-'.$letter]);
+            $code->forceFill(['created_at' => now()->startOfDay()->addDays($index)])->save();
+            $codes[$letter] = $code;
+        }
+        Book::factory()->count(2)->create(['pre_order_code_id' => $codes['A']->id]);
+        Book::factory()->create(['pre_order_code_id' => $codes['B']->id]);
+        Book::factory()->create(['pre_order_code_id' => $codes['C']->id])->delete();
+
+        foreach (['code' => ['A', 'B', 'C'], 'books_count' => ['C', 'B', 'A'], 'created_at' => ['C', 'A', 'B']] as $sort => $ascending) {
+            foreach (['asc' => $ascending, 'desc' => array_reverse($ascending)] as $direction => $order) {
+                $this->get(route('admin.pre-order-codes.index', compact('sort', 'direction')))->assertInertia(fn (Assert $page) => $page
+                    ->where('filters.sort', $sort)->where('filters.direction', $direction)
+                    ->where('preOrderCodes.data.0.code', 'PO-'.$order[0])
+                    ->where('preOrderCodes.data.1.code', 'PO-'.$order[1])
+                    ->where('preOrderCodes.data.2.code', 'PO-'.$order[2])
+                    ->where('preOrderCodes.data.0.created_at', $codes[$order[0]]->created_at->toISOString()));
+            }
+        }
+
+        $this->getJson(route('admin.pre-order-codes.index', ['sort' => 'id;drop', 'direction' => 'asc']))
+            ->assertUnprocessable()->assertJsonValidationErrors('sort');
+        $this->getJson(route('admin.pre-order-codes.index', ['sort' => 'code', 'direction' => 'sideways']))
+            ->assertUnprocessable()->assertJsonValidationErrors('direction');
+    }
+
+    public function test_sort_and_search_remain_in_pagination_links(): void
+    {
+        $this->admin();
+        foreach (range(1, 21) as $number) {
+            PreOrderCode::create(['code' => sprintf('PO-%02d', $number)]);
+        }
+        $this->get(route('admin.pre-order-codes.index', ['search' => 'PO-', 'sort' => 'code', 'direction' => 'desc', 'page' => 2]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filters.search', 'PO-')->where('filters.sort', 'code')->where('filters.direction', 'desc')
+                ->where('preOrderCodes.meta.from', 21)->where('preOrderCodes.data.0.code', 'PO-01')
+                ->where('preOrderCodes.links.prev', fn ($url) => str_contains($url, 'sort=code') && str_contains($url, 'direction=desc') && str_contains($url, 'search=PO-')));
+    }
+
     public function test_admin_can_create_edit_and_soft_delete_a_code_with_books(): void
     {
         $this->admin();

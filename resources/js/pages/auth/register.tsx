@@ -99,5 +99,5 @@ export default function Register({ passwordRules }: { passwordRules: string }) {
 
 Register.layout = {
     title: 'Mulai cerita baru',
-    description: 'Buat akun untuk berbelanja di Wonder Book.',
+    description: 'Buat akun untuk berbelanja di Wonder Prince Library.',
 };

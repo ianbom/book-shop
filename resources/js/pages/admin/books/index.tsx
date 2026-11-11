@@ -1,5 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
     BookOpen,
     Download,
     Upload,
@@ -18,6 +21,9 @@ import { Pagination } from '@/components/admin/shared/pagination';
 import admin from '@/routes/admin';
 import { rupiah } from '@/lib/format';
 import type { Book, Category, Paginated } from '@/types/admin';
+import bookPlaceholder from '../../../../images/book-placeholder.png';
+
+type Sort = 'title' | 'author' | 'price' | 'stock' | 'created_at';
 
 export default function BooksIndex({
     books,
@@ -26,7 +32,13 @@ export default function BooksIndex({
 }: {
     books: Paginated<Book>;
     categories: { data: Category[] } | Category[];
-    filters: { search?: string; category?: string; status?: string };
+    filters: {
+        search?: string;
+        category?: string;
+        status?: string;
+        sort: Sort;
+        direction: 'asc' | 'desc';
+    };
 }) {
     const categoryData = Array.isArray(categories)
         ? categories
@@ -34,11 +46,59 @@ export default function BooksIndex({
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        router.get(admin.books.index(), Object.fromEntries(data.entries()), {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            admin.books.index(),
+            { ...filters, ...Object.fromEntries(data.entries()) },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
+    const sortHeader = (sort: Sort, label: string) => {
+        const active = filters.sort === sort;
+        const Icon = active
+            ? filters.direction === 'asc'
+                ? ArrowUp
+                : ArrowDown
+            : ArrowUpDown;
+        return (
+            <th
+                scope="col"
+                className="px-4 py-4"
+                aria-sort={
+                    active
+                        ? filters.direction === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                        : undefined
+                }
+            >
+                <button
+                    type="button"
+                    className="focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-sm whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none"
+                    onClick={() =>
+                        router.get(
+                            admin.books.index(),
+                            {
+                                ...filters,
+                                sort,
+                                direction:
+                                    active && filters.direction === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                            },
+                            { preserveState: true, replace: true },
+                        )
+                    }
+                >
+                    {label}
+                    <Icon className="size-3.5" aria-hidden="true" />
+                </button>
+            </th>
+        );
+    };
+
     return (
         <>
             <Head title="Buku" />
@@ -179,33 +239,66 @@ export default function BooksIndex({
                             <table className="w-full min-w-[760px] text-left text-sm">
                                 <thead className="bg-muted/85 text-muted-foreground border-b text-xs font-semibold">
                                     <tr>
-                                        <th className="px-4 py-4">Buku</th>
-                                        <th className="px-4 py-4">Penulis</th>
+                                        <th
+                                            scope="col"
+                                            className="w-16 px-4 py-4"
+                                        >
+                                            No
+                                        </th>
+                                        {sortHeader('title', 'Buku')}
+                                        {sortHeader('author', 'Penulis')}
                                         <th className="px-4 py-4">Kategori</th>
-                                        <th className="px-4 py-4">Harga</th>
-                                        <th className="px-4 py-4">Stok</th>
+                                        {sortHeader('price', 'Harga')}
+                                        {sortHeader('stock', 'Stok')}
                                         <th className="px-4 py-4">Status</th>
                                         <th className="px-4 py-4" />
                                     </tr>
                                 </thead>
                                 <tbody className="divide-border/80 divide-y bg-white">
-                                    {books.data.map((book) => (
+                                    {books.data.map((book, index) => (
                                         <tr
                                             key={book.id}
                                             className="hover:bg-muted/45 transition-colors"
                                         >
+                                            <td className="px-4 py-3.5 tabular-nums">
+                                                {(books.meta.from ?? 1) + index}
+                                            </td>
                                             <td className="px-4 py-3.5">
-                                                <Link
-                                                    href={admin.books.show(
-                                                        book.id,
-                                                    )}
-                                                    className="text-primary font-medium"
-                                                >
-                                                    {book.title}
-                                                </Link>
-                                                <div className="text-muted-foreground text-xs">
-                                                    {book.isbn ||
-                                                        'ISBN tidak tersedia'}
+                                                <div className="flex items-center gap-3">
+                                                    <img
+                                                        src={
+                                                            book.primary_image_url ||
+                                                            bookPlaceholder
+                                                        }
+                                                        alt=""
+                                                        loading="lazy"
+                                                        className="bg-secondary size-11 shrink-0 rounded border object-contain"
+                                                        onError={(event) => {
+                                                            if (
+                                                                event.currentTarget.getAttribute(
+                                                                    'src',
+                                                                ) !==
+                                                                bookPlaceholder
+                                                            ) {
+                                                                event.currentTarget.src =
+                                                                    bookPlaceholder;
+                                                            }
+                                                        }}
+                                                    />
+                                                    <div className="min-w-40">
+                                                        <Link
+                                                            href={admin.books.show(
+                                                                book.id,
+                                                            )}
+                                                            className="text-primary font-medium"
+                                                        >
+                                                            {book.title}
+                                                        </Link>
+                                                        <div className="text-muted-foreground text-xs">
+                                                            {book.isbn ||
+                                                                'ISBN tidak tersedia'}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3.5">
